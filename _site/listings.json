@@ -1,0 +1,40 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/template.html",
+      "/posts/post-with-code/index.html",
+      "/posts/welcome/index.html",
+      "/posts/2022-07-11-europython2022-summary.html",
+      "/posts/2022-05-30-mocking-with-pytest-patch.html",
+      "/posts/2022-04-22-python-dataclass-partiala-immutable.html",
+      "/posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html",
+      "/posts/2021-11-18-what-can-we-learn-from-shipping-crisis-as-a-data-scientist.html",
+      "/posts/2021-08-18-python-file-not-found-long-file-path-window.html",
+      "/posts/2021-07-10-5minutes-data-science-design-pattern-callback.html",
+      "/posts/2021-07-02-kedro-datacatalog.html",
+      "/posts/2021-06-26-jupyter-sql-notebook.html",
+      "/posts/2021-06-20-logging-config-dict-issue-kedro.html",
+      "/posts/2021-05-29-python-internal-series-python-gil-and-memory.html",
+      "/posts/2021-04-16-full-stack-deep-learning-lecture-03.html",
+      "/posts/2021-03-27-microsoft-azure-dp100.html",
+      "/posts/2021-03-21-full-stack-deep-learning-lecture-01.html",
+      "/posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html",
+      "/posts/2021-03-17-pytest-data-test-truncated-error.html",
+      "/posts/2021-03-05-pyodbc-linux.html",
+      "/posts/2020-12-10-typer-create-command-line-and-use-it-anywhere.html",
+      "/posts/2020-12-04-kedro-pipeline.html",
+      "/posts/2020-11-14-hong-kong-elevation-map-with-rayshader.html",
+      "/posts/2020-11-10-pandas memory optimization.html",
+      "/posts/2020-04-13-recreating-the-bbc-graphs-in-python-plotnine-altair.html",
+      "/posts/2020-04-10-presentation-ready-chart.html",
+      "/posts/2020-03-21-10-lessons-learnt-from-kaggle-competition.html",
+      "/posts/2020-02-22-python-dynamic-dispatch.html",
+      "/posts/2020-02-20-test.html",
+      "/posts/2020-02-09-MixUp-and-Beta-Distribution.html",
+      "/posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html",
+      "/posts/2019-10-19-Deskto-Notification.html",
+      "/posts/2019-01-01-codespace-template.html"
+    ]
+  }
+]
