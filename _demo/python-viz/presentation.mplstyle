@@ -1,0 +1,11 @@
+axes.titlesize : 24
+axes.labelsize : 24
+lines.linewidth : 3
+lines.markersize : 10
+xtick.labelsize : 18
+ytick.labelsize : 18
+figure.figsize : 10, 6
+figure.titlesize: 24
+font.sans-serif: Lato-Regular
+legend.fontsize: 18
+axes.titlelocation: left # Require matplotlib >= 3.2.1
