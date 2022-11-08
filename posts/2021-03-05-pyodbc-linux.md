@@ -1,6 +1,7 @@
 ---
 aliases:
 - /impala/pyodbc/2021/03/05/pyodbc-linux
+- /blog/posts/2021-03-05-pyodbc-linux.html
 author: noklam
 authorImageURL: https://avatars0.githubusercontent.com/u/18221871?s=400&u=0ca734683fc7e41a3565c5591218008af5a77e9b&v=4
 authorTitle: A data scientist in Hong Kong
@@ -58,7 +59,7 @@ import pyodbc
 import pandas as pd
 
 conn = pyodbc.connect(f"""
-Driver=Cloudera ODBC Driver for Impala 64-bit; 
+Driver=Cloudera ODBC Driver for Impala 64-bit;
 PWD=password;
 UID=username;
 Database=database
