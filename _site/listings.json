@@ -2,8 +2,10 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2022-07-11-EuroPython2022-Summary.html",
+      "/posts/2022-11-08-Notebook Debug demo.html",
+      "/posts/2022-10-11-kedro-debug-runner.html",
       "/posts/template.html",
-      "/posts/2022-07-11-europython2022-summary.html",
       "/posts/2022-05-30-mocking-with-pytest-patch.html",
       "/posts/2022-04-22-python-dataclass-partiala-immutable.html",
       "/posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html",
