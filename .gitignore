@@ -1,3 +1,5 @@
 /.quarto/
 _site/posts/*.html
-
+_site/
+*ipynb_checkpoints*
+*.parquet
