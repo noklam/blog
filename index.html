@@ -2,13 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.475">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="My blog about kedro and non-kedro stuff, data science">
 
-<title>noklam</title>
+<title>blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,69 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -94,6 +30,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-listing/list.min.js"></script>
+<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -122,19 +60,57 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      page: 25,
+    pagination: { item: "<li class='page-item'><a class='page page-link' href='#'></a></li>" },
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-83544344-5', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="noklam">
-<meta property="og:description" content="My blog about kedro and non-kedro stuff, data science">
-<meta property="og:site-name" content="noklam">
-<meta name="twitter:title" content="noklam">
-<meta name="twitter:description" content="My blog about kedro and non-kedro stuff, data science">
-<meta name="twitter:card" content="summary">
 </head>
 
-<body class="nav-sidebar floating nav-fixed">
-
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -142,821 +118,1457 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">noklam</span>
+    <span class="navbar-title">blog</span>
     </a>
   </div>
-          <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/noklam"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-    <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">noklam</h1>
-      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
-        <i class="bi bi-chevron-right"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
-<!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">noklam</a>
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page-left">
+      <h1 class="title">blog</h1>
+                      </div>
   </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./core.html" class="sidebar-item-text sidebar-link">core</a>
-  </div>
-</li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/index.html" class="sidebar-item-text sidebar-link">Data Science &amp; Software Engineering</a>
-  </div>
-</li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-02-20-test.html" class="sidebar-item-text sidebar-link">Fastpages Notebook Blog Post</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-02-22-python-dynamic-dispatch.html" class="sidebar-item-text sidebar-link">The missing piece in Python tutorial - What is dispatch why you should care</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-03-21-10-lessons-learnt-from-kaggle-competition.html" class="sidebar-item-text sidebar-link">Lesson learnt from Kaggle - Bengali Image Classification Competition</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-04-10-presentation-ready-chart.html" class="sidebar-item-text sidebar-link">Making Powerpoint Ready Chart with matplotlib</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-04-12-property-based-testing-in-python.html" class="sidebar-item-text sidebar-link">Beyond Unit Testing - What is Property-based Testing?</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-04-13-recreating-the-bbc-graphs-in-python-plotnine-altair.html" class="sidebar-item-text sidebar-link">Recreating the BBC style graphic in Python - <code>plotnine</code> and <code>altair</code></a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-11-10-pandas memory optimization.html" class="sidebar-item-text sidebar-link">Optimizing pandas - Reducing 90% memory footprint - updated version</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-16" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-16" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-11-14-hong-kong-elevation-map-with-rayshader.html" class="sidebar-item-text sidebar-link">Hong Kong Elevation map with rayshader (with R)</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-17" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-17" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-18" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-18" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-12-04-kedro-pipeline.html" class="sidebar-item-text sidebar-link">Introduction to Kedro - pipeline for data science</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-19" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-19" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-20" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-20" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-20" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2020-12-10-typer-create-command-line-and-use-it-anywhere.html" class="sidebar-item-text sidebar-link">Create python command line in few lines, and use it anywhere as a standalone tool!</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-21" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-21" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-21" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-22" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-22" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-22" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-03-17-pytest-data-test-truncated-error.html" class="sidebar-item-text sidebar-link">Data Test as CI</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-23" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-23" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-23" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-24" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-24" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-24" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html" class="sidebar-item-text sidebar-link">deepcopy, LGBM and pickle</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-25" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-25" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-25" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-26" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-26" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-26" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-03-21-full-stack-deep-learning-lecture-01.html" class="sidebar-item-text sidebar-link">Full Stack Deep Learning Notes - Lecture 01</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-27" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-27" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-27" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-28" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-28" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-28" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-03-27-microsoft-azure-dp100.html" class="sidebar-item-text sidebar-link">Microsoft Azure - DP100</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-29" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-29" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-29" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-30" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-30" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-30" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-04-16-full-stack-deep-learning-lecture-03.html" class="sidebar-item-text sidebar-link">Full Stack Deep Learning Notes - Lecture 03 - Recurrent Neural Network</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-31" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-31" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-31" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-32" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-32" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-32" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-05-29-python-internal-series-python-gil-and-memory.html" class="sidebar-item-text sidebar-link">Python Internal Series - Global Interpreter Lock (GIL) and Memory Management</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-33" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-33" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-33" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-34" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-34" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-34" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-06-26-jupyter-sql-notebook.html" class="sidebar-item-text sidebar-link">Jupyter Superpower - Extend SQL analysis with Python</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-35" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-35" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-35" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-36" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-36" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-36" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-07-02-kedro-datacatalog.html" class="sidebar-item-text sidebar-link">Advance Kedro Series - Digging into Dataset Memory Management and CacheDataSet</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-37" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-37" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-37" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-38" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-38" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-38" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-07-10-5minutes-data-science-design-pattern-callback.html" class="sidebar-item-text sidebar-link">5 Minutes Data Science Design Patterns I - Callback</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-39" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-39" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-39" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-40" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-40" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-40" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-07-14-kedro-telemetry-with-grafana.html" class="sidebar-item-text sidebar-link">Kedro Telemetry with Grafana</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-41" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-41" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-41" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-42" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-42" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-42" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2021-08-18-python-file-not-found-long-file-path-window.html" class="sidebar-item-text sidebar-link">Python FileNotFoundError or You have a really long file path?</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-43" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-43" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-43" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-44" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-44" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-44" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2022-04-22-python-dataclass-partiala-immutable.html" class="sidebar-item-text sidebar-link">How to achieve Partial Immutability with Python’s dataclass?</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-45" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-45" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-45" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-46" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-46" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-46" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2022-05-30-mocking-with-pytest-patch.html" class="sidebar-item-text sidebar-link">Testing with Mocking</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-47" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-47" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-47" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-48" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-48" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-48" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2022-07-11-europython2022-summary.html" class="sidebar-item-text sidebar-link">EuroPython 2022 - Conference Notes &amp; Summary</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-49" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-49" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-49" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-50" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-50" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-50" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2022-10-11-kedro-debug-runner.html" class="sidebar-item-text sidebar-link">core</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-51" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-51" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-51" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-52" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-52" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-52" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/2022-11-08-notebook debug demo.html" class="sidebar-item-text sidebar-link">Steps to debug Kedro pipeline in a notebook</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-53" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-53" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-53" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-54" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-54" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-54" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./blog/posts/Jupyter_kernel_explained.html" class="sidebar-item-text sidebar-link">What is a Kernel for computer?</a>
-  </div>
-</li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-55" aria-expanded="true">blog</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-55" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-55" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-56" aria-expanded="false">posts</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-56" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-56" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-57" aria-expanded="false">my_icons</a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-57" aria-expanded="false">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-57" class="collapse list-unstyled sidebar-section depth3 ">  
-      </ul>
-  </li>
-      </ul>
-  </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-58" aria-expanded="true">kedro</a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-58" aria-expanded="true">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-58" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./kedro/index.html" class="sidebar-item-text sidebar-link">Kedro’s related stuff</a>
-  </div>
-</li>
-      </ul>
-  </li>
-    </ul>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+    
+      
     </div>
-</nav>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#install" id="toc-install" class="nav-link active" data-scroll-target="#install">Install</a></li>
-  <li><a href="#how-to-use" id="toc-how-to-use" class="nav-link" data-scroll-target="#how-to-use">How to use</a></li>
-  </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/noklam/blog/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
-    </div>
+        
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(37)</span></div><div class="category" data-category="ML">ML <span class="quarto-category-count">(2)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(1)</span></div><div class="category" data-category="azure">azure <span class="quarto-category-count">(1)</span></div><div class="category" data-category="cli">cli <span class="quarto-category-count">(1)</span></div><div class="category" data-category="codespaces">codespaces <span class="quarto-category-count">(1)</span></div><div class="category" data-category="deepcopy">deepcopy <span class="quarto-category-count">(1)</span></div><div class="category" data-category="design pattern">design pattern <span class="quarto-category-count">(1)</span></div><div class="category" data-category="europython">europython <span class="quarto-category-count">(2)</span></div><div class="category" data-category="fastai">fastai <span class="quarto-category-count">(1)</span></div><div class="category" data-category="fsdl">fsdl <span class="quarto-category-count">(2)</span></div><div class="category" data-category="impala">impala <span class="quarto-category-count">(1)</span></div><div class="category" data-category="jupyter">jupyter <span class="quarto-category-count">(1)</span></div><div class="category" data-category="kaggle">kaggle <span class="quarto-category-count">(1)</span></div><div class="category" data-category="kedro">kedro <span class="quarto-category-count">(4)</span></div><div class="category" data-category="nbdev">nbdev <span class="quarto-category-count">(1)</span></div><div class="category" data-category="pickle">pickle <span class="quarto-category-count">(1)</span></div><div class="category" data-category="product">product <span class="quarto-category-count">(1)</span></div><div class="category" data-category="pyodbc">pyodbc <span class="quarto-category-count">(1)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(23)</span></div><div class="category" data-category="python-internal">python-internal <span class="quarto-category-count">(1)</span></div><div class="category" data-category="reviewnb">reviewnb <span class="quarto-category-count">(1)</span></div><div class="category" data-category="software">software <span class="quarto-category-count">(1)</span></div><div class="category" data-category="sql">sql <span class="quarto-category-count">(1)</span></div><div class="category" data-category="typer">typer <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">noklam</h1>
+
+
+
+
+
+
+
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1680791743761" data-listing-reading-time-sort="4.615">
+<div class="thumbnail">
+<a href="./posts/Jupyter_kernel_explained.html">
+<div class="thumbnail-image">
+
 </div>
-
-<div>
-  <div class="description">
-    My blog about kedro and non-kedro stuff, data science
-  </div>
+</a><p><a href="./posts/Jupyter_kernel_explained.html"></a></p>
 </div>
+<div class="body">
+<a href="./posts/Jupyter_kernel_explained.html">
+<h3 class="no-anchor listing-title">
+What is a Kernel for computer?
+</h3>
+<div class="listing-subtitle">
 
-
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-</header>
-
-<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
-<p>This file will become your README and also the index of your documentation.</p>
-<section id="install" class="level2">
-<h2 class="anchored" data-anchor-id="install">Install</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install noklam</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="how-to-use" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-use">How to use</h2>
-<p>Fill me in please! Don’t forget code examples:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="op">+</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>2</code></pre>
+</div>
+<div class="listing-description">
+author…
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/Jupyter_kernel_explained.html"> </a>
 </div>
 </div>
+<div class="quarto-post image-right" data-index="1" data-categories="python" data-listing-date-sort="1668556800000" data-listing-file-modified-sort="1680791127294" data-listing-reading-time-sort="0.805">
+<div class="thumbnail">
+<a href="./posts/python_single_dispatch/python-dispatch-typehint.html">
+<div class="thumbnail-image">
 
+</div>
+</a><p><a href="./posts/python_single_dispatch/python-dispatch-typehint.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/python_single_dispatch/python-dispatch-typehint.html">
+<h3 class="no-anchor listing-title">
+Function overloading - singledispatch in Python with type hint
+</h3>
+<div class="listing-subtitle">
 
-</section>
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/python_single_dispatch/python-dispatch-typehint.html">
+<div class="listing-description">
+<p>Using singledispatch with type hint</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/python_single_dispatch/python-dispatch-typehint.html">
+<div class="listing-date">
+Nov 16, 2022
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="python" data-listing-date-sort="1668470400000" data-listing-file-modified-sort="1680791127244" data-listing-reading-time-sort="2.09">
+<div class="thumbnail">
+<a href="./posts/kedro_duckdb/kedro-duckdb.html">
+<div class="thumbnail-image">
 
-</main> <!-- /main -->
+</div>
+</a><p><a href="./posts/kedro_duckdb/kedro-duckdb.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/kedro_duckdb/kedro-duckdb.html">
+<h3 class="no-anchor listing-title">
+Kedro DuckDB
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/kedro_duckdb/kedro-duckdb.html">
+<div class="listing-description">
+<p>Kedro Meet the Duck</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/kedro_duckdb/kedro-duckdb.html">
+<div class="listing-date">
+Nov 15, 2022
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-categories="kedro" data-listing-date-sort="1668297600000" data-listing-file-modified-sort="1680791127290" data-listing-reading-time-sort="0.48">
+<div class="thumbnail">
+<a href="./posts/pandas_expert/kedro-meta-analysis.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/pandas_expert/kedro-meta-analysis.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/pandas_expert/kedro-meta-analysis.html">
+<h3 class="no-anchor listing-title">
+Understanding the Kedro codebase - A quick dirty meta-analysis - (Part I)
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('kedro'); return false;">
+kedro
+</div>
+</div>
+<a href="./posts/pandas_expert/kedro-meta-analysis.html">
+<div class="listing-description">
+<p>Meta-analysis of the kedro codebase</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/pandas_expert/kedro-meta-analysis.html">
+<div class="listing-date">
+Nov 13, 2022
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-categories="python" data-listing-date-sort="1668038400000" data-listing-file-modified-sort="1680791127292" data-listing-reading-time-sort="0.83">
+<div class="thumbnail">
+<a href="./posts/python_expert/python-expert-decorator-generator-contextmanager.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/python_expert/python-expert-decorator-generator-contextmanager.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/python_expert/python-expert-decorator-generator-contextmanager.html">
+<h3 class="no-anchor listing-title">
+Being Python Expert
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/python_expert/python-expert-decorator-generator-contextmanager.html">
+<div class="listing-description">
+<p>Notes for the talk - James Powell: So you want to be a Python expert? | PyData Seattle 2017</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/python_expert/python-expert-decorator-generator-contextmanager.html">
+<div class="listing-date">
+Nov 10, 2022
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="5" data-categories="python,kedro" data-listing-date-sort="1667865600000" data-listing-file-modified-sort="1680791127042" data-listing-reading-time-sort="2.58">
+<div class="thumbnail">
+<a href="./posts/2022-11-08-kedro-debugging.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2022-11-08-kedro-debugging.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2022-11-08-kedro-debugging.html">
+<h3 class="no-anchor listing-title">
+Demo of debugging Kedro pipeline with noetebook
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('kedro'); return false;">
+kedro
+</div>
+</div>
+<a href="./posts/2022-11-08-kedro-debugging.html">
+<div class="listing-description">
+<p>Demo of debugging Kedro pipeline with noetebook</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2022-11-08-kedro-debugging.html">
+<div class="listing-date">
+Nov 8, 2022
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="6" data-categories="europython" data-listing-date-sort="1667260800000" data-listing-file-modified-sort="1680791127040" data-listing-reading-time-sort="0.035">
+<div class="thumbnail">
+<a href="./posts/kedro-debug-runner.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/kedro-debug-runner.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/kedro-debug-runner.html">
+<h3 class="no-anchor listing-title">
+Quick implementation of Kedro DebugRunner
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('europython'); return false;">
+europython
+</div>
+</div>
+<a href="./posts/kedro-debug-runner.html">
+<div class="listing-description">
+<p>Quick implementation of a debug runner</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/kedro-debug-runner.html">
+<div class="listing-date">
+Nov 1, 2022
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="7" data-categories="europython" data-listing-date-sort="1657494000000" data-listing-file-modified-sort="1680791127039" data-listing-reading-time-sort="8.815">
+<div class="thumbnail">
+<p><a href="./posts/2022-07-11-europython2022-summary.html"> <img src="./posts/images/europython.jpg" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2022-07-11-europython2022-summary.html">
+<h3 class="no-anchor listing-title">
+EuroPython 2022 - Conference Notes &amp; Summary
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('europython'); return false;">
+europython
+</div>
+</div>
+<a href="./posts/2022-07-11-europython2022-summary.html">
+<div class="listing-description">
+<p>Notes for EuroPython2022 (Update daily)</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2022-07-11-europython2022-summary.html">
+<div class="listing-date">
+Jul 11, 2022
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="8" data-categories="python" data-listing-date-sort="1653865200000" data-listing-file-modified-sort="1680791127039" data-listing-reading-time-sort="1.44">
+<div class="thumbnail">
+<a href="./posts/2022-05-30-mocking-with-pytest-patch.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2022-05-30-mocking-with-pytest-patch.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2022-05-30-mocking-with-pytest-patch.html">
+<h3 class="no-anchor listing-title">
+Testing with Mocking
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2022-05-30-mocking-with-pytest-patch.html">
+<div class="listing-description">
+<p>I have been working with on some unit tests recently with mocking. There are some traps that I falled into and I want to document it here.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2022-05-30-mocking-with-pytest-patch.html">
+<div class="listing-date">
+May 30, 2022
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="9" data-categories="python" data-listing-date-sort="1650582000000" data-listing-file-modified-sort="1680791127038" data-listing-reading-time-sort="0.93">
+<div class="thumbnail">
+<a href="./posts/2022-04-22-python-dataclass-partiala-immutable.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2022-04-22-python-dataclass-partiala-immutable.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2022-04-22-python-dataclass-partiala-immutable.html">
+<h3 class="no-anchor listing-title">
+How to achieve Partial Immutability with Python’s dataclass?
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2022-04-22-python-dataclass-partiala-immutable.html">
+<div class="listing-description">
+<p>Exploring the Python’s <code>dataclass</code></p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2022-04-22-python-dataclass-partiala-immutable.html">
+<div class="listing-date">
+Apr 22, 2022
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="10" data-categories="python" data-listing-date-sort="1644451200000" data-listing-file-modified-sort="1680791127037" data-listing-reading-time-sort="0.065">
+<div class="thumbnail">
+<a href="./posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html">
+<h3 class="no-anchor listing-title">
+Journey of understanding Python and programming language
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html">
+<div class="listing-description">
+<p>Some unfinished notes about Python lower level details.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html">
+<div class="listing-date">
+Feb 10, 2022
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="11" data-categories="product" data-listing-date-sort="1637193600000" data-listing-file-modified-sort="1680791127037" data-listing-reading-time-sort="4.265">
+<div class="thumbnail">
+<p><a href="./posts/2021-11-18-what-can-we-learn-from-shipping-crisis-as-a-data-scientist.html"> <img src="./posts/images/2021-11-18-23-37-38.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-11-18-what-can-we-learn-from-shipping-crisis-as-a-data-scientist.html">
+<h3 class="no-anchor listing-title">
+What can we learn from Shipping Crisis as a Data Scientist?
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('product'); return false;">
+product
+</div>
+</div>
+<a href="./posts/2021-11-18-what-can-we-learn-from-shipping-crisis-as-a-data-scientist.html">
+<div class="listing-description">
+<p>The Long Beach port congestion could teach us a lot about data science in real world.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-11-18-what-can-we-learn-from-shipping-crisis-as-a-data-scientist.html">
+<div class="listing-date">
+Nov 18, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="12" data-categories="python" data-listing-date-sort="1629241200000" data-listing-file-modified-sort="1680791127035" data-listing-reading-time-sort="1.41">
+<div class="thumbnail">
+<p><a href="./posts/2021-08-18-python-file-not-found-long-file-path-window.html"> <img src="./posts/images/file_not_found/01.jpg " class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-08-18-python-file-not-found-long-file-path-window.html">
+<h3 class="no-anchor listing-title">
+Python FileNotFoundError or You have a really long file path?
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2021-08-18-python-file-not-found-long-file-path-window.html">
+<div class="listing-description">
+<p>Today I encountered an interesting bug that I think it is worth to write it down for my future self.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-08-18-python-file-not-found-long-file-path-window.html">
+<div class="listing-date">
+Aug 18, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="13" data-categories="python,design pattern,software" data-listing-date-sort="1625871600000" data-listing-file-modified-sort="1680791127034" data-listing-reading-time-sort="2.99">
+<div class="thumbnail">
+<a href="./posts/2021-07-10-5minutes-data-science-design-pattern-callback.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-07-10-5minutes-data-science-design-pattern-callback.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-07-10-5minutes-data-science-design-pattern-callback.html">
+<h3 class="no-anchor listing-title">
+5 Minutes Data Science Design Patterns I - Callback
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('design pattern'); return false;">
+design pattern
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('software'); return false;">
+software
+</div>
+</div>
+<a href="./posts/2021-07-10-5minutes-data-science-design-pattern-callback.html">
+<div class="listing-description">
+<p>A mini collections of design pattern for Data Science - Starting with callbacks.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-07-10-5minutes-data-science-design-pattern-callback.html">
+<div class="listing-date">
+Jul 10, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="14" data-categories="python,kedro" data-listing-date-sort="1625180400000" data-listing-file-modified-sort="1680791127033" data-listing-reading-time-sort="2.68">
+<div class="thumbnail">
+<a href="./posts/2021-07-02-kedro-datacatalog.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-07-02-kedro-datacatalog.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-07-02-kedro-datacatalog.html">
+<h3 class="no-anchor listing-title">
+Advance Kedro Series - Digging into Dataset Memory Management and CacheDataSet
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('kedro'); return false;">
+kedro
+</div>
+</div>
+<a href="./posts/2021-07-02-kedro-datacatalog.html">
+<div class="listing-description">
+<p>Kedro pipeline offers some nice feature like automatically release data in memory that is no longer need. How is this possible? Let’s dive deep into the code.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-07-02-kedro-datacatalog.html">
+<div class="listing-date">
+Jul 2, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="15" data-categories="python,reviewnb,sql" data-listing-date-sort="1624662000000" data-listing-file-modified-sort="1680791127032" data-listing-reading-time-sort="5.325">
+<div class="thumbnail">
+<p><a href="./posts/2021-06-26-jupyter-sql-notebook.html"> <img src="./posts/images/reviewnb/dbeaver.png " class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-06-26-jupyter-sql-notebook.html">
+<h3 class="no-anchor listing-title">
+Jupyter Superpower - Extend SQL analysis with Python
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('reviewnb'); return false;">
+reviewnb
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('sql'); return false;">
+sql
+</div>
+</div>
+<a href="./posts/2021-06-26-jupyter-sql-notebook.html">
+<div class="listing-description">
+<p>Making collboration with Notebook possible and share perfect SQL analysis with Notebook.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-06-26-jupyter-sql-notebook.html">
+<div class="listing-date">
+Jun 26, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="16" data-categories="python" data-listing-date-sort="1624143600000" data-listing-file-modified-sort="1680791127032" data-listing-reading-time-sort="1.61">
+<div class="thumbnail">
+<a href="./posts/2021-06-20-logging-config-dict-issue-kedro.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-06-20-logging-config-dict-issue-kedro.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-06-20-logging-config-dict-issue-kedro.html">
+<h3 class="no-anchor listing-title">
+A logging.config.dictConfig() issue in python
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2021-06-20-logging-config-dict-issue-kedro.html">
+<div class="listing-description">
+<p>logging.config.dictConfig()</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-06-20-logging-config-dict-issue-kedro.html">
+<div class="listing-date">
+Jun 20, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="17" data-categories="python-internal" data-listing-date-sort="1622242800000" data-listing-file-modified-sort="1680791127030" data-listing-reading-time-sort="1.585">
+<div class="thumbnail">
+<a href="./posts/2021-05-29-python-internal-series-python-gil-and-memory.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-05-29-python-internal-series-python-gil-and-memory.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-05-29-python-internal-series-python-gil-and-memory.html">
+<h3 class="no-anchor listing-title">
+Python Internal Series - Global Interpreter Lock (GIL) and Memory Management
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python-internal'); return false;">
+python-internal
+</div>
+</div>
+<a href="./posts/2021-05-29-python-internal-series-python-gil-and-memory.html">
+<div class="listing-description">
+<p>Despite the bad reputation of GIL, it was arguably designed on purpose. The GIL actually comes with a lot of benefit.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-05-29-python-internal-series-python-gil-and-memory.html">
+<div class="listing-date">
+May 29, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="18" data-categories="fsdl" data-listing-date-sort="1618527600000" data-listing-file-modified-sort="1680791127029" data-listing-reading-time-sort="0.98">
+<div class="thumbnail">
+<p><a href="./posts/2021-04-16-full-stack-deep-learning-lecture-03.html"> <img src="./posts/images/rnn.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-04-16-full-stack-deep-learning-lecture-03.html">
+<h3 class="no-anchor listing-title">
+Full Stack Deep Learning Notes - Lecture 03 - Recurrent Neural Network
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('fsdl'); return false;">
+fsdl
+</div>
+</div>
+<a href="./posts/2021-04-16-full-stack-deep-learning-lecture-03.html">
+<div class="listing-description">
+<p>Lecture &amp; Lab notes - This lecture is about Recurrent Neural Network. Key concetps included input gate, forget gate, cell state, and output gate. It also explains how attention mechanism works for a encoder-decoder based architecture.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-04-16-full-stack-deep-learning-lecture-03.html">
+<div class="listing-date">
+Apr 16, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="19" data-categories="azure" data-listing-date-sort="1616803200000" data-listing-file-modified-sort="1680791127028" data-listing-reading-time-sort="4.695">
+<div class="thumbnail">
+<a href="./posts/2021-03-27-microsoft-azure-dp100.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-03-27-microsoft-azure-dp100.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-03-27-microsoft-azure-dp100.html">
+<h3 class="no-anchor listing-title">
+Microsoft Azure - DP100
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('azure'); return false;">
+azure
+</div>
+</div>
+<a href="./posts/2021-03-27-microsoft-azure-dp100.html">
+<div class="listing-description">
+<p>This note helps you to prepare the Azure Assoicate Data Scientist DP-100 exam. I took DP100 in Mar 2021 and includes some important notes for study. Particularly, syntax types questions are very common. You need to study the lab and make sure you understand and remember some syntax to pass this exam.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-03-27-microsoft-azure-dp100.html">
+<div class="listing-date">
+Mar 27, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="20" data-categories="fsdl" data-listing-date-sort="1616284800000" data-listing-file-modified-sort="1680791127027" data-listing-reading-time-sort="3.235">
+<div class="thumbnail">
+<a href="./posts/2021-03-21-full-stack-deep-learning-lecture-01.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-03-21-full-stack-deep-learning-lecture-01.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-03-21-full-stack-deep-learning-lecture-01.html">
+<h3 class="no-anchor listing-title">
+Full Stack Deep Learning Notes - Lecture 01
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('fsdl'); return false;">
+fsdl
+</div>
+</div>
+<a href="./posts/2021-03-21-full-stack-deep-learning-lecture-01.html">
+<div class="listing-description">
+<p>Lecture &amp; Lab notes, explain <code>DataModules</code>, <code>Trainer</code> <code>LightningModule</code>.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-03-21-full-stack-deep-learning-lecture-01.html">
+<div class="listing-date">
+Mar 21, 2021
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="21" data-categories="python,pickle,deepcopy" data-listing-date-sort="1616112000000" data-listing-file-modified-sort="1680791127026" data-listing-reading-time-sort="4.13">
+<div class="thumbnail">
+<p><a href="./posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html"> <img src="./posts/images/serialize.jpg " class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html">
+<h3 class="no-anchor listing-title">
+deepcopy, LGBM and pickle
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('pickle'); return false;">
+pickle
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('deepcopy'); return false;">
+deepcopy
+</div>
+</div>
+<a href="./posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html">
+<div class="listing-description">
+<p>At first sight, these 3 things may not sounds related at all. I am writing this article to share a bug with lightgbm that I encountered and it eventually leads to deeper understanding of what <code>pickle</code> really are.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html">
+<div class="listing-date">
+Mar 19, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="22" data-categories="python" data-listing-date-sort="1615939200000" data-listing-file-modified-sort="1680791127025" data-listing-reading-time-sort="0.44">
+<div class="thumbnail">
+<a href="./posts/2021-03-17-pytest-data-test-truncated-error.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-03-17-pytest-data-test-truncated-error.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-03-17-pytest-data-test-truncated-error.html">
+<h3 class="no-anchor listing-title">
+Data Test as CI
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2021-03-17-pytest-data-test-truncated-error.html">
+<div class="listing-description">
+<p>Unit Test with Pytest. I want to display a full information rich string into my CI Log, but it is trimmed by Python. Here is a simple fix to make it display full string in the log file.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-03-17-pytest-data-test-truncated-error.html">
+<div class="listing-date">
+Mar 17, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="23" data-categories="pyodbc,impala" data-listing-date-sort="1614902400000" data-listing-file-modified-sort="1680791127025" data-listing-reading-time-sort="1.045">
+<div class="thumbnail">
+<a href="./posts/2021-03-05-pyodbc-linux.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2021-03-05-pyodbc-linux.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2021-03-05-pyodbc-linux.html">
+<h3 class="no-anchor listing-title">
+Setting up pyodbc for Impala connection, works on both Linux and Window
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('pyodbc'); return false;">
+pyodbc
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('impala'); return false;">
+impala
+</div>
+</div>
+<a href="./posts/2021-03-05-pyodbc-linux.html">
+<div class="listing-description">
+<p>Easiest way to connect with Impala in Windows</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2021-03-05-pyodbc-linux.html">
+<div class="listing-date">
+Mar 5, 2021
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="24" data-categories="python,cli,typer" data-listing-date-sort="1607558400000" data-listing-file-modified-sort="1680791127024" data-listing-reading-time-sort="1.345">
+<div class="thumbnail">
+<a href="./posts/2020-12-10-typer-create-command-line-and-use-it-anywhere.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2020-12-10-typer-create-command-line-and-use-it-anywhere.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-12-10-typer-create-command-line-and-use-it-anywhere.html">
+<h3 class="no-anchor listing-title">
+Create python command line in few lines, and use it anywhere as a standalone tool!
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('cli'); return false;">
+cli
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('typer'); return false;">
+typer
+</div>
+</div>
+<a href="./posts/2020-12-10-typer-create-command-line-and-use-it-anywhere.html">
+<div class="listing-description">
+<p>Creating python command line could be useful for a lot of tools. Traditionally, <code>argparse</code> has been used heavily, a new library called <code>typer</code> leverage python type hint, that makes creating command line interface in Python much pleasant.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-12-10-typer-create-command-line-and-use-it-anywhere.html">
+<div class="listing-date">
+Dec 10, 2020
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="25" data-categories="python,kedro" data-listing-date-sort="1607040000000" data-listing-file-modified-sort="1680791127023" data-listing-reading-time-sort="11.615">
+<div class="thumbnail">
+<p><a href="./posts/2020-12-04-kedro-pipeline.html"> <img data-src="./posts/images/kedro_viz.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-12-04-kedro-pipeline.html">
+<h3 class="no-anchor listing-title">
+Introduction to Kedro - pipeline for data science
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('kedro'); return false;">
+kedro
+</div>
+</div>
+<a href="./posts/2020-12-04-kedro-pipeline.html">
+<div class="listing-description">
+<p>Kedro</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-12-04-kedro-pipeline.html">
+<div class="listing-date">
+Dec 4, 2020
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="26" data-categories="R" data-listing-date-sort="1605312000000" data-listing-file-modified-sort="1680791127023" data-listing-reading-time-sort="1.25">
+<div class="thumbnail">
+<p><a href="./posts/2020-11-14-hong-kong-elevation-map-with-rayshader.html"> <img data-src="./posts/images/rayshader_img/elevation_map.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-11-14-hong-kong-elevation-map-with-rayshader.html">
+<h3 class="no-anchor listing-title">
+Hong Kong Elevation map with rayshader (with R)
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('R'); return false;">
+R
+</div>
+</div>
+<a href="./posts/2020-11-14-hong-kong-elevation-map-with-rayshader.html">
+<div class="listing-description">
+<p>Inspired by https://www.reddit.com/r/dataisbeautiful/comments/bjp8bg/the_united_states_of_elevation_oc/. This is my little weekend project, Hong Kong elevation tile with <code>rayshader</code>, powered by <code>fastpages</code> with Jupyter notebook! I haven’t used R in years, so I spent a lot more time than expected to finish this.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-11-14-hong-kong-elevation-map-with-rayshader.html">
+<div class="listing-date">
+Nov 14, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="27" data-categories="python" data-listing-date-sort="1604966400000" data-listing-file-modified-sort="1680791127022" data-listing-reading-time-sort="0.215">
+<div class="thumbnail">
+<a href="./posts/2020-11-10-pandas memory optimization.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2020-11-10-pandas memory optimization.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-11-10-pandas memory optimization.html">
+<h3 class="no-anchor listing-title">
+Optimizing pandas - Reducing 90% memory footprint - updated version
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2020-11-10-pandas memory optimization.html">
+<div class="listing-description">
+<p>Have you ever deal with data files that does not fit into your memory? Here is a function that just trim memory footprint for you. This post is base on https://www.dataquest.io/blog/pandas-big-data/ and updated with a new automated functions from https://github.com/ianozsvald/dtype_diet/blob/master/dtype_diet.py</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-11-10-pandas memory optimization.html">
+<div class="listing-date">
+Nov 10, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="28" data-categories="python" data-listing-date-sort="1586732400000" data-listing-file-modified-sort="1680791127016" data-listing-reading-time-sort="6.405">
+<div class="thumbnail">
+<a href="./posts/2020-04-13-recreating-the-bbc-graphs-in-python-plotnine-altair.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2020-04-13-recreating-the-bbc-graphs-in-python-plotnine-altair.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-04-13-recreating-the-bbc-graphs-in-python-plotnine-altair.html">
+<h3 class="no-anchor listing-title">
+Recreating the BBC style graphic in Python - <code>plotnine</code> and <code>altair</code>
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2020-04-13-recreating-the-bbc-graphs-in-python-plotnine-altair.html">
+<div class="listing-description">
+<p>Do you know that you can have <code>ggplot</code> in BBC R graphics cookbook? This is an attempt to reproduce https://bbc.github.io/rcookbook/ in python</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-04-13-recreating-the-bbc-graphs-in-python-plotnine-altair.html">
+<div class="listing-date">
+Apr 13, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="29" data-categories="python" data-listing-date-sort="1586473200000" data-listing-file-modified-sort="1680791127010" data-listing-reading-time-sort="2.63">
+<div class="thumbnail">
+<p><a href="./posts/2020-04-10-presentation-ready-chart.html"> <img data-src="./posts/images/powerpoint-ready-chart.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-04-10-presentation-ready-chart.html">
+<h3 class="no-anchor listing-title">
+Making Powerpoint Ready Chart with matplotlib
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2020-04-10-presentation-ready-chart.html">
+<div class="listing-description">
+<p>Are you tired with fiddling with every single python plot and you always forgot how to configure matplotlib? Start creating your own matplotlib style or just use this. [Updated on 17-07-2022]</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-04-10-presentation-ready-chart.html">
+<div class="listing-date">
+Apr 10, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="30" data-categories="python,kaggle" data-listing-date-sort="1584748800000" data-listing-file-modified-sort="1680791127006" data-listing-reading-time-sort="8.13">
+<div class="thumbnail">
+<p><a href="./posts/2020-03-21-10-lessons-learnt-from-kaggle-competition.html"> <img data-src="./posts/images/bengali_00_header.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-03-21-10-lessons-learnt-from-kaggle-competition.html">
+<h3 class="no-anchor listing-title">
+Lesson learnt from Kaggle - Bengali Image Classification Competition
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('kaggle'); return false;">
+kaggle
+</div>
+</div>
+<a href="./posts/2020-03-21-10-lessons-learnt-from-kaggle-competition.html">
+<div class="listing-description">
+<p>My first silver medal on Kaggles Competition - Bengali Image Classification Competition. 10 lessons learn!</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-03-21-10-lessons-learnt-from-kaggle-competition.html">
+<div class="listing-date">
+Mar 21, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="31" data-categories="python,fastai" data-listing-date-sort="1582329600000" data-listing-file-modified-sort="1680791127006" data-listing-reading-time-sort="2.74">
+<div class="thumbnail">
+<a href="./posts/2020-02-22-python-dynamic-dispatch.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2020-02-22-python-dynamic-dispatch.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-02-22-python-dynamic-dispatch.html">
+<h3 class="no-anchor listing-title">
+The missing piece in Python tutorial - What is dispatch why you should care
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('fastai'); return false;">
+fastai
+</div>
+</div>
+<a href="./posts/2020-02-22-python-dynamic-dispatch.html">
+<div class="listing-description">
+<p>Dispatch is an amazing useful features which is underused in Python. In this article, I will show you how you can use it to make Python more powerful.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-02-22-python-dynamic-dispatch.html">
+<div class="listing-date">
+Feb 22, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="32" data-categories="jupyter" data-listing-date-sort="1582156800000" data-listing-file-modified-sort="1680791127004" data-listing-reading-time-sort="2.785">
+<div class="thumbnail">
+<p><a href="./posts/2020-02-20-test.html"> <img data-src="./posts/images/chart-preview.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-02-20-test.html">
+<h3 class="no-anchor listing-title">
+Fastpages Notebook Blog Post
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('jupyter'); return false;">
+jupyter
+</div>
+</div>
+<a href="./posts/2020-02-20-test.html">
+<div class="listing-description">
+<p>A tutorial of fastpages for Jupyter notebooks.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-02-20-test.html">
+<div class="listing-date">
+Feb 20, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="33" data-categories="ML" data-listing-date-sort="1581206400000" data-listing-file-modified-sort="1680791127003" data-listing-reading-time-sort="2.51">
+<div class="thumbnail">
+<p><a href="./posts/2020-02-09-MixUp-and-Beta-Distribution.html"> <img data-src="./posts/assets/output_5_0.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-02-09-MixUp-and-Beta-Distribution.html">
+<h3 class="no-anchor listing-title">
+data augmentation - Understand MixUp and Beta Distribution
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('ML'); return false;">
+ML
+</div>
+</div>
+<a href="./posts/2020-02-09-MixUp-and-Beta-Distribution.html">
+<div class="listing-description">
+<p>Mixup and Beta Distribution</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-02-09-MixUp-and-Beta-Distribution.html">
+<div class="listing-date">
+Feb 9, 2020
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="34" data-categories="python,ML" data-listing-date-sort="1581120000000" data-listing-file-modified-sort="1680791127002" data-listing-reading-time-sort="2.66">
+<div class="thumbnail">
+<a href="./posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html">
+<h3 class="no-anchor listing-title">
+Hydra - Config Composition for Machine Learning Project
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('ML'); return false;">
+ML
+</div>
+</div>
+<a href="./posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html">
+<div class="listing-description">
+GitHub: https://github.com/noklam/notadatascientist/tree/master/demo/hydra-example
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html">
+<div class="listing-date">
+Feb 8, 2020
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="35" data-categories="python" data-listing-date-sort="1571439600000" data-listing-file-modified-sort="1680791127001" data-listing-reading-time-sort="0.645">
+<div class="thumbnail">
+<a href="./posts/2019-10-19-Deskto-Notification.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/2019-10-19-Deskto-Notification.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/2019-10-19-Deskto-Notification.html">
+<h3 class="no-anchor listing-title">
+plyer - Desktop Notification with Python
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('python'); return false;">
+python
+</div>
+</div>
+<a href="./posts/2019-10-19-Deskto-Notification.html">
+<div class="listing-description">
+<p>Desktop notifiaction with Python</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2019-10-19-Deskto-Notification.html">
+<div class="listing-date">
+Oct 19, 2019
+</div>
+<div class="listing-author">
+noklam
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="36" data-categories="codespaces,nbdev" data-listing-date-sort="1546300800000" data-listing-file-modified-sort="1680791127000" data-listing-reading-time-sort="5.935">
+<div class="thumbnail">
+<p><a href="./posts/2019-01-01-codespace-template.html"> <img data-src="./posts/images/fastpages_posts/codespaces/codespaces.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/2019-01-01-codespace-template.html">
+<h3 class="no-anchor listing-title">
+nbdev + GitHub Codespaces: A New Literate Programming Environment
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('codespaces'); return false;">
+codespaces
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('nbdev'); return false;">
+nbdev
+</div>
+</div>
+<a href="./posts/2019-01-01-codespace-template.html">
+<div class="listing-description">
+<p>How a new GitHub feature makes literate programming easier than ever before.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/2019-01-01-codespace-template.html">
+<div class="listing-date">
+Jan 1, 2019
+</div>
+</a><div class="listing-author"><a href="./posts/2019-01-01-codespace-template.html">
+</a><a href="https://twitter.com/HamelHusain">Hamel Husain</a> &amp; <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a>
+</div>
+
+</div>
+</div>
+</div>
+<div class="listing-no-matching d-none">
+No matching items
+</div>
+<nav id="listing-pagination" class="listing-pagination" aria-label="Page Navigation">
+  <ul class="pagination"></ul>
+</nav>
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
