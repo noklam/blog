@@ -1,9 +1,0 @@
-project:
-  output-dir: _docs
-
-website:
-  title: "noklam"
-  site-url: "https://noklam.github.io/blog"
-  description: "My blog about kedro and non-kedro stuff, data science"
-  repo-branch: main
-  repo-url: "https://github.com/noklam/blog"
