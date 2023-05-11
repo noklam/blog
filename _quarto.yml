@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  google-analytics: 375770529
+  google-analytics: "375770529"
   title: "blog"
   navbar:
     right:
