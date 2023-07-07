@@ -3,6 +3,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/python_single_dispatch/python-dispatch-typehint.html",
+      "/posts/python_warning/2023-07-08-python-warning-test-version-switch-mock.html",
       "/posts/kedro_duckdb/kedro-duckdb.html",
       "/posts/pandas_expert/kedro-meta-analysis.html",
       "/posts/python_expert/python-expert-decorator-generator-contextmanager.html",
