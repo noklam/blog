@@ -2,102 +2,106 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-06-20-logging-config-dict-issue-kedro.html</loc>
-    <lastmod>2023-07-07T15:06:49.836Z</lastmod>
+    <lastmod>2023-07-30T21:45:55.147Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-17-pytest-data-test-truncated-error.html</loc>
-    <lastmod>2023-07-07T15:06:50.639Z</lastmod>
+    <lastmod>2023-07-30T21:45:55.915Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-05-29-python-internal-series-python-gil-and-memory.html</loc>
-    <lastmod>2023-07-07T15:06:51.334Z</lastmod>
+    <lastmod>2023-07-30T21:45:56.675Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-07-10-5minutes-data-science-design-pattern-callback.html</loc>
-    <lastmod>2023-07-07T15:06:52.248Z</lastmod>
+    <lastmod>2023-07-30T21:45:57.616Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2020-02-09-MixUp-and-Beta-Distribution.html</loc>
-    <lastmod>2023-07-07T15:06:53.450Z</lastmod>
+    <lastmod>2023-07-30T21:45:58.944Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-05-pyodbc-linux.html</loc>
-    <lastmod>2023-07-07T15:06:54.527Z</lastmod>
+    <lastmod>2023-07-30T21:46:00.013Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html</loc>
-    <lastmod>2023-07-07T15:06:55.199Z</lastmod>
+    <lastmod>2023-07-30T21:46:00.688Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2019-01-01-codespace-template.html</loc>
-    <lastmod>2023-07-07T15:06:55.895Z</lastmod>
+    <lastmod>2023-07-30T21:46:01.516Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2019-10-19-Deskto-Notification.html</loc>
-    <lastmod>2023-07-07T15:06:56.421Z</lastmod>
+    <lastmod>2023-07-30T21:46:02.068Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-21-full-stack-deep-learning-lecture-01.html</loc>
-    <lastmod>2023-07-07T15:06:57.166Z</lastmod>
+    <lastmod>2023-07-30T21:46:02.947Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-04-16-full-stack-deep-learning-lecture-03.html</loc>
-    <lastmod>2023-07-07T15:06:57.705Z</lastmod>
+    <lastmod>2023-07-30T21:46:03.885Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/python_single_dispatch/python-dispatch-typehint.html</loc>
-    <lastmod>2023-07-07T15:06:58.290Z</lastmod>
+    <lastmod>2023-07-30T21:46:04.408Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-11-18-what-can-we-learn-from-shipping-crisis-as-a-data-scientist.html</loc>
-    <lastmod>2023-07-07T15:06:58.951Z</lastmod>
+    <lastmod>2023-07-30T21:46:05.216Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-06-26-jupyter-sql-notebook.html</loc>
-    <lastmod>2023-07-07T15:06:59.651Z</lastmod>
+    <lastmod>2023-07-30T21:46:05.963Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/python_warning/2023-07-08-python-warning-test-version-switch-mock.html</loc>
-    <lastmod>2023-07-07T15:07:00.310Z</lastmod>
+    <lastmod>2023-07-30T21:46:06.456Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-27-microsoft-azure-dp100.html</loc>
-    <lastmod>2023-07-07T15:07:00.927Z</lastmod>
+    <lastmod>2023-07-30T21:46:07.050Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html</loc>
-    <lastmod>2023-07-07T15:07:01.495Z</lastmod>
+    <lastmod>2023-07-30T21:46:07.560Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html</loc>
-    <lastmod>2023-07-07T15:07:02.543Z</lastmod>
+    <lastmod>2023-07-30T21:46:08.544Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-08-18-python-file-not-found-long-file-path-window.html</loc>
-    <lastmod>2023-07-07T15:07:03.107Z</lastmod>
+    <lastmod>2023-07-30T21:46:09.031Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/pandas_expert/kedro-meta-analysis.html</loc>
-    <lastmod>2023-07-07T15:07:03.776Z</lastmod>
+    <lastmod>2023-07-30T21:46:09.666Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/kedro_duckdb/kedro-duckdb.html</loc>
-    <lastmod>2023-07-07T15:07:04.580Z</lastmod>
+    <lastmod>2023-07-30T21:46:10.408Z</lastmod>
+  </url>
+  <url>
+    <loc>https://noklam.github.io/blog/posts/reflection_of_my_open_source_journey/2023-07-31-reflection-on-opensource-journey.html</loc>
+    <lastmod>2023-07-30T21:46:10.860Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-07-02-kedro-datacatalog.html</loc>
-    <lastmod>2023-07-07T15:07:06.146Z</lastmod>
+    <lastmod>2023-07-30T21:46:12.628Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/python_expert/python-expert-decorator-generator-contextmanager.html</loc>
-    <lastmod>2023-07-07T15:07:06.733Z</lastmod>
+    <lastmod>2023-07-30T21:46:13.222Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/index.html</loc>
-    <lastmod>2023-07-07T15:07:08.178Z</lastmod>
+    <lastmod>2023-07-30T21:46:14.703Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/about.html</loc>
-    <lastmod>2023-07-07T15:07:08.762Z</lastmod>
+    <lastmod>2023-07-30T21:46:15.372Z</lastmod>
   </url>
 </urlset>
