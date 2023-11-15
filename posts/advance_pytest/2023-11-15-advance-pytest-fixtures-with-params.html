@@ -6,11 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="noklam">
-<meta name="dcterms.date" content="2021-05-29">
-<meta name="description" content="Despite the bad reputation of GIL, it was arguably designed on purpose. The GIL actually comes with a lot of benefit.">
+<meta name="dcterms.date" content="2023-11-15">
+<meta name="description" content="Using pytest fixture with params combination">
 
-<title>blog - Python Internal Series - Global Interpreter Lock (GIL) and Memory Management</title>
+<title>blog - Advance Pytest - parameterize your fixture</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -60,22 +59,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -107,7 +106,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 </script>
 
 
-<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -117,7 +116,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">blog</span>
     </a>
   </div>
@@ -128,7 +127,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../about.html" rel="" target="">
+    <a class="nav-link" href="../../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
@@ -152,14 +151,14 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Python Internal Series - Global Interpreter Lock (GIL) and Memory Management</h1>
+      <h1 class="title">Advance Pytest - parameterize your fixture</h1>
                   <div>
         <div class="description">
-          Despite the bad reputation of GIL, it was arguably designed on purpose. The GIL actually comes with a lot of benefit.
+          Using pytest fixture with params combination
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">python-internal</div>
+                <div class="quarto-category">pytest</div>
               </div>
                   </div>
   </div>
@@ -167,17 +166,11 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   
   <div class="quarto-title-meta">
 
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>noklam </p>
-            </div>
-    </div>
       
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">May 29, 2021</p>
+        <p class="date">November 15, 2023</p>
       </div>
     </div>
     
@@ -193,15 +186,15 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#is-gil-a-bad-design" id="toc-is-gil-a-bad-design" class="nav-link active" data-scroll-target="#is-gil-a-bad-design">Is GIL a bad design?</a></li>
-  <li><a href="#global-interpreter-lock-a.k.a-mutex-lock" id="toc-global-interpreter-lock-a.k.a-mutex-lock" class="nav-link" data-scroll-target="#global-interpreter-lock-a.k.a-mutex-lock">Global Interpreter Lock a.k.a Mutex Lock</a></li>
-  <li><a href="#why-gil-is-needed-in-the-first-place" id="toc-why-gil-is-needed-in-the-first-place" class="nav-link" data-scroll-target="#why-gil-is-needed-in-the-first-place">Why GIL is needed in the first place?</a>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
   <ul class="collapse">
-  <li><a href="#python-memory-management---reference-count-garbage-collection-gc" id="toc-python-memory-management---reference-count-garbage-collection-gc" class="nav-link" data-scroll-target="#python-memory-management---reference-count-garbage-collection-gc">Python Memory Management - Reference Count &amp; Garbage Collection (gc)</a></li>
-  <li><a href="#lock-deadlock" id="toc-lock-deadlock" class="nav-link" data-scroll-target="#lock-deadlock">Lock &amp; Deadlock</a></li>
-  <li><a href="#memory-management" id="toc-memory-management" class="nav-link" data-scroll-target="#memory-management">Memory Management</a></li>
+  <li><a href="#parameterize-tests" id="toc-parameterize-tests" class="nav-link" data-scroll-target="#parameterize-tests">Parameterize Tests</a>
+  <ul class="collapse">
+  <li><a href="#style-a---use-the-fixture-as-an-argument" id="toc-style-a---use-the-fixture-as-an-argument" class="nav-link" data-scroll-target="#style-a---use-the-fixture-as-an-argument">Style A - use the fixture as an argument</a></li>
+  <li><a href="#style-b---use-the-fixture-as-a-decorator" id="toc-style-b---use-the-fixture-as-a-decorator" class="nav-link" data-scroll-target="#style-b---use-the-fixture-as-a-decorator">Style B - use the fixture as a decorator</a></li>
   </ul></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -211,63 +204,71 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<section id="is-gil-a-bad-design" class="level2">
-<h2 class="anchored" data-anchor-id="is-gil-a-bad-design">Is GIL a bad design?</h2>
-<p>Most people first learn about GIL because of how it slows down Python program and prevent multi-threading running efficiently, however, the GIL is one of the reason why Python survive 30 years and still growing healthyly.</p>
-<p>GIL is nothing like the stereotype people think, legacy, slow. There are multiple benefits GIL provide:</p>
-<ul>
-<li>It speed ups single thread program.</li>
-<li>It is compatible with many C Program thanks to the C API of CPysthon.</li>
-</ul>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Today I encountered a little testing challenge where I need to parameterize my tests. We use <code>pytest</code> extensively for our unit tests. Particularly, I need to duplicate all my tests for a new folder structure. At first, I thought about just writing new tests, then I quickly realise that I will end up duplicating a big chunk of our tests. On the other hand, some tests only make sense for a particular structure. If you are familiar with <code>pytest</code>, you may know that you can use <code>pytest.mark.parametrize</code> for testing a matrix of inputs and outputs. This is not applicable because I want to parameterise my fixture instead of the parameters of a test.</p>
+<p>After a while of Googling, I found <a href="https://docs.pytest.org/en/7.1.x/how-to/fixtures.html#parametrizing-fixtures">Parameterize fixtures</a>. It wasn’t immediately obivous to me how I can use this to apply a matrix of tests while keeping it flexible enough to use only part of the fixtures. It sounds complicated but it will make more sense as I show you more example</p>
+<section id="parameterize-tests" class="level2">
+<h2 class="anchored" data-anchor-id="parameterize-tests">Parameterize Tests</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pytest</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">@pytest.fixture</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> a():</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_foo(a):</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you have use <code>pytest</code> before, you will know that <code>pytest.fixture</code> is the recommended way to reuse test setup. To test a matrix of input and outputs, you may use <code>pytest.mark.parameterize</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pytest</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">@pytest.fixture</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> a():</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>pytest.mark.parametrize(<span class="st">"input"</span>, [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>])</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_foo(<span class="bu">input</span>):</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This will create 3 tests and each of them will have an input <code>1</code>, <code>2</code>, <code>3</code> respectively. However this is not applicable to my use case because I want to parameterize my fixtures instead of a test. The test requires a fairly complicated setup, which involves creating dummy files and folder. This wasn’t a problem before we only create one specific type of structure. Recently, we want to make it generic and support different types of structure, so I need to expand the tests to cover this.</p>
+<p>To do this, I discovered that I can use <code>pytest.fixture</code> with a <code>params</code> argument.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@pytest.fixture</span>(params<span class="op">=</span>[<span class="st">"structure_a"</span>, <span class="st">"structure_b"</span>,<span class="st">"structure_c"</span>])</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> a(request):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> request.param</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_a(a):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>   ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This also creates 3 tests, which is great! Now for most of the cases, this is fine, but some tests only make sense for <code>structure_a</code> but not the other, should I duplicate another set of fixture? This is a feasible option but it’s not ideal. Turns out I can reuse the setup logic and create a combination of fixture easily. There are two different styles to do this, essentially instead of creating the fixture directly, we keep it as a function and create the a combination of fixtures base on this <code>setup</code> function.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> setup(params):  <span class="co"># Note this is just a function but not a fixture</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="style-a---use-the-fixture-as-an-argument" class="level3">
+<h3 class="anchored" data-anchor-id="style-a---use-the-fixture-as-an-argument">Style A - use the fixture as an argument</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>use_all_folder_structure <span class="op">=</span> pytest.fixture(setup, params<span class="op">=</span>[<span class="st">"a"</span>,<span class="st">"b"</span>,<span class="st">"c"</span>]), name<span class="op">=</span><span class="st">"use_all_folder_structure"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_foo_a(use_all_folder_structure):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="global-interpreter-lock-a.k.a-mutex-lock" class="level2">
-<h2 class="anchored" data-anchor-id="global-interpreter-lock-a.k.a-mutex-lock">Global Interpreter Lock a.k.a Mutex Lock</h2>
-<p>To start with, GIL is a mutex lock.</p>
-</section>
-<section id="why-gil-is-needed-in-the-first-place" class="level2">
-<h2 class="anchored" data-anchor-id="why-gil-is-needed-in-the-first-place">Why GIL is needed in the first place?</h2>
-<p>Memory management. Python use something called “reference counting”, which make it different from many modern programming lanaguage. It is what allow Python programmer to lay back and let Python take care when to release memory. Precisely, it is actually the C program controlling the memory life cycle for Python (Cpython). Cpython is known as the default Python interpreter. It first compiles Python to intermediate bytecode (.pyc files). These bytecode then being interpreted by a virtual machine ane executed. It is worth to mention that other variants of Python exist, i.e.&nbsp;IronPython(C#), Jython(Java), Pypy(Python) and they have different memory management mechanisms.</p>
-<section id="python-memory-management---reference-count-garbage-collection-gc" class="level3">
-<h3 class="anchored" data-anchor-id="python-memory-management---reference-count-garbage-collection-gc">Python Memory Management - Reference Count &amp; Garbage Collection (gc)</h3>
-<div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sys.getrefcount(a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="18">
-<pre><code>3</code></pre>
-</div>
-</div>
-<p>Reference counting is a simple idea. The intuition is that if a particular object is not referenced by anything, it can be recycled since it will not be used anymore.</p>
-<p>For example, the list <code>[1]</code> is now referenced by the variable <code>a</code>, so the reference count is incremented by 1.</p>
-<div class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> [<span class="dv">1</span>]</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>sys.getrefcount(a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="19">
-<pre><code>2</code></pre>
-</div>
-</div>
-<p>Note that the reference count is 2 instead of 1. 1. The first reference is <code>a = [1]</code> 2. When the variable <code>a</code> is passed to <code>sys.getrefcount(a)</code> as an argument, it also increases the reference count.</p>
-<div class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">del</span> a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>When <code>del a</code> is called, the list <code>[1]</code> have 0 reference count, and it is collected by Python automatically behind the scene.</p>
-</section>
-<section id="lock-deadlock" class="level3">
-<h3 class="anchored" data-anchor-id="lock-deadlock">Lock &amp; Deadlock</h3>
-</section>
-<section id="memory-management" class="level3">
-<h3 class="anchored" data-anchor-id="memory-management">Memory Management</h3>
+<section id="style-b---use-the-fixture-as-a-decorator" class="level3">
+<h3 class="anchored" data-anchor-id="style-b---use-the-fixture-as-a-decorator">Style B - use the fixture as a decorator</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> pytest.fixture(setup, params<span class="op">=</span> [<span class="st">"a"</span>,<span class="st">"b"</span>,<span class="st">"c"</span>]) ,name<span class="op">=</span><span class="st">"use_all_folder_structure"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>use_all_folder_structure <span class="op">=</span> pytest.mark.usefixtures(<span class="st">"use_all_folder_structure"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="at">@use_all_folder_structure</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_foo_b():</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I can easily create another fixture to run on a subset of fixture.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> pytest.fixture(setup, params<span class="op">=</span> [<span class="st">"a"</span>]) ,name<span class="op">=</span><span class="st">"use_folder_structure_a"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">@use_folder_structure_a</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_bar_b():</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
-<section id="reference" class="level1">
-<h1>Reference</h1>
-<ul>
-<li>https://www.youtube.com/watch?v=KVKufdTphKs&amp;t=731s</li>
-<li>https://realpython.com/python-gil/</li>
-<li>https://devguide.python.org/garbage_collector/</li>
-</ul>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>To summarisze, it is possible to apply a matrix of fixtures easily. Which style do you perfer?</p>
 
 
 </section>

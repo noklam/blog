@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.3.433">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="dcterms.date" content="2022-11-13">
 <meta name="description" content="Meta-analysis of the kedro codebase">
 
-<title>../../blog - Understanding the Kedro codebase - A quick dirty meta-analysis - (Part I)</title>
+<title>blog - Understanding the Kedro codebase - A quick dirty meta-analysis - (Part I)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,9 +19,10 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -48,43 +49,13 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -120,7 +91,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-28PTCJ2ELM"></script>
@@ -151,27 +123,29 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <span class="navbar-title">blog</span>
     </a>
   </div>
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">
+    <a class="nav-link" href="../../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/noklam"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/noklam" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
+            <div class="quarto-navbar-tools">
+</div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
@@ -227,7 +201,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<div class="quarto-video ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/pjq3QOxl9Ok" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/pjq3QOxl9Ok" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
 <p>Inspired by this talk</p>
 <section id="how-many-lines-of-code-in-kedro" class="level1">
 <h1>How many lines of code in Kedro?</h1>
@@ -322,30 +296,31 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>line_counts_df[<span class="st">"fullpath"</span>] <span class="op">=</span>  line_counts_df[<span class="st">"fullpath"</span>].<span class="bu">str</span>.replace(<span class="st">"/Users/Nok_Lam_Chan/GitHub/kedro/"</span>, <span class="st">""</span>)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>line_counts_df.head(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>fullpath</th>
-      <th>line_of_code</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>tools/cli.py</td>
-      <td>62</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>features/environment.py</td>
-      <td>128</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">fullpath</th>
+<th data-quarto-table-cell-role="th">line_of_code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>tools/cli.py</td>
+<td>62</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>features/environment.py</td>
+<td>128</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -355,123 +330,124 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>line_counts_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>fullpath</th>
-      <th>line_of_code</th>
-      <th>toplevel</th>
-      <th>module</th>
-      <th>submodule</th>
-      <th>filename</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>tools/cli.py</td>
-      <td>62</td>
-      <td>tools</td>
-      <td>cli.py</td>
-      <td>None</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>features/environment.py</td>
-      <td>128</td>
-      <td>features</td>
-      <td>environment.py</td>
-      <td>None</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>tests/test_utils.py</td>
-      <td>30</td>
-      <td>tests</td>
-      <td>test_utils.py</td>
-      <td>None</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>tests/conftest.py</td>
-      <td>89</td>
-      <td>tests</td>
-      <td>conftest.py</td>
-      <td>None</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>docs/conf.py</td>
-      <td>598</td>
-      <td>docs</td>
-      <td>conf.py</td>
-      <td>None</td>
-      <td>None</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>276</th>
-      <td>kedro/extras/datasets/pandas/feather_dataset.py</td>
-      <td>191</td>
-      <td>kedro</td>
-      <td>extras</td>
-      <td>datasets</td>
-      <td>pandas/feather_dataset.py</td>
-    </tr>
-    <tr>
-      <th>277</th>
-      <td>kedro/extras/datasets/pandas/hdf_dataset.py</td>
-      <td>204</td>
-      <td>kedro</td>
-      <td>extras</td>
-      <td>datasets</td>
-      <td>pandas/hdf_dataset.py</td>
-    </tr>
-    <tr>
-      <th>278</th>
-      <td>kedro/extras/datasets/pandas/csv_dataset.py</td>
-      <td>194</td>
-      <td>kedro</td>
-      <td>extras</td>
-      <td>datasets</td>
-      <td>pandas/csv_dataset.py</td>
-    </tr>
-    <tr>
-      <th>279</th>
-      <td>kedro/extras/datasets/pandas/excel_dataset.py</td>
-      <td>254</td>
-      <td>kedro</td>
-      <td>extras</td>
-      <td>datasets</td>
-      <td>pandas/excel_dataset.py</td>
-    </tr>
-    <tr>
-      <th>280</th>
-      <td>kedro/extras/datasets/pandas/gbq_dataset.py</td>
-      <td>314</td>
-      <td>kedro</td>
-      <td>extras</td>
-      <td>datasets</td>
-      <td>pandas/gbq_dataset.py</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">fullpath</th>
+<th data-quarto-table-cell-role="th">line_of_code</th>
+<th data-quarto-table-cell-role="th">toplevel</th>
+<th data-quarto-table-cell-role="th">module</th>
+<th data-quarto-table-cell-role="th">submodule</th>
+<th data-quarto-table-cell-role="th">filename</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>tools/cli.py</td>
+<td>62</td>
+<td>tools</td>
+<td>cli.py</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>features/environment.py</td>
+<td>128</td>
+<td>features</td>
+<td>environment.py</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>tests/test_utils.py</td>
+<td>30</td>
+<td>tests</td>
+<td>test_utils.py</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>tests/conftest.py</td>
+<td>89</td>
+<td>tests</td>
+<td>conftest.py</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>docs/conf.py</td>
+<td>598</td>
+<td>docs</td>
+<td>conf.py</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">276</td>
+<td>kedro/extras/datasets/pandas/feather_dataset.py</td>
+<td>191</td>
+<td>kedro</td>
+<td>extras</td>
+<td>datasets</td>
+<td>pandas/feather_dataset.py</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">277</td>
+<td>kedro/extras/datasets/pandas/hdf_dataset.py</td>
+<td>204</td>
+<td>kedro</td>
+<td>extras</td>
+<td>datasets</td>
+<td>pandas/hdf_dataset.py</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">278</td>
+<td>kedro/extras/datasets/pandas/csv_dataset.py</td>
+<td>194</td>
+<td>kedro</td>
+<td>extras</td>
+<td>datasets</td>
+<td>pandas/csv_dataset.py</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">279</td>
+<td>kedro/extras/datasets/pandas/excel_dataset.py</td>
+<td>254</td>
+<td>kedro</td>
+<td>extras</td>
+<td>datasets</td>
+<td>pandas/excel_dataset.py</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">280</td>
+<td>kedro/extras/datasets/pandas/gbq_dataset.py</td>
+<td>314</td>
+<td>kedro</td>
+<td>extras</td>
+<td>datasets</td>
+<td>pandas/gbq_dataset.py</td>
+</tr>
+</tbody>
 </table>
+
 <p>281 rows × 6 columns</p>
 </div>
 </div>
@@ -480,59 +456,60 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Sort by Top level module</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>line_counts_df.groupby([<span class="st">"toplevel"</span>]).<span class="bu">sum</span>().sort_values(ascending<span class="op">=</span><span class="va">False</span>, by <span class="op">=</span><span class="st">"line_of_code"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>line_of_code</th>
-    </tr>
-    <tr>
-      <th>toplevel</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>tests</th>
-      <td>25341</td>
-    </tr>
-    <tr>
-      <th>kedro</th>
-      <td>18683</td>
-    </tr>
-    <tr>
-      <th>features</th>
-      <td>1587</td>
-    </tr>
-    <tr>
-      <th>docs</th>
-      <td>1185</td>
-    </tr>
-    <tr>
-      <th>resume-kedro</th>
-      <td>1007</td>
-    </tr>
-    <tr>
-      <th>iris-demo</th>
-      <td>550</td>
-    </tr>
-    <tr>
-      <th>iris</th>
-      <td>547</td>
-    </tr>
-    <tr>
-      <th>test</th>
-      <td>405</td>
-    </tr>
-    <tr>
-      <th>tools</th>
-      <td>88</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">line_of_code</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">toplevel</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">tests</td>
+<td>25341</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">kedro</td>
+<td>18683</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">features</td>
+<td>1587</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">docs</td>
+<td>1185</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">resume-kedro</td>
+<td>1007</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">iris-demo</td>
+<td>550</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">iris</td>
+<td>547</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">test</td>
+<td>405</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">tools</td>
+<td>88</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -540,78 +517,79 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>line_counts_df.groupby([<span class="st">"module"</span>,<span class="st">"submodule"</span>]).<span class="bu">sum</span>().sort_values(ascending<span class="op">=</span><span class="va">False</span>, by <span class="op">=</span><span class="st">"line_of_code"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th></th>
-      <th>line_of_code</th>
-    </tr>
-    <tr>
-      <th>module</th>
-      <th>submodule</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>extras</th>
-      <th>datasets</th>
-      <td>15775</td>
-    </tr>
-    <tr>
-      <th rowspan="2" valign="top">framework</th>
-      <th>cli</th>
-      <td>8837</td>
-    </tr>
-    <tr>
-      <th>session</th>
-      <td>2574</td>
-    </tr>
-    <tr>
-      <th rowspan="2" valign="top">pipeline</th>
-      <th>test_pipeline.py</th>
-      <td>940</td>
-    </tr>
-    <tr>
-      <th>pipeline.py</th>
-      <td>926</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <th>...</th>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>config</th>
-      <th>__init__.py</th>
-      <td>19</td>
-    </tr>
-    <tr>
-      <th>runner</th>
-      <th>__init__.py</th>
-      <td>16</td>
-    </tr>
-    <tr>
-      <th>pipeline</th>
-      <th>__init__.py</th>
-      <td>9</td>
-    </tr>
-    <tr>
-      <th>extras</th>
-      <th>__init__.py</th>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>framework</th>
-      <th>__init__.py</th>
-      <td>1</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">line_of_code</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">module</th>
+<th data-quarto-table-cell-role="th">submodule</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">extras</td>
+<td data-quarto-table-cell-role="th">datasets</td>
+<td>15775</td>
+</tr>
+<tr class="even">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">framework</td>
+<td data-quarto-table-cell-role="th">cli</td>
+<td>8837</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">session</td>
+<td>2574</td>
+</tr>
+<tr class="even">
+<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">pipeline</td>
+<td data-quarto-table-cell-role="th">test_pipeline.py</td>
+<td>940</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">pipeline.py</td>
+<td>926</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">config</td>
+<td data-quarto-table-cell-role="th">__init__.py</td>
+<td>19</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">runner</td>
+<td data-quarto-table-cell-role="th">__init__.py</td>
+<td>16</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">pipeline</td>
+<td data-quarto-table-cell-role="th">__init__.py</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">extras</td>
+<td data-quarto-table-cell-role="th">__init__.py</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">framework</td>
+<td data-quarto-table-cell-role="th">__init__.py</td>
+<td>1</td>
+</tr>
+</tbody>
 </table>
+
 <p>74 rows × 1 columns</p>
 </div>
 </div>
@@ -628,67 +606,68 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>kedro_line_counts_df.groupby([<span class="st">"module"</span>]).<span class="bu">sum</span>().sort_values(ascending<span class="op">=</span><span class="va">False</span>, by <span class="op">=</span><span class="st">"line_of_code"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>line_of_code</th>
-    </tr>
-    <tr>
-      <th>module</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>extras</th>
-      <td>6871</td>
-    </tr>
-    <tr>
-      <th>framework</th>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>io</th>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>pipeline</th>
-      <td>1837</td>
-    </tr>
-    <tr>
-      <th>runner</th>
-      <td>1068</td>
-    </tr>
-    <tr>
-      <th>config</th>
-      <td>721</td>
-    </tr>
-    <tr>
-      <th>templates</th>
-      <td>443</td>
-    </tr>
-    <tr>
-      <th>ipython</th>
-      <td>164</td>
-    </tr>
-    <tr>
-      <th>utils.py</th>
-      <td>28</td>
-    </tr>
-    <tr>
-      <th>__init__.py</th>
-      <td>11</td>
-    </tr>
-    <tr>
-      <th>__main__.py</th>
-      <td>10</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">line_of_code</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">module</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">extras</td>
+<td>6871</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">framework</td>
+<td>5246</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">io</td>
+<td>2284</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">pipeline</td>
+<td>1837</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">runner</td>
+<td>1068</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">config</td>
+<td>721</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">templates</td>
+<td>443</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">ipython</td>
+<td>164</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">utils.py</td>
+<td>28</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">__init__.py</td>
+<td>11</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">__main__.py</td>
+<td>10</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -696,267 +675,268 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by file </span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>kedro_line_counts_df_group.sort_values(ascending<span class="op">=</span><span class="va">False</span>, by <span class="op">=</span>[<span class="st">"module_line_of_code"</span>,<span class="st">"line_of_code"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>module</th>
-      <th>submodule</th>
-      <th>line_of_code</th>
-      <th>module_line_of_code</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>6</th>
-      <td>extras</td>
-      <td>datasets</td>
-      <td>6734</td>
-      <td>6871</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>extras</td>
-      <td>logging</td>
-      <td>110</td>
-      <td>6871</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>extras</td>
-      <td>extensions</td>
-      <td>25</td>
-      <td>6871</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>extras</td>
-      <td>__init__.py</td>
-      <td>2</td>
-      <td>6871</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>framework</td>
-      <td>cli</td>
-      <td>3439</td>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>framework</td>
-      <td>session</td>
-      <td>511</td>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>framework</td>
-      <td>hooks</td>
-      <td>418</td>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>framework</td>
-      <td>project</td>
-      <td>369</td>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>framework</td>
-      <td>context</td>
-      <td>352</td>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>framework</td>
-      <td>startup.py</td>
-      <td>156</td>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>framework</td>
-      <td>__init__.py</td>
-      <td>1</td>
-      <td>5246</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>io</td>
-      <td>core.py</td>
-      <td>748</td>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>io</td>
-      <td>data_catalog.py</td>
-      <td>594</td>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>io</td>
-      <td>partitioned_dataset.py</td>
-      <td>551</td>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>io</td>
-      <td>memory_dataset.py</td>
-      <td>132</td>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>io</td>
-      <td>cached_dataset.py</td>
-      <td>113</td>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>io</td>
-      <td>lambda_dataset.py</td>
-      <td>113</td>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>io</td>
-      <td>__init__.py</td>
-      <td>33</td>
-      <td>2284</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>pipeline</td>
-      <td>pipeline.py</td>
-      <td>926</td>
-      <td>1837</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>pipeline</td>
-      <td>node.py</td>
-      <td>612</td>
-      <td>1837</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>pipeline</td>
-      <td>modular_pipeline.py</td>
-      <td>290</td>
-      <td>1837</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>pipeline</td>
-      <td>__init__.py</td>
-      <td>9</td>
-      <td>1837</td>
-    </tr>
-    <tr>
-      <th>30</th>
-      <td>runner</td>
-      <td>runner.py</td>
-      <td>456</td>
-      <td>1068</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>runner</td>
-      <td>parallel_runner.py</td>
-      <td>353</td>
-      <td>1068</td>
-    </tr>
-    <tr>
-      <th>32</th>
-      <td>runner</td>
-      <td>thread_runner.py</td>
-      <td>156</td>
-      <td>1068</td>
-    </tr>
-    <tr>
-      <th>31</th>
-      <td>runner</td>
-      <td>sequential_runner.py</td>
-      <td>87</td>
-      <td>1068</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>runner</td>
-      <td>__init__.py</td>
-      <td>16</td>
-      <td>1068</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>config</td>
-      <td>templated_config.py</td>
-      <td>281</td>
-      <td>721</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>config</td>
-      <td>common.py</td>
-      <td>248</td>
-      <td>721</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>config</td>
-      <td>config.py</td>
-      <td>134</td>
-      <td>721</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>config</td>
-      <td>abstract_config.py</td>
-      <td>39</td>
-      <td>721</td>
-    </tr>
-    <tr>
-      <th>0</th>
-      <td>config</td>
-      <td>__init__.py</td>
-      <td>19</td>
-      <td>721</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>templates</td>
-      <td>project</td>
-      <td>410</td>
-      <td>443</td>
-    </tr>
-    <tr>
-      <th>33</th>
-      <td>templates</td>
-      <td>pipeline</td>
-      <td>33</td>
-      <td>443</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>ipython</td>
-      <td>__init__.py</td>
-      <td>164</td>
-      <td>164</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">module</th>
+<th data-quarto-table-cell-role="th">submodule</th>
+<th data-quarto-table-cell-role="th">line_of_code</th>
+<th data-quarto-table-cell-role="th">module_line_of_code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>extras</td>
+<td>datasets</td>
+<td>6734</td>
+<td>6871</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">8</td>
+<td>extras</td>
+<td>logging</td>
+<td>110</td>
+<td>6871</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">7</td>
+<td>extras</td>
+<td>extensions</td>
+<td>25</td>
+<td>6871</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>extras</td>
+<td>__init__.py</td>
+<td>2</td>
+<td>6871</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>framework</td>
+<td>cli</td>
+<td>3439</td>
+<td>5246</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">14</td>
+<td>framework</td>
+<td>session</td>
+<td>511</td>
+<td>5246</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">12</td>
+<td>framework</td>
+<td>hooks</td>
+<td>418</td>
+<td>5246</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">13</td>
+<td>framework</td>
+<td>project</td>
+<td>369</td>
+<td>5246</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">11</td>
+<td>framework</td>
+<td>context</td>
+<td>352</td>
+<td>5246</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>framework</td>
+<td>startup.py</td>
+<td>156</td>
+<td>5246</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>framework</td>
+<td>__init__.py</td>
+<td>1</td>
+<td>5246</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">18</td>
+<td>io</td>
+<td>core.py</td>
+<td>748</td>
+<td>2284</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">19</td>
+<td>io</td>
+<td>data_catalog.py</td>
+<td>594</td>
+<td>2284</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">22</td>
+<td>io</td>
+<td>partitioned_dataset.py</td>
+<td>551</td>
+<td>2284</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">21</td>
+<td>io</td>
+<td>memory_dataset.py</td>
+<td>132</td>
+<td>2284</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17</td>
+<td>io</td>
+<td>cached_dataset.py</td>
+<td>113</td>
+<td>2284</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">20</td>
+<td>io</td>
+<td>lambda_dataset.py</td>
+<td>113</td>
+<td>2284</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">16</td>
+<td>io</td>
+<td>__init__.py</td>
+<td>33</td>
+<td>2284</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">27</td>
+<td>pipeline</td>
+<td>pipeline.py</td>
+<td>926</td>
+<td>1837</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">26</td>
+<td>pipeline</td>
+<td>node.py</td>
+<td>612</td>
+<td>1837</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25</td>
+<td>pipeline</td>
+<td>modular_pipeline.py</td>
+<td>290</td>
+<td>1837</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">24</td>
+<td>pipeline</td>
+<td>__init__.py</td>
+<td>9</td>
+<td>1837</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">30</td>
+<td>runner</td>
+<td>runner.py</td>
+<td>456</td>
+<td>1068</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">29</td>
+<td>runner</td>
+<td>parallel_runner.py</td>
+<td>353</td>
+<td>1068</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">32</td>
+<td>runner</td>
+<td>thread_runner.py</td>
+<td>156</td>
+<td>1068</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">31</td>
+<td>runner</td>
+<td>sequential_runner.py</td>
+<td>87</td>
+<td>1068</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">28</td>
+<td>runner</td>
+<td>__init__.py</td>
+<td>16</td>
+<td>1068</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>config</td>
+<td>templated_config.py</td>
+<td>281</td>
+<td>721</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>config</td>
+<td>common.py</td>
+<td>248</td>
+<td>721</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>config</td>
+<td>config.py</td>
+<td>134</td>
+<td>721</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>config</td>
+<td>abstract_config.py</td>
+<td>39</td>
+<td>721</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0</td>
+<td>config</td>
+<td>__init__.py</td>
+<td>19</td>
+<td>721</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">34</td>
+<td>templates</td>
+<td>project</td>
+<td>410</td>
+<td>443</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">33</td>
+<td>templates</td>
+<td>pipeline</td>
+<td>33</td>
+<td>443</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">23</td>
+<td>ipython</td>
+<td>__init__.py</td>
+<td>164</td>
+<td>164</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -1003,9 +983,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -1070,6 +1064,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {

@@ -2,7 +2,10 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/rust_learning/2023-11-11-rust-learning.html",
+      "/posts/advance_pytest/2023-11-15-advance-pytest-fixtures-with-params.html",
       "/posts/understand_namespace/2023-09-26-understand-kedro-namespace-pipeline.html",
+      "/posts/reflection_of_my_open_source_journey/2023-07-31-reflection-on-opensource-journey.html",
       "/posts/python_single_dispatch/python-dispatch-typehint.html",
       "/posts/python_warning/2023-07-08-python-warning-test-version-switch-mock.html",
       "/posts/kedro_duckdb/kedro-duckdb.html",
