@@ -1,0 +1,95 @@
+---
+badges: true
+categories:
+- pytest
+date: '2023-11-15'
+description: 'Using pytest fixture with params combination'
+title: 'Advance Pytest - parameterize your fixture'
+toc: true
+---
+
+# Introduction
+Today I encountered a little testing challenge where I need to parameterize my tests. We use `pytest` extensively for our unit tests. Particularly, I need to duplicate all my tests for a new folder structure. At first, I thought about just writing new tests, then I quickly realise that I will end up duplicating a big chunk of our tests. On the other hand, some tests only make sense for a particular structure. If you are familiar with `pytest`, you may know that you can use `pytest.mark.parametrize` for testing a matrix of inputs and outputs. This is not applicable because I want to parameterise my fixture instead of the parameters of a test.
+
+After a while of Googling, I found [Parameterize fixtures](https://docs.pytest.org/en/7.1.x/how-to/fixtures.html#parametrizing-fixtures). It wasn't immediately obivous to me how I can use this to apply a matrix of tests while keeping it flexible enough to use only part of the fixtures. It sounds complicated but it will make more sense as I show you more example
+
+
+## Parameterize Tests
+```python
+import pytest
+
+@pytest.fixture
+def a():
+    ...
+
+
+def test_foo(a):
+    ...
+```
+
+If you have use `pytest` before, you will know that `pytest.fixture` is the recommended way to reuse test setup. To test a matrix of input and outputs, you may use `pytest.mark.parameterize`.
+
+```python
+import pytest
+
+@pytest.fixture
+def a():
+    ...
+
+pytest.mark.parametrize("input", [1,2,3])
+def test_foo(input):
+    ...
+```
+This will create 3 tests and each of them will have an input `1`, `2`, `3` respectively. However this is not applicable to my use case because I want to parameterize my fixtures instead of a test. The test requires a fairly complicated setup, which involves creating dummy files and folder. This wasn't a problem before we only create one specific type of structure. Recently, we want to make it generic and support different types of structure, so I need to expand the tests to cover this.
+
+To do this, I discovered that I can use `pytest.fixture` with a `params` argument.
+
+```python
+@pytest.fixture(params=["structure_a", "structure_b","structure_c"])
+def a(request):
+    return request.param
+
+
+def test_a(a):
+   ...
+```
+
+This also creates 3 tests, which is great! Now for most of the cases, this is fine, but some tests only make sense for `structure_a` but not the other, should I duplicate another set of fixture? This is a feasible option but it's not ideal. Turns out I can reuse the setup logic and create a combination of fixture easily. There are two different styles to do this, essentially instead of creating the fixture directly, we keep it as a function and create the a combination of fixtures base on this `setup` function.
+
+```python
+def setup(params):  # Note this is just a function but not a fixture
+    ...
+
+```
+
+### Style A - use the fixture as an argument
+```python
+use_all_folder_structure = pytest.fixture(setup, params=["a","b","c"]), name="use_all_folder_structure")
+def test_foo_a(use_all_folder_structure):
+    print()
+```
+
+
+### Style B - use the fixture as a decorator
+```python
+
+_ = pytest.fixture(setup, params= ["a","b","c"]) ,name="use_all_folder_structure")
+use_all_folder_structure = pytest.mark.usefixtures("use_all_folder_structure",
+
+)
+@use_all_folder_structure
+def test_foo_b():
+    print()
+```
+
+I can easily create another fixture to run on a subset of fixture.
+```python
+_ = pytest.fixture(setup, params= ["a"]) ,name="use_folder_structure_a")
+
+@use_folder_structure_a
+def test_bar_b():
+    print()
+```
+
+# Conclusion
+To summarisze, it is possible to apply a matrix of fixtures easily. Which style do you perfer?
