@@ -3,6 +3,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/rust_learning/2023-11-11-rust-learning.html",
+      "/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep.html",
       "/posts/advance_pytest/2023-11-15-advance-pytest-fixtures-with-params.html",
       "/posts/understand_namespace/2023-09-26-understand-kedro-namespace-pipeline.html",
       "/posts/reflection_of_my_open_source_journey/2023-07-31-reflection-on-opensource-journey.html",
