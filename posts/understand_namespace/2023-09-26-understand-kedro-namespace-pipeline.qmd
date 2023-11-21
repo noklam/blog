@@ -3,8 +3,7 @@ badges: true
 categories:
 - kedro
 date: '2023-09-26'
-description: 'Learn how to use Kedro\'s Namespace Pipelines for efficient time series forecasting.'
-hide: false
+description: "Learn how to use Kedro's Namespace Pipelines for efficient time series forecasting."
 title: 'A Guide to Kedro Namespace Pipelines for Time Series Forecasting'
 toc: true
 ---
