@@ -1,4 +1,4 @@
-"""default_node_name file for ensuring the package is executable
+"""default-node-name file for ensuring the package is executable
 as `default-node-name` and `python -m default_node_name`
 """
 import importlib

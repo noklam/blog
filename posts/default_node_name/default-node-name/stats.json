@@ -1,0 +1,1 @@
+{"example_iris_data": {"rows": 150, "columns": 5, "file_size": 3858}, "X_train": {"rows": 120, "columns": 4}, "X_test": {"rows": 30, "columns": 4}}

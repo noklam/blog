@@ -1,4 +1,4 @@
-"""default_node_name
+"""default-node-name
 """
 
 __version__ = "0.1"
