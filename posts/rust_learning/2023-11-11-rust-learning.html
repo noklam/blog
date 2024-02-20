@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2023-11-11">
+<meta name="description" content="Learnin Rust, one step at a time">
 
-<title>blog - 2023-11-11</title>
+<title>blog - Experimenting Rust with Python</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -107,7 +109,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -149,14 +151,28 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">2023-11-11</h1>
-                      </div>
+      <h1 class="title">Experimenting Rust with Python</h1>
+                  <div>
+        <div class="description">
+          Learnin Rust, one step at a time
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">rust</div>
+              </div>
+                  </div>
   </div>
     
   
   <div class="quarto-title-meta">
 
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 11, 2023</p>
+      </div>
+    </div>
     
       
     </div>
@@ -165,35 +181,34 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#section" id="toc-section" class="nav-link active" data-scroll-target="#section">2023-11-11</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>badges: true</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>categories:</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">-</span> rust</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>date: <span class="st">'2023-11-11'</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>description: <span class="st">'Learnin Rust, one step at a time'</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>title: <span class="st">'Learning Rust'</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>toc: true</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">---</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section">2023-11-11</h2>
 <p>As a Python only developer, I found it extremly hard to learn a new langauge particular with language like C++ or Rust that involves build steps. (Does it has debugger support like PyCharm?). I tried to learn Rust by reading the book last year, I finished a few chapters but never get to write any programme and I forgot most of it already. The only thing that stays is <a href="https://doc.rust-lang.org/book/">Rust</a> has a concept of lifetime and borrow checker.</p>
 <p>I am hoping that by pushing my <a href="https://github.com/noklam/learning_rust">learning journey</a> online will give myself extra motivation. Ultimately I want to learn just enough Rust to optimise performance for Python program, it could be just simple algorithm, or if I ever learn enough I would like to write an event simulation engine (or at least learn to build one).</p>
 <p>Key learning today: - <code>pyo3</code> seems to be the choice for Rust binding for Python. I checked what <code>ruff</code> <a href="https://github.com/astral-sh/ruff/blob/3e00ddce38e7847cbdfc5734226ca88eeb2c9128/pyproject.toml#L3C18-L3C25">used</a> (An insanely fast Python linter and now formatter). I prefer to stick with a good enough choice (noted that building and distributing Python package is a headache, I don’t want to spend my energy on this now) - I followed the <a href="https://pyo3.rs/v0.20.0/">PyO3 tutorial</a> to build a Rust binding for Python. - I try to follow as much as possible without forcing myself to understand everything. Building something functional first and try to break it is a better learning process for me. - Use of <code>#[pymodule]</code> and <code>maturin develop</code> to build Python package. - You can also run Python in Rust!</p>
 <p>It build and install the package <code>string_sum</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> import <span class="ex">string_sum</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dir<span class="kw">(</span><span class="ex">string_sum</span><span class="kw">)</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">[</span><span class="st">'__all__'</span><span class="ex">,</span> <span class="st">'__builtins__'</span>, <span class="st">'__cached__'</span>, <span class="st">'__doc__'</span>, <span class="st">'__file__'</span>, <span class="st">'__loader__'</span>, <span class="st">'__name__'</span>, <span class="st">'__package__'</span>, <span class="st">'__path__'</span>, <span class="st">'__spec__'</span>, <span class="st">'string_sum'</span>, <span class="st">'sum_as_string'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> import <span class="ex">string_sum</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dir<span class="kw">(</span><span class="ex">string_sum</span><span class="kw">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">[</span><span class="st">'__all__'</span><span class="ex">,</span> <span class="st">'__builtins__'</span>, <span class="st">'__cached__'</span>, <span class="st">'__doc__'</span>, <span class="st">'__file__'</span>, <span class="st">'__loader__'</span>, <span class="st">'__name__'</span>, <span class="st">'__package__'</span>, <span class="st">'__path__'</span>, <span class="st">'__spec__'</span>, <span class="st">'string_sum'</span>, <span class="st">'sum_as_string'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Questions - <code>string_sum.cpython-310-darwin.so</code>, this is the only file I find in the <code>site_package</code> alongside <code>__init__.py</code>. How do I find the interface other than doing <code>dir</code>?</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

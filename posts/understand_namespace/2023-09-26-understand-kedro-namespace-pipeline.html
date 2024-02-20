@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="dcterms.date" content="2023-09-26">
-<meta name="description" content="Understand how namespace works in Kedro with a time series forcasting example">
+<meta name="description" content="Learn how to use Kedro’s Namespace Pipelines for efficient time series forecasting.">
 
-<title>blog - Understanding the Kedro namespace with time series forecasting pipeline</title>
+<title>blog - A Guide to Kedro Namespace Pipelines for Time Series Forecasting</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -151,10 +151,10 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Understanding the Kedro namespace with time series forecasting pipeline</h1>
+      <h1 class="title">A Guide to Kedro Namespace Pipelines for Time Series Forecasting</h1>
                   <div>
         <div class="description">
-          Understand how namespace works in Kedro with a time series forcasting example
+          Learn how to use Kedro’s Namespace Pipelines for efficient time series forecasting.
         </div>
       </div>
                           <div class="quarto-categories">
@@ -186,7 +186,12 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#build-the-time-series-pipeline" id="toc-build-the-time-series-pipeline" class="nav-link active" data-scroll-target="#build-the-time-series-pipeline">Build the time-series pipeline</a></li>
+  <li><a href="#understanding-kedros-namespace-pipelines" id="toc-understanding-kedros-namespace-pipelines" class="nav-link active" data-scroll-target="#understanding-kedros-namespace-pipelines">Understanding Kedro’s Namespace Pipelines</a>
+  <ul class="collapse">
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">Getting Started</a></li>
+  <li><a href="#utilizing-namespace-for-efficiency" id="toc-utilizing-namespace-for-efficiency" class="nav-link" data-scroll-target="#utilizing-namespace-for-efficiency">Utilizing Namespace for Efficiency</a></li>
+  <li><a href="#building-the-time-series-pipeline" id="toc-building-the-time-series-pipeline" class="nav-link" data-scroll-target="#building-the-time-series-pipeline">Building the Time-Series Pipeline</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -196,170 +201,109 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<p>Kedro support <a href="https://docs.kedro.org/en/0.18.0/tutorial/namespace_pipelines.html">Namespace Pipeline</a>, which is a flexible way to re-use pipeline. If your pipeline has some recursive structure and parallel fork, namespace pipeline may be a good candidate to achieve this. For example, it is handy for time-series forecasting.</p>
-<p>Typically, time-series forecasts have a recursive structure, where the current prediction will become the input of next prediction. In this example, we will try to build up a recursive pipeline. First, let’s start with create a dummy node <code>make_monthly_predictions</code> and making sense of <code>namespace</code>.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="forecast.jpg" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Example of multi-step forecast</figcaption>
-</figure>
-</div>
+<section id="understanding-kedros-namespace-pipelines" class="level1">
+<h1>Understanding Kedro’s Namespace Pipelines</h1>
+<p>Kedro’s <a href="https://docs.kedro.org/en/0.18.0/tutorial/namespace_pipelines.html">Namespace Pipeline</a> is a powerful feature that allows for flexible pipeline reuse, especially handy for tasks like time series forecasting.</p>
+<section id="getting-started" class="level2">
+<h2 class="anchored" data-anchor-id="getting-started">Getting Started</h2>
+<p>This blog post is based on this <a href="https://github.com/noklam/kedro_gallery/tree/master/loop-pipeline">example Kedro project</a>. Consider a basic pipeline node for monthly predictions:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_monthly_predictions(input_data):</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    output_data <span class="op">=</span> <span class="st">"dummy"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> output_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fill your actual logic here!</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    output_data <span class="op">=</span> input_data</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> output_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Now, let’s create a simple one node pipeline using Kedro, this will be the building block of our pipelines:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline.modular_pipeline <span class="im">import</span> pipeline</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline <span class="im">import</span> node</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline <span class="im">import</span> node</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>base_pipeline <span class="op">=</span> pipeline(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        node(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span>make_monthly_predictions,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            inputs<span class="op">=</span>[<span class="st">"input_data"</span>],</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>            outputs<span class="op">=</span>[<span class="st">"output_data"</span>]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>It basically just call the <code>make_monthly_prediction</code>, and define what are the “inputs” and “outputs”.</p>
+</section>
+<section id="utilizing-namespace-for-efficiency" class="level2">
+<h2 class="anchored" data-anchor-id="utilizing-namespace-for-efficiency">Utilizing Namespace for Efficiency</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./forecast.jpg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">time series diagram</figcaption>
+</figure>
+</div>
+<p>Now that we have our base pipeline, For time series forecasting, where predictions depend on previous results, we can efficiently handle this with [Namespace Pipelines]((https://docs.kedro.org/en/0.18.0/tutorial/namespace_pipelines.html). Start by creating a Namespace Pipeline:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>base_pipeline <span class="op">=</span> pipeline(</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline <span class="op">=</span> pipeline(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    [</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        node(</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span>make_monthly_predictions,</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            inputs<span class="op">=</span>[<span class="st">"input_data"</span>],</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            outputs<span class="op">=</span>[<span class="st">"output_data"</span>]</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    namespace<span class="op">=</span><span class="st">"namespace"</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>This is a 1-node pipeline, which takes 1 month of data and make 1 month of prediction. The next step is create many similar pipelines with different input data. i.e.&nbsp;current prediction need to become input for next node. Kedro provide a feature call namespace pipeline, <a href="https://docs.kedro.org/en/stable/nodes_and_pipelines/modular_pipelines.html#using-the-modular-pipeline-wrapper-to-provide-overrides">which can be used to override datasets argument easily</a>.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="pipeline_docstring.jpg" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">pipeline.png</figcaption>
-</figure>
-</div>
+<p>The <code>namespace</code> argument automatically adds a prefix to inputs and outputs. You can inspect the pipeline by printing it.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline <span class="op">=</span> pipeline(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    [</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        node(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span>make_monthly_predictions,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            inputs<span class="op">=</span>[<span class="st">"input_data"</span>],</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            outputs<span class="op">=</span>[<span class="st">"output_data"</span>]</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    namespace<span class="op">=</span><span class="st">"namespace"</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>When the <code>namespace</code> argument is specified, it will add a <code>prefix</code> to the <code>inputs</code> and <code>outputs</code> automatically.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>Pipeline([
-Node(make_monthly_predictions, ['namespace.input_data'], ['namespace.output_data'], None)
-])</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Optionally, you may also want to keep the dataset without namespace by specifying which dataset you want to keep.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>SyntaxError: invalid syntax (677617201.py, line 1)</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline <span class="op">=</span> pipeline(</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    [</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        node(</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span>make_monthly_predictions,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>            inputs<span class="op">=</span>[<span class="st">"input_data"</span>],</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>            outputs<span class="op">=</span>[<span class="st">"output_data"</span>]</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> [<span class="st">"input_data"</span>],</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    namespace<span class="op">=</span><span class="st">"namespace"</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>namespace_pipeline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>Pipeline([
 Node(make_monthly_predictions, ['input_data'], ['namespace.output_data'], None)
 ])</code></pre>
 </div>
 </div>
-<p>Notice that now the node take <code>input_data</code> instead of <code>namespace.input_data</code>. For time series data, we want to connect the output to the next input, you can do this by providing a <code>dict</code></p>
+<p>If you want to keep some datasets from namespacing, you can specify the <code>inputs</code> or <code>outputs</code> argument of the <code>pipeline</code> function to overide it:</p>
+<p>(https://docs.kedro.org/en/stable/nodes_and_pipelines/modular_pipelines.html#using-the-modular-pipeline-wrapper-to-provide-overrides). <img src="pipeline_docstring.jpg" class="img-fluid" alt="pipeline.png"></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline <span class="op">=</span> pipeline(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    [</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        node(</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span>make_monthly_predictions,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>            inputs<span class="op">=</span>[<span class="st">"input_data"</span>],</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>            outputs<span class="op">=</span>[<span class="st">"output_data"</span>]</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> {<span class="st">"input_data"</span>: <span class="st">"my_fav_data"</span>},</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    namespace<span class="op">=</span><span class="st">"namespace"</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>namespace_pipeline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline <span class="op">=</span> pipeline(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        node(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span>make_monthly_predictions,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            inputs<span class="op">=</span>[<span class="st">"input_data"</span>],</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            outputs<span class="op">=</span>[<span class="st">"output_data"</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    inputs<span class="op">=</span>[<span class="st">"input_data"</span>],  <span class="co"># Escape from namespace</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    namespace<span class="op">=</span><span class="st">"namespace"</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>namespace_pipeline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>Pipeline([
-Node(make_monthly_predictions, ['my_fav_data'], ['namespace.output_data'], None)
+Node(make_monthly_predictions, ['input_data'], ['namespace.output_data'], None)
 ])</code></pre>
 </div>
 </div>
-<section id="build-the-time-series-pipeline" class="level1">
-<h1>Build the time-series pipeline</h1>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="forecast.jpg" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">forecast pipeline structure</figcaption>
-</figure>
-</div>
-<p>Now we understand better how to use <code>namespace</code>, what we need to do is roughly 1. Create a base_pipeline 2. Iteratively loop through these pipeline and apply namespace 3. Connect these pipeline by updating the <code>inputs</code> or <code>outputs</code> definition</p>
+</section>
+<section id="building-the-time-series-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-time-series-pipeline">Building the Time-Series Pipeline</h2>
+<p>Now that we understand the mechanics of namespace, let’s build a time-series pipeline by iterating through months and connecting pipelines:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>months <span class="op">=</span> [<span class="st">"jan"</span>, <span class="st">"feb"</span>, <span class="st">"mar"</span>, <span class="st">"apr"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>base_pipeline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>Pipeline([
-Node(make_monthly_predictions, ['input_data'], ['output_data'], None)
-])</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>months <span class="op">=</span> [<span class="st">"jan"</span>, <span class="st">"feb"</span>, <span class="st">"mar"</span>, <span class="st">"apr"</span>]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_pipeline(months):</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    pipelines <span class="op">=</span> []</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(months) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        curr, <span class="bu">next</span> <span class="op">=</span> months[i], months[i<span class="op">+</span><span class="dv">1</span>]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        pipelines.append(pipeline(base_pipeline,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            outputs<span class="op">=</span>{<span class="st">"output_data"</span>: <span class="ss">f"</span><span class="sc">{</span><span class="bu">next</span><span class="sc">}</span><span class="ss">.input_data"</span>},</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            namespace<span class="op">=</span>curr))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pipeline(pipelines)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>final_pipeline <span class="op">=</span> create_pipeline(months)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_pipeline(months):</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    pipelines <span class="op">=</span> []</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(months)):</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">+</span> <span class="dv">1</span> <span class="op">&gt;=</span> <span class="bu">len</span>(months): <span class="cf">break</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        curr, <span class="bu">next</span> <span class="op">=</span> months[i], months[i<span class="op">+</span><span class="dv">1</span>]</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        pipelines.append(pipeline(base_pipeline, namespace<span class="op">=</span>curr))</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pipeline(pipelines) <span class="co"># Aggregate the pipelines</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>pipelines <span class="op">=</span> create_pipeline(months)</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>pipelines</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>Pipeline([
-Node(make_monthly_predictions, ['feb.input_data'], ['feb.output_data'], None),
-Node(make_monthly_predictions, ['jan.input_data'], ['jan.output_data'], None),
-Node(make_monthly_predictions, ['mar.input_data'], ['mar.output_data'], None)
-])</code></pre>
-</div>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="disconnect_pipeline.jpg" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">disconnect pipeline</figcaption>
-</figure>
-</div>
-<p>If we zoom in to focus on the pair of <code>jan</code> and <code>feb</code>, they are still not connected properly, so we need to update the pipeline to output as <code>feb.input_data</code> instead of <code>jan.output_data</code>.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>Node(make_monthly_predictions, [<span class="st">'feb.input_data'</span>], [<span class="st">'feb.output_data'</span>], <span class="va">None</span>),</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>Node(make_monthly_predictions, [<span class="st">'jan.input_data'</span>], [<span class="st">'jan.output_data'</span>], <span class="va">None</span>),</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_pipeline(months):</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    pipelines <span class="op">=</span> []</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(months)):</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">+</span> <span class="dv">1</span> <span class="op">&gt;=</span> <span class="bu">len</span>(months): <span class="cf">break</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        curr, <span class="bu">next</span> <span class="op">=</span> months[i], months[i<span class="op">+</span><span class="dv">1</span>]</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        pipelines.append(pipeline(base_pipeline,</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                                  outputs<span class="op">=</span>{<span class="st">"output_data"</span>:<span class="ss">f"</span><span class="sc">{</span><span class="bu">next</span><span class="sc">}</span><span class="ss">.input_data"</span>}, <span class="co"># Override the input definition</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                                          namespace<span class="op">=</span>curr))</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pipeline(pipelines) <span class="co"># Aggregate the pipelines</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>pipelines <span class="op">=</span> create_pipeline(months)</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>pipelines</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>final_pipeline</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <pre><code>Pipeline([
 Node(make_monthly_predictions, ['jan.input_data'], ['feb.input_data'], None),
@@ -368,16 +312,10 @@ Node(make_monthly_predictions, ['mar.input_data'], ['apr.input_data'], None)
 ])</code></pre>
 </div>
 </div>
-<p>We can verify the pipeline with <code>kedro viz</code></p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="connect.jpg" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">connect pipeline</figcaption>
-</figure>
-</div>
-<p>You can find the example repository <a href="https://github.com/noklam/kedro_gallery/tree/master/loop-pipeline">here</a></p>
+<p>By visualizing the pipeline with <code>kedro viz</code>, you can observe the connections between each step. <img src="connect.jpg" class="img-fluid" alt="connect pipeline"></p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
