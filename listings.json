@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/kedro-with-databricks-asset-bundle/2024-02-21-kedro-with-databricks-asset.html",
       "/posts/enhance-debugging-experience-with-jupyter-magic/2024-02-20-Enhance-debugging-experience-with-jupyter-magic.html",
       "/posts/default_node_name/2024-02-08-default-node-name.html",
       "/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep.html",

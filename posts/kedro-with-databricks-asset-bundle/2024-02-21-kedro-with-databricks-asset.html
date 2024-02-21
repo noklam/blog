@@ -6,11 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="noklam">
-<meta name="dcterms.date" content="2023-11-16">
-<meta name="description" content="Kedro Config Loader, resolution order">
+<meta name="description" content="Using Kedro with Databricks Assets Bundle">
 
-<title>blog - How Kedro Config Loader works</title>
+<title>blog - Kedro with Databricks Assets Bundle</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -118,15 +150,16 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">How Kedro Config Loader works</h1>
+      <h1 class="title">Kedro with Databricks Assets Bundle</h1>
                   <div>
         <div class="description">
-          Kedro Config Loader, resolution order
+          Using Kedro with Databricks Assets Bundle
         </div>
       </div>
                           <div class="quarto-categories">
                 <div class="quarto-category">python</div>
                 <div class="quarto-category">kedro</div>
+                <div class="quarto-category">databricks</div>
               </div>
                   </div>
   </div>
@@ -134,19 +167,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   
   <div class="quarto-title-meta">
 
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>noklam </p>
-            </div>
-    </div>
       
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">November 16, 2023</p>
-      </div>
-    </div>
     
       
     </div>
@@ -160,8 +181,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#config-resolution-without-globals" id="toc-config-resolution-without-globals" class="nav-link active" data-scroll-target="#config-resolution-without-globals">Config Resolution (Without Globals)</a></li>
-  <li><a href="#config-resolution-with-globals" id="toc-config-resolution-with-globals" class="nav-link" data-scroll-target="#config-resolution-with-globals">Config Resolution (With Globals)</a></li>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link active" data-scroll-target="#requirements">Requirements</a></li>
   </ul>
 </nav>
     </div>
@@ -171,20 +191,46 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<p>Kedro offers a <a href="https://docs.kedro.org/en/stable/configuration/index.html">configuration system</a>, it involves concepts such as - environment (it can be multiple files) - variable interpolation (advance templating) - globals - custom resolvers - runtime parameters (override via CLI or programatically)</p>
-<p>The official documentation has plenty of examples, so I am going to focus on explaining the internals.</p>
-<section id="config-resolution-without-globals" class="level1">
-<h1>Config Resolution (Without Globals)</h1>
-<p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
+<p>(Disclaimer: This is not an official documentation).</p>
+<p>This post describe the process of using Databricks Assets bundle, deploy the notebook to a Databricks workspace and runs the notebook as a Databricks Job.</p>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<p>I test this with the following dependencies: - kedro==0.19.2 - databricks-cli==0.214.0 # Installation guide: https://docs.databricks.com/en/dev-tools/cli/install.html</p>
+<p>First, I create a new kedro project which contains a spark pipeline that are ready to run in databricks with <code>kedro new -s databricks-iris</code>. The workflow of using Databricks worksapce to develop Kedro project is documented <a href="https://docs.kedro.org/en/stable/deployment/databricks/databricks_notebooks_development_workflow.html">here</a>.</p>
+<p>Next, you need to have the Databricks CLI installed, run this command to create a Databricks Assets Bundle template.</p>
+<p><code>databricks bundle init</code>, it will prompt you for a few things. For testing purpose, I answer <code>yes</code> for all questions. The resulting folder look like this: <img src="bundle-folder.png" class="img-fluid" alt="bundle folder structure"></p>
+<p>This create yet another project template. Both <code>kedro new</code> and <code>databricks bundle init</code> assume you are creating new project. Since we have a Kedro project already, you don’t need the project related files. i.e.&nbsp;<code>requirements-dev.txt</code>, <code>setup.py</code> and <code>src/&lt;project_name&gt;</code>. You can then move everythin from a Kedro project inside the <code>bundle_example</code> folder so that they share the same root level. i.e.&nbsp;<code>pyproject.toml</code> (create by Kedro) should be in the same level as <code>databricks.yml</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">`</span><span class="ex">databricks</span> bundle deploy <span class="at">-t</span> dev<span class="kw">`</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Error:</span> terraform apply: exit status 1</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">Error:</span> cannot create job: default auth: cannot configure default credentials, please check https://docs.databricks.com/en/dev-tools/auth.html#databricks-client-unified-authentication to configure credentials for your preferred authentication method. Config: host=https://adb-4127266075722018.18.azuredatabricks.net. Env: DATABRICKS_HOST</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">with</span> databricks_job.my_project_job,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="ex">on</span> bundle.tf.json line 77, in resource.databricks_job.my_project_job:</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">77:</span>       }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I try to submit a job immediately after creating the bundles, the error suggests that I need to create a developer token to submit job to Databricks locally. Go to Databricks workspace -&gt; User Settings -&gt; Developer -&gt; Generate New</p>
+<p>Run in terminal: <code>export DATABRICKS_TOKEN=&lt;your-token&gt;</code></p>
+<p>After this, I run <code>databricks bundle deploy -t dev</code> again and I see this in my workspace.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="2023-11-16-kedro-config-loader-dive-deep_files/figure-html/5da18ef3-1-image.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">image.png</figcaption>
+<p><img src="workspace-bundle.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">workspace-budnle</figcaption>
 </figure>
 </div>
-</section>
-<section id="config-resolution-with-globals" class="level1">
-<h1>Config Resolution (With Globals)</h1>
+<p>If you name your bundle <code>my_project</code>, you should see a <code>my_project_job.yml</code>. You will need to update the <code>tasks</code> and the <code>notebook_path</code> to the targeted notebook. <code>databricks bundle run -t dev my_project_job</code></p>
+<p>For example:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">tasks</span><span class="kw">:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="kw">-</span><span class="at"> </span><span class="fu">task_key</span><span class="kw">:</span><span class="at"> notebook_task</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">job_cluster_key</span><span class="kw">:</span><span class="at"> job_cluster</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">notebook_task</span><span class="kw">:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">notebook_path</span><span class="kw">:</span><span class="at"> ../src/notebook.ipynb</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>After this, I can submit a job and see this on Databricks. Unfortunately I cannot get it running because I have permission issue to create a Databricks Job, but I can see the job request on the UI.</p>
+<p>Appendix: ### The databricks asset bundle use <code>entrypoints</code> for deployment.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>   entry_points<span class="op">=</span>{</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>        <span class="st">"packages"</span>: [</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">"main=my_project.main:main"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    },</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>
