@@ -182,6 +182,11 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
    
   <ul>
   <li><a href="#requirements" id="toc-requirements" class="nav-link active" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#submit-the-job" id="toc-submit-the-job" class="nav-link" data-scroll-target="#submit-the-job">Submit the job</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix:</a>
+  <ul class="collapse">
+  <li><a href="#the-databricks-asset-bundle-use-entrypoints-for-deployment." id="toc-the-databricks-asset-bundle-use-entrypoints-for-deployment." class="nav-link" data-scroll-target="#the-databricks-asset-bundle-use-entrypoints-for-deployment.">The databricks asset bundle use <code>entrypoints</code> for deployment.</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -210,6 +215,9 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">77:</span>       }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>I try to submit a job immediately after creating the bundles, the error suggests that I need to create a developer token to submit job to Databricks locally. Go to Databricks workspace -&gt; User Settings -&gt; Developer -&gt; Generate New</p>
 <p>Run in terminal: <code>export DATABRICKS_TOKEN=&lt;your-token&gt;</code></p>
+</section>
+<section id="submit-the-job" class="level2">
+<h2 class="anchored" data-anchor-id="submit-the-job">Submit the job</h2>
 <p>After this, I run <code>databricks bundle deploy -t dev</code> again and I see this in my workspace.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -225,14 +233,23 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="fu">notebook_task</span><span class="kw">:</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">            </span><span class="fu">notebook_path</span><span class="kw">:</span><span class="at"> ../src/notebook.ipynb</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>After this, I can submit a job and see this on Databricks. Unfortunately I cannot get it running because I have permission issue to create a Databricks Job, but I can see the job request on the UI.</p>
-<p>Appendix: ### The databricks asset bundle use <code>entrypoints</code> for deployment.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>   entry_points<span class="op">=</span>{</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>        <span class="st">"packages"</span>: [</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">"main=my_project.main:main"</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        ]</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    },</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Summary</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Although there are <span class="kw">not</span> much documentation on the Internet yet, it<span class="st">'s fairly easy to combine the two. It would be nice to automate some of the manual steps, but it is challenging because both takes a template approach and it'</span>s always hard to merge them automatically.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="appendix" class="level1">
+<h1>Appendix:</h1>
+<section id="the-databricks-asset-bundle-use-entrypoints-for-deployment." class="level3">
+<h3 class="anchored" data-anchor-id="the-databricks-asset-bundle-use-entrypoints-for-deployment.">The databricks asset bundle use <code>entrypoints</code> for deployment.</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>   entry_points<span class="op">=</span>{</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        <span class="st">"packages"</span>: [</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">"main=my_project.main:main"</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    },</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
