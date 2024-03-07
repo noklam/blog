@@ -182,6 +182,8 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
    
   <ul>
   <li><a href="#requirements" id="toc-requirements" class="nav-link active" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#create-a-project-with-kedro-and-databricks-asset-bundles" id="toc-create-a-project-with-kedro-and-databricks-asset-bundles" class="nav-link" data-scroll-target="#create-a-project-with-kedro-and-databricks-asset-bundles">Create a project with Kedro and Databricks Asset Bundles</a></li>
+  <li><a href="#create-the-developer-token" id="toc-create-the-developer-token" class="nav-link" data-scroll-target="#create-the-developer-token">Create the Developer Token</a></li>
   <li><a href="#submit-the-job" id="toc-submit-the-job" class="nav-link" data-scroll-target="#submit-the-job">Submit the job</a></li>
   <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix:</a>
   <ul class="collapse">
@@ -201,6 +203,9 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <section id="requirements" class="level2">
 <h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
 <p>I test this with the following dependencies: - kedro==0.19.2 - databricks-cli==0.214.0 # Installation guide: https://docs.databricks.com/en/dev-tools/cli/install.html</p>
+</section>
+<section id="create-a-project-with-kedro-and-databricks-asset-bundles" class="level2">
+<h2 class="anchored" data-anchor-id="create-a-project-with-kedro-and-databricks-asset-bundles">Create a project with Kedro and Databricks Asset Bundles</h2>
 <p>First, I create a new kedro project which contains a spark pipeline that are ready to run in databricks with <code>kedro new -s databricks-iris</code>. The workflow of using Databricks worksapce to develop Kedro project is documented <a href="https://docs.kedro.org/en/stable/deployment/databricks/databricks_notebooks_development_workflow.html">here</a>.</p>
 <p>Next, you need to have the Databricks CLI installed, run this command to create a Databricks Assets Bundle template.</p>
 <p><code>databricks bundle init</code>, it will prompt you for a few things. For testing purpose, I answer <code>yes</code> for all questions. The resulting folder look like this: <img src="bundle-folder.png" class="img-fluid" alt="bundle folder structure"></p>
@@ -213,6 +218,9 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">with</span> databricks_job.my_project_job,</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="ex">on</span> bundle.tf.json line 77, in resource.databricks_job.my_project_job:</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">77:</span>       }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="create-the-developer-token" class="level2">
+<h2 class="anchored" data-anchor-id="create-the-developer-token">Create the Developer Token</h2>
 <p>I try to submit a job immediately after creating the bundles, the error suggests that I need to create a developer token to submit job to Databricks locally. Go to Databricks workspace -&gt; User Settings -&gt; Developer -&gt; Generate New</p>
 <p>Run in terminal: <code>export DATABRICKS_TOKEN=&lt;your-token&gt;</code></p>
 </section>
