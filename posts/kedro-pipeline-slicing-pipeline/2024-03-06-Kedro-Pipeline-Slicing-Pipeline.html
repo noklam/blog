@@ -496,12 +496,17 @@ Node(foo, None, 'model_pipeline', 'model_pipeline')
 <h2 class="anchored" data-anchor-id="more-notes">More notes</h2>
 <section id="the-pipeline.filter-support-or-operator" class="level3">
 <h3 class="anchored" data-anchor-id="the-pipeline.filter-support-or-operator">The <code>Pipeline.filter</code> support <code>or</code> operator</h3>
+<p>While the current filter supports many options, there may be some value to wrap around the Pipeline API to support things like <code>or</code>. This is only possible if you use the Python API directly but not CLI (with the example above). maybe something similar to the <a href="https://docs.getdbt.com/reference/node-selection/graph-operators">Graph Operators in dbt</a>.</p>
+<p>e.g.&nbsp;</p>
+<pre><code>kedro run --select "my_model+"         # select my_model and all children
+kedro run --select "+my_model"         # select my_model and all parents
+kedro run --select "+my_model+"        # select my_model, and all of its parents and children</code></pre>
 </section>
 <section id="selecting-or-slicing-multiple-pipeline-with-kedro-run" class="level3">
 <h3 class="anchored" data-anchor-id="selecting-or-slicing-multiple-pipeline-with-kedro-run">Selecting or slicing multiple pipeline with <code>kedro run</code></h3>
 <p>Since Pipeline API support arithmetic, it would be quite straight forward to support things like <code>kedro run --pipeline a+b</code> or <code>kedro run --pipeline a-b</code>. Let’s have a look what’s options are available for the CLI.</p>
 <div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>kedro run <span class="op">--</span><span class="bu">help</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>kedro run <span class="op">--</span><span class="bu">help</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Usage: kedro run [OPTIONS]
 
@@ -554,8 +559,8 @@ Options:
 </div>
 <p>This is what happen when you do <code>kedro run -p training -t model_a</code>, it’s a two steps flitering: 1. Apply the <code>-p</code> pipeline name to select a key from the pipeline dictionary, it’s just <code>pipelines[pipeline_name]</code>, note this mean you can only select ONE pipeline at a time. 2. The pipeline is then further filtered with <code>Pipeline.filter</code></p>
 <div class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline.pipeline <span class="im">import</span> Pipeline</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>Pipeline.<span class="bu">filter</span>??</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>Pipeline.<span class="bu">filter</span>??</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Signature:
 Pipeline.filter(
