@@ -288,7 +288,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        pprint(<span class="ss">f"Print Catalog </span><span class="sc">{</span>apply_dict(catalog._data_sets)<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">#         pprint(f"Print Catalog {apply_dict2(lambda x:x.exists(), catalog._data_sets)}")</span></span>
 <span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"*****************************"</span>)</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>hook_manager <span class="op">=</span> get_hook_manager()</span>
 <span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>debug_hook <span class="op">=</span> hook_manager.register(DebugHook())<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -520,7 +520,7 @@ Finish node C([B]) -&gt; [C]
 <span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span>:</span>
 <span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._suggest_resume_scenario(pipeline, done_nodes)</span>
 <span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span></span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print load counts for every node run</span></span>
 <span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>        pprint(<span class="ss">f"</span><span class="sc">{</span>load_counts<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"pipeline input: "</span>, pipeline.inputs())</span>
@@ -538,7 +538,7 @@ Finish node C([B]) -&gt; [C]
 <span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._logger.info(</span>
 <span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Completed </span><span class="sc">%d</span><span class="st"> out of </span><span class="sc">%d</span><span class="st"> tasks"</span>, exec_index <span class="op">+</span> <span class="dv">1</span>, <span class="bu">len</span>(nodes)</span>
 <span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>SequentialRunner._run <span class="op">=</span> _run</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>c:\programdata\miniconda3\lib\site-packages\ipykernel\ipkernel.py:283: DeprecationWarning: `should_run_async` will not call `transform_cell` automatically in the future. Please pass the result to `transformed_cell` argument and any exception that happen during thetransform in `preprocessing_exc_tuple` in IPython 7.17 and above.
@@ -553,7 +553,7 @@ Finish node C([B]) -&gt; [C]
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># adding extra behaviour to a single node</span></span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Finish node </span><span class="sc">{</span>node<span class="sc">.</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"*****************************"</span>)</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>hook_manager.set_blocked(debug_hook)<span class="op">;</span> <span class="co"># I tried hook_manger.unregister(), but it is not working.</span></span>
 <span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>print_hook <span class="op">=</span> hook_manager.register(PrintHook())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
