@@ -1,6 +1,4 @@
 ---
-aliases:
-- /markdown/2020/01/14/test-markdown-post
 categories:
 - markdown
 date: '2020-01-14'
@@ -58,7 +56,7 @@ And a numbered list:
 
 ## Code
 
-You can format text and code per usual 
+You can format text and code per usual
 
 General preformatted text:
 
