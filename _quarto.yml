@@ -4,6 +4,7 @@ project:
 website:
   google-analytics: "G-28PTCJ2ELM"
   title: "blog"
+  site-url: https://noklam.github.io/blog
   navbar:
     right:
       - about.qmd
@@ -11,6 +12,8 @@ website:
         href: https://github.com/noklam
       - icon: twitter
         href: https://twitter.com
+      - icon: rss
+        href: index.xml
 format:
   html:
     theme: cosmo
