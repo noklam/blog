@@ -2267,7 +2267,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/693c0323-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/05d394ef-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>
@@ -8103,7 +8103,7 @@ font-style: inherit;">for</span> configuration</span>
 background-color: null;
 font-style: inherit;">*</span> Multi<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">-</span>run </span>
+font-style: inherit;">-</span>run</span>
 <span id="cb8-7"><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> Supports plugins</span>
@@ -8115,7 +8115,7 @@ font-style: inherit;">in</span> multiple YAML files</span>
 <span id="cb8-9">    <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> The structure of files largely resemble how a Python modules works. i.e. module.sub_module.xxx</span>
-<span id="cb8-10">    </span>
+<span id="cb8-10"></span>
 <span id="cb8-11"></span>
 <span id="cb8-12">Some downsides:</span>
 <span id="cb8-13"><span class="op" style="color: #5E5E5E;
@@ -8132,7 +8132,7 @@ font-style: inherit;">and</span> cause some problem</span></code></pre></div>
   <category>europython</category>
   <guid>https://noklam.github.io/blog/posts/2022-07-11-europython2022-summary.html</guid>
   <pubDate>Sun, 10 Jul 2022 23:00:00 GMT</pubDate>
-  <media:content url="https://noklam.github.io/blog/posts/images/europython.jpg" medium="image" type="image/jpeg"/>
+  <media:content url="https://noklam.github.io/blog/posts/europython.jpg" medium="image" type="image/jpeg"/>
 </item>
 <item>
   <title>Testing with Mocking</title>
