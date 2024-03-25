@@ -1,6 +1,4 @@
 ---
-aliases:
-- /ML/python/2020/02/08/Config-Composition-with-Hydra-for-Machine-Learning-Experiments
 author: noklam
 authorImageURL: https://avatars0.githubusercontent.com/u/18221871?s=400&u=0ca734683fc7e41a3565c5591218008af5a77e9b&v=4
 authorTitle: A data scientist in Hong Kong
@@ -55,15 +53,15 @@ if __name__ == "__main__":
 
 
 ```python
-python demo.py 
+python demo.py
 ```
 
     gamma: 0.01
     learning_rate: 0.01
     run_mode: train
     week: 8
-    
-    
+
+
 
 For example, with a simple example with 4 parameters only, you can simply run the experiment with default
 
@@ -80,8 +78,8 @@ python demo.py learning_rate=0.1
     learning_rate: 0.1
     run_mode: train
     week: 8
-    
-    
+
+
 
 In somecase, you may only need to test a model instead of changing it.
 
@@ -94,7 +92,7 @@ python demo.py learning_rate=0.1 run_mode=test
     learning_rate: 0.1
     run_mode: test
     week: 8
-        
+
 
 It also safeguard your experiment if you pass in some parameters that is not exist
 
@@ -109,7 +107,7 @@ It also safeguard your experiment if you pass in some parameters that is not exi
      "C:\ProgramData\Anaconda3\lib\site-packages\omegaconf\dictconfig.py", line 41, in __setitem__
         "Accessing unknown key in a struct : {}".format(self.get_full_key(key))
     KeyError: 'Accessing unknown key in a struct : typo'
-    
+
 
 # --Multirun,  Combination of parameters
 In case you want to gridsearch paramters, which is very common in machine learning, you can use an additional argument __multirun__ to do that easily.
@@ -127,7 +125,7 @@ In case you want to gridsearch paramters, which is very common in machine learni
     learning_rate: 0.1
     run_mode: train
     week: 8
-    
+
     [2020-02-08 19:28:46,192][HYDRA] 	#1 : learning_rate=0.1 gamma=0.01
     gamma: 0.01
     learning_rate: 0.1

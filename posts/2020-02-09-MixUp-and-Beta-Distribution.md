@@ -1,6 +1,4 @@
 ---
-aliases:
-- /ML/2020/02/09/MixUp-and-Beta-Distribution
 author: noklam
 authorImageURL: https://avatars0.githubusercontent.com/u/18221871?s=400&u=0ca734683fc7e41a3565c5591218008af5a77e9b&v=4
 authorTitle: A data scientist in Hong Kong
@@ -59,7 +57,7 @@ plt.legend(['factorial','Γ']);
 ![png](assets/output_5_0.png)
 
 
-# When α != β 
+# When α != β
 
 
 ```python
@@ -81,7 +79,7 @@ for a, b in zip(a_ls, b_ls):
 
     C:\ProgramData\Anaconda3\envs\fastai2\lib\site-packages\IPython\core\pylabtools.py:132: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
       fig.canvas.print_figure(bytes_io, **kw)
-    
+
 
 
 ![png](assets/output_7_1.png)
@@ -92,7 +90,7 @@ A few observations from this graph.
 * when α and β = 1, it reduce to uniform distribution
 * when α = β, the distribution is a symmetric distribution
 
-# When α != β 
+# When α != β
 
 
 ```python
@@ -114,7 +112,7 @@ for a, b in zip(a_ls, b_ls):
 
     C:\ProgramData\Anaconda3\envs\fastai2\lib\site-packages\IPython\core\pylabtools.py:132: UserWarning: Creating legend with loc="best" can be slow with large amounts of data.
       fig.canvas.print_figure(bytes_io, **kw)
-    
+
 
 
 ![png](assets/output_10_1.png)
