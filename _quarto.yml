@@ -4,6 +4,7 @@ project:
 website:
   google-analytics: "G-28PTCJ2ELM"
   title: "blog"
+  site-url: https://noklam.github.io/blog
   navbar:
     right:
       - about.qmd
