@@ -2,12 +2,11 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/2020-04-13-Recreating-the-BBC-graphs-in-Python-plotnine-altair.html",
-      "/posts/2020-04-10-Presentation-Ready-Chart.html",
       "/posts/kedro-pipeline-slicing-pipeline/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html",
       "/posts/kedro-with-databricks-asset-bundle/2024-02-21-kedro-with-databricks-asset.html",
       "/posts/enhance-debugging-experience-with-jupyter-magic/2024-02-20-Enhance-debugging-experience-with-jupyter-magic.html",
       "/posts/default_node_name/2024-02-08-default-node-name.html",
+      "/posts/2020-04-10-Presentation-Ready-Chart.html",
       "/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep.html",
       "/posts/advance_pytest/2023-11-15-advance-pytest-fixtures-with-params.html",
       "/posts/rust_learning/2023-11-11-rust-learning.html",
@@ -36,6 +35,7 @@
       "/posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html",
       "/posts/2021-03-17-pytest-data-test-truncated-error.html",
       "/posts/2021-03-05-pyodbc-linux.html",
+      "/posts/2020-04-13-Recreating-the-BBC-graphs-in-Python-plotnine-altair.html",
       "/posts/2020-02-09-MixUp-and-Beta-Distribution.html",
       "/posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html",
       "/posts/2019-10-19-Deskto-Notification.html",
