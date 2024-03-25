@@ -12,6 +12,8 @@ website:
         href: https://github.com/noklam
       - icon: twitter
         href: https://twitter.com
+      - icon: rss
+        href: index.xml
 format:
   html:
     theme: cosmo
