@@ -2,9 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/kedro-pipeline-slicing-pipeline/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html",
       "/posts/2020-04-13-Recreating-the-BBC-graphs-in-Python-plotnine-altair.html",
       "/posts/2020-04-10-Presentation-Ready-Chart.html",
+      "/posts/kedro-pipeline-slicing-pipeline/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html",
       "/posts/kedro-with-databricks-asset-bundle/2024-02-21-kedro-with-databricks-asset.html",
       "/posts/enhance-debugging-experience-with-jupyter-magic/2024-02-20-Enhance-debugging-experience-with-jupyter-magic.html",
       "/posts/default_node_name/2024-02-08-default-node-name.html",
