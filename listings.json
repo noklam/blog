@@ -3,6 +3,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/2022-04-22-python-dataclass-partial-immutable.html",
+      "/posts/kedro_data_catalog/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html",
       "/posts/kedro-pipeline-slicing-pipeline/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html",
       "/posts/kedro-with-databricks-asset-bundle/2024-02-21-kedro-with-databricks-asset.html",
       "/posts/enhance-debugging-experience-with-jupyter-magic/2024-02-20-Enhance-debugging-experience-with-jupyter-magic.html",

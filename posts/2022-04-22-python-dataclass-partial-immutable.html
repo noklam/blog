@@ -8,7 +8,7 @@
 
 <meta name="author" content="noklam">
 <meta name="dcterms.date" content="2022-04-22">
-<meta name="description" content="Should you use Python’s dataclass or attrs?">
+<meta name="description" content="Should you use Python’s dataclasses or attrs? This article will give you an overview with examples.">
 
 <title>blog - How to achieve Partial Immutability with Python? dataclasses or attrs?</title>
 <style>
@@ -160,7 +160,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
       <h1 class="title">How to achieve Partial Immutability with Python? <code>dataclasses</code> or <code>attrs</code>?</h1>
                   <div>
         <div class="description">
-          Should you use Python’s <code>dataclass</code> or <code>attrs</code>?
+          Should you use Python’s <code>dataclasses</code> or <code>attrs</code>? This article will give you an overview with examples.
         </div>
       </div>
                           <div class="quarto-categories">
@@ -206,9 +206,12 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   <li><a href="#post_init-assignment-and-derived-attributes" id="toc-post_init-assignment-and-derived-attributes" class="nav-link" data-scroll-target="#post_init-assignment-and-derived-attributes"><strong>post_init</strong> assignment and Derived Attributes</a></li>
   <li><a href="#derived-attributes" id="toc-derived-attributes" class="nav-link" data-scroll-target="#derived-attributes">Derived Attributes</a></li>
   <li><a href="#partial-immutable-data-class-at-field-level" id="toc-partial-immutable-data-class-at-field-level" class="nav-link" data-scroll-target="#partial-immutable-data-class-at-field-level">Partial Immutable Data Class at field level</a></li>
-  <li><a href="#dataclass-post_init-assignment-in-a-frozen-dataclass" id="toc-dataclass-post_init-assignment-in-a-frozen-dataclass" class="nav-link" data-scroll-target="#dataclass-post_init-assignment-in-a-frozen-dataclass">dataclass <code>post_init</code> assignment in a frozen dataclass ✾</a></li>
+  <li><a href="#dataclass-post_init-assignment-in-a-frozen-dataclass" id="toc-dataclass-post_init-assignment-in-a-frozen-dataclass" class="nav-link" data-scroll-target="#dataclass-post_init-assignment-in-a-frozen-dataclass">dataclass <code>post_init</code> assignment in a frozen dataclass ✾</a>
+  <ul class="collapse">
+  <li><a href="#the-object.__setattr__-trick" id="toc-the-object.__setattr__-trick" class="nav-link" data-scroll-target="#the-object.__setattr__-trick">The <code>object.__setattr__</code> trick</a></li>
   </ul></li>
-  <li><a href="#appendeix---the-obj.__setattr__-trick" id="toc-appendeix---the-obj.__setattr__-trick" class="nav-link" data-scroll-target="#appendeix---the-obj.__setattr__-trick">Appendeix - the <code>obj.__setattr__</code> trick</a></li>
+  <li><a href="#derived-attribute-immutability" id="toc-derived-attribute-immutability" class="nav-link" data-scroll-target="#derived-attribute-immutability">Derived Attribute + Immutability</a></li>
+  </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
@@ -239,15 +242,20 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 </tr>
 <tr class="even">
 <td style="text-align: left;">Immutable Field</td>
-<td style="text-align: center;">Limited</td>
-<td style="text-align: right;">Flexible</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: right;">✅</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">post init</td>
+<td style="text-align: left;">Derived Attributes</td>
 <td style="text-align: center;">✅</td>
 <td style="text-align: right;">✅</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">Derived Attributes + Immutability</td>
+<td style="text-align: center;">❌</td>
+<td style="text-align: right;">✅</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">Dependencies</td>
 <td style="text-align: center;">✅ standard library</td>
 <td style="text-align: right;">✅ almost <a href="https://github.com/python-attrs/attrs/blob/a1053048f133608297b44c08360a8d295e1a2b94/pyproject.toml#L29">zero dependency</a></td>
@@ -370,58 +378,93 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <pre><code>FrozenInstanceError: cannot assign to field 'c'</code></pre>
 </div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>It doesn’t work<span class="op">!</span> Because the frozen flag will block <span class="bu">any</span> assignment even <span class="kw">in</span> the `__post_init__` method assignment too.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">### The `object.__setattr__` trick</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>All Python objects are just regular objects, thus they aren<span class="st">'t truely "immutable". Most of the time, the libraries achieve the immutability via implementing the `__setattr__` method.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-</section>
-<section id="appendeix---the-obj.__setattr__-trick" class="level1">
-<h1>Appendeix - the <code>obj.__setattr__</code> trick</h1>
+<p>It doesn’t work! Because the frozen flag will block any assignment even in the <code>__post_init__</code> method assignment too.</p>
+<section id="the-object.__setattr__-trick" class="level3">
+<h3 class="anchored" data-anchor-id="the-object.__setattr__-trick">The <code>object.__setattr__</code> trick</h3>
 <p>All Python objects are just regular objects, thus they aren’t truely “immutable”. Most of the time, the libraries achieve the immutability via implementing the <code>__setattr__</code> method.</p>
 <div class="cell" data-execution_count="59">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="at">@define</span>(frozen<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FrozenAttrs:</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  a: <span class="bu">int</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>frozen_class <span class="op">=</span> FrozenAttrs(<span class="dv">1</span>)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>frozen_class.a <span class="op">=</span> <span class="dv">3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="at">@define</span>(frozen<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FrozenAttrs:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  a: <span class="bu">int</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>frozen_class <span class="op">=</span> FrozenAttrs(<span class="dv">1</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>frozen_class.a <span class="op">=</span> <span class="dv">3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-error">
 <pre><code>FrozenInstanceError: </code></pre>
 </div>
 </div>
 <p>It may seems like it is indeed immutable, but if you try hard enough you can always crack it.</p>
 <div class="cell" data-execution_count="61">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">object</span>.<span class="fu">__setattr__</span>(frozen_class, <span class="st">"a"</span>, <span class="dv">100</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>frozen_class.a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">object</span>.<span class="fu">__setattr__</span>(frozen_class, <span class="st">"a"</span>, <span class="dv">100</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>frozen_class.a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="61">
 <pre><code>100</code></pre>
 </div>
 </div>
 <p>The <code>object</code> class is almost like the parent of all class. So that even though <code>frozen_class.__setattr__</code> works fine, you can still by pass this via this trick. In theory, you could also use this trick to achieve partial immutability with <code>dataclasses</code>.</p>
 <div class="cell" data-execution_count="62">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span>(frozen<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FrozenDataClass:</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    a: <span class="bu">int</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    b: <span class="bu">int</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __post_init__(<span class="va">self</span>):</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">object</span>.<span class="fu">__setattr__</span>(<span class="va">self</span>, <span class="st">'c'</span>, <span class="va">self</span>.a <span class="op">+</span> <span class="va">self</span>.b)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>frozen <span class="op">=</span> FrozenDataClass(<span class="dv">1</span>,<span class="dv">2</span>)</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>frozen.a, frozen.b, frozen.c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span>(frozen<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FrozenDataClass:</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    a: <span class="bu">int</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    b: <span class="bu">int</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __post_init__(<span class="va">self</span>):</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">object</span>.<span class="fu">__setattr__</span>(<span class="va">self</span>, <span class="st">'c'</span>, <span class="va">self</span>.a <span class="op">+</span> <span class="va">self</span>.b)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>frozen <span class="op">=</span> FrozenDataClass(<span class="dv">1</span>,<span class="dv">2</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>frozen.a, frozen.b, frozen.c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="62">
 <pre><code>(1, 2, 3)</code></pre>
 </div>
 </div>
 </section>
+</section>
+<section id="derived-attribute-immutability" class="level2">
+<h2 class="anchored" data-anchor-id="derived-attribute-immutability">Derived Attribute + Immutability</h2>
+<p>We learnt that the frozen dataclass doesn’t work well with derived attributes with <code>dataclasses</code>. This is so common and probably easier to achieve via the good old <code>@property</code>. Does that mean dataclass are not useful? This is something that I found unclear when reading through the docs. Luckily <code>attrs</code> has a solution to this too:</p>
+<div class="cell" data-execution_count="70">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> attrs</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> attrs <span class="im">import</span> define</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="at">@define</span>(frozen<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FrozenDerivedAttrs:</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    a: <span class="bu">int</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    b: <span class="bu">int</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    c: <span class="bu">int</span> <span class="op">=</span> field(init<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">@c.default</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _default_value(<span class="va">self</span>):</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>         <span class="cf">return</span> <span class="va">self</span>.a <span class="op">+</span> <span class="va">self</span>.b</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>obj <span class="op">=</span> FrozenDerivedAttrs(<span class="dv">1</span>,<span class="dv">2</span>)</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>obj.c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="70">
+<pre><code>3</code></pre>
+</div>
+</div>
+<p>The above method is more natural way of writing Python class, but there is another approach that are usually easier to test. Essentially, you use factory method to produce an immutable class.</p>
+<div class="cell" data-execution_count="72">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="at">@define</span>(frozen<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FrozenDerivedAttrs:</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    a: <span class="bu">int</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    b: <span class="bu">int</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    derived: <span class="bu">int</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> from_args(cls, a,b):</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(a,b, a<span class="op">+</span>b)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>obj <span class="op">=</span> FrozenDerivedAttrs.from_args(<span class="dv">1</span>,<span class="dv">2</span>)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>obj.derived</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="72">
+<pre><code>3</code></pre>
+</div>
+</div>
+</section>
+</section>
 <section id="conclusion" class="level1">
 <h1>Conclusion</h1>
-<p><code>attrs</code> offers a lot more flexibility compare to <code>dataclasses</code>, from frozen class, frozen field, derived attributes and a combination of them (there are a lot more, you should check out <a href="https://www.attrs.org/en/stable/examples.html">attrs by Example</a>). You may be able to achieve similar thing by using the <code>obejct.__setattr__</code> trick, but I’d also argue if you are trying so hard to fight with the library, you probably shouldn’t use it.</p>
+<p><code>attrs</code> offers a lot more flexibility compare to <code>dataclasses</code>, from frozen class, frozen field, derived attributes and a combination of them (there are a lot more, you should check out <a href="https://www.attrs.org/en/stable/examples.html">attrs by Example</a>). You may be able to achieve similar thing by using the <code>obejct.__setattr__</code> trick, but I’d also argue if you are trying so hard to fight with the library, you probably shouldn’t use it. I do feel that when I am writing class with <code>attrs</code> it feels slightly different in the beginning, but they also teach you how you should write your data class in the long run.</p>
 
 
 </section>
