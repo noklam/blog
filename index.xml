@@ -13,7 +13,7 @@
 <lastBuildDate>Tue, 26 Mar 2024 00:00:00 GMT</lastBuildDate>
 <item>
   <title>How to save or load data with Kedro?</title>
-  <link>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html</link>
+  <link>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html</link>
   <description><![CDATA[ 
 
 
@@ -260,7 +260,7 @@ font-style: inherit;">=</span> DataCatalog.from_config(catalog_config)</span></c
  ]]></description>
   <category>python</category>
   <category>kedro</category>
-  <guid>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html</guid>
+  <guid>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html</guid>
   <pubDate>Tue, 26 Mar 2024 00:00:00 GMT</pubDate>
 </item>
 <item>
@@ -2519,7 +2519,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/f4e7126e-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/9971283d-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>
