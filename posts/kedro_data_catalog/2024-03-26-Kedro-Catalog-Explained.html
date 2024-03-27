@@ -195,8 +195,13 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#catalog.yml" id="toc-catalog.yml" class="nav-link active" data-scroll-target="#catalog.yml">catalog.yml</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#create-a-kedro-node" id="toc-create-a-kedro-node" class="nav-link active" data-scroll-target="#create-a-kedro-node">Create a Kedro Node</a></li>
+  <li><a href="#using-the-datacatalog-class-in-a-python-file" id="toc-using-the-datacatalog-class-in-a-python-file" class="nav-link" data-scroll-target="#using-the-datacatalog-class-in-a-python-file">Using the <code>DataCatalog</code> class in a Python file</a></li>
+  <li><a href="#construct-the-datacatalog-class-with-catalog.yml" id="toc-construct-the-datacatalog-class-with-catalog.yml" class="nav-link" data-scroll-target="#construct-the-datacatalog-class-with-catalog.yml">Construct the <code>DataCatalog</code> class with <code>catalog.yml</code></a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a>
+  <ul class="collapse">
+  <li><a href="#bonus---kedro-runner" id="toc-bonus---kedro-runner" class="nav-link" data-scroll-target="#bonus---kedro-runner">Bonus - Kedro Runner</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -206,10 +211,12 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<p>The first answer that you may get is to use the <code>DataCatalog</code>, but what really is <code>DataCatalog</code>? Some may say it is the <code>catalog.yml</code>, there are some truth in it but it’s not an accurate answer.</p>
-<p>Let’s try a different explanation, forget about the existence of <code>DataCatalog</code> (you don’t even need to use this class in your Kedro Project). Instead, we focus on “how” to load or save data in a Kedro Project.</p>
+<p>The first answer that you may get is to use the data catalog, but what really is data catalog? Some may say it is the <code>catalog.yml</code>, other may mentions the <code>DataCatalog</code> class. They are both true but it lacks a bit of context.</p>
+<p>Let’s focus on “how” to load or save data in a Kedro Project.</p>
+<section id="create-a-kedro-node" class="level2">
+<h2 class="anchored" data-anchor-id="create-a-kedro-node">Create a Kedro Node</h2>
 <p>First, we need a Python function that takes some inputs and outputs:</p>
-<div class="cell" data-execution_count="5">
+<div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dummy_func():</span>
@@ -217,16 +224,16 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># df.to_csv("my_data.csv") # You don't need to save it explicitly</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>This function takes no input but produce a DataFrame, how does Kedro know how to save this data? In Kedro, it uses <code>Node</code> instead of function. A Node is a Python function + inputs + outputs. The inputs and outputs is merely a name of the data rather than the actual object.</p>
-<div class="cell" data-execution_count="6">
+<p>This function takes no input but produces a DataFrame, how does Kedro know how to save this data? In Kedro, it uses <code>Node</code> instead of function. A Node is a Python function + inputs + outputs. The inputs and outputs is merely a name of the data rather than the actual object.</p>
+<div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline <span class="im">import</span> node, pipeline</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dummy_node <span class="op">=</span> node(func<span class="op">=</span>dummy_func, inputs<span class="op">=</span><span class="va">None</span>, outputs<span class="op">=</span><span class="st">"my_data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You can call the node directly, but it’s not necessary because it is handled by Kedro Runner and Kedro Pipeline.</p>
-<div class="cell" data-execution_count="11">
+<div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dummy_func()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 
 
@@ -248,28 +255,59 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="13">
+<div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> dummy_node()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>{'my_data':    foo
  0  bar}</code></pre>
 </div>
 </div>
-<p>It saves the DataFrame inside a dictionary with the key “my_data” (the outputs defined in node). The last step is to save it as a file, which is where the <a href="https://docs.kedro.org/en/latest/data/data_catalog.html"><code>DataCatalog</code> or <code>catalog.yml</code></a> come into the picture.</p>
+<p>It saves the DataFrame inside a dictionary with the key “my_data” (the outputs defined in node).</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"my_data"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">foo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>bar</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
 <div class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.io <span class="im">import</span> DataCatalog</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>catalog_config <span class="op">=</span> {<span class="st">"my_data"</span>:</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                        {<span class="st">"type"</span>: <span class="st">"pandas.CSVDataset"</span>,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"filepath"</span>: <span class="st">"my_csv.csv"</span>}</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                        }</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>catalog <span class="op">=</span> DataCatalog.from_config(catalog_config)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>catalog.save( <span class="st">"my_data"</span>, result[<span class="st">"my_data"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pd.testing.assert_frame_equal(result[<span class="st">"my_data"</span>], dummy_func()) <span class="co"># assertion pass</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="using-the-datacatalog-class-in-a-python-file" class="level2">
+<h2 class="anchored" data-anchor-id="using-the-datacatalog-class-in-a-python-file">Using the <code>DataCatalog</code> class in a Python file</h2>
+<p>The last step is to save it as a file, which is where the <a href="https://docs.kedro.org/en/latest/data/data_catalog.html"><code>DataCatalog</code> or <code>catalog.yml</code></a> comes into the picture.</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.io <span class="im">import</span> DataCatalog</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>catalog_config <span class="op">=</span> {<span class="st">"my_data"</span>:</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                        {<span class="st">"type"</span>: <span class="st">"pandas.CSVDataset"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"filepath"</span>: <span class="st">"my_csv.csv"</span>}</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                        }</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>catalog <span class="op">=</span> DataCatalog.from_config(catalog_config)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>catalog.save( <span class="st">"my_data"</span>, result[<span class="st">"my_data"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can check if the data is saved correctly:</p>
 <div class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pd.read_csv(<span class="st">"my_csv.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pd.read_csv(<span class="st">"my_csv.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <div>
 
@@ -293,8 +331,8 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 </div>
 </div>
 <div class="cell" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use DataCatalog</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>catalog.load(<span class="st">"my_data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use DataCatalog</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>catalog.load(<span class="st">"my_data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <div>
 
@@ -317,37 +355,59 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 </div>
 </div>
 </div>
-<section id="catalog.yml" class="level2">
-<h2 class="anchored" data-anchor-id="catalog.yml">catalog.yml</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>catalog_config <span class="op">=</span> {<span class="st">"my_data"</span>:</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                        {<span class="st">"type"</span>: <span class="st">"pandas.CSVDataset"</span>,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"filepath"</span>: <span class="st">"my_csv.csv"</span>}</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                        }</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>catalog <span class="op">=</span> DataCatalog.from_config(catalog_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+</section>
+<section id="construct-the-datacatalog-class-with-catalog.yml" class="level2">
+<h2 class="anchored" data-anchor-id="construct-the-datacatalog-class-with-catalog.yml">Construct the <code>DataCatalog</code> class with <code>catalog.yml</code></h2>
 <p>Going back to this, <code>catalog.yml</code> is merely <code>catalog_config</code> but written in YAML.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>catalog_config <span class="op">=</span> {<span class="st">"my_data"</span>:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                        {<span class="st">"type"</span>: <span class="st">"pandas.CSVDataset"</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"filepath"</span>: <span class="st">"my_csv.csv"</span>}</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                        }</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>catalog <span class="op">=</span> DataCatalog.from_config(catalog_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can replace the dictionary with <code>catalog.yml</code>.</p>
 <div class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>catalog_yml <span class="op">=</span> <span class="st">"""</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">my_data:</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="st">  type: pandas.CSVDataset</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="st">  filepath: my_csv.csv</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> yaml</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>catalog_config <span class="op">=</span> yaml.safe_load(catalog_yml)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>new_catalog <span class="op">=</span> DataCatalog.from_config(catalog_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Usually defined in a catalog.yml file</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>catalog_yml <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">my_data:</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="st">  type: pandas.CSVDataset</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">  filepath: my_csv.csv</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> yaml</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>catalog_config <span class="op">=</span> yaml.safe_load(catalog_yml)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>new_catalog <span class="op">=</span> DataCatalog.from_config(catalog_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="summary" class="level1">
 <h1>Summary</h1>
-<p>These abstraction are usually hidden from the end users. You do not need to use the <code>DataCatalog</code> if you are working with a Kedro Project. Behind the scene, this is what happened.</p>
+<p>These abstractions are usually hidden from the end users. You do not need to use the <code>DataCatalog</code> if you are working with a Kedro Project. Behind the scenes, this is what happens.</p>
 <ol type="1">
 <li>Function signature (and outputs) are mapped according to the node definition.</li>
-<li><code>DataCatalog</code> load the data according to their name, and look that up from <code>catalog.yml</code> to figure out whether it should be load from a CSV or a parquet file</li>
+<li><code>DataCatalog</code> loads the data according to their name, and look that up from <code>catalog.yml</code> to figure out whether it should be load from a CSV or a parquet file</li>
 </ol>
+<section id="bonus---kedro-runner" class="level2">
+<h2 class="anchored" data-anchor-id="bonus---kedro-runner">Bonus - Kedro Runner</h2>
+<p>There is one important component missing in this article, the <a href="https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#runners">Kedro Runner</a>. During a <code>kedro run</code>, the <code>Runner</code> decide the order of executing the node, request data from <code>DataCatalog</code>, and save data with <code>DataCatalog</code>. The pseudocode of a <code>kedro run</code> is roughly like this:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> node <span class="kw">in</span> nodes:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    run_node(node, catalog)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_node(node, catalog):</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Prepare Data</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> {}</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="kw">in</span> node.inputs:</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        inputs[name] <span class="op">=</span> catalog.load(name)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Execute Node</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    outputs <span class="op">=</span> node.run(inputs)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Save Data</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="kw">in</span> node.outputs:</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        catalog.save(outputs[name], name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

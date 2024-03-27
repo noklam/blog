@@ -872,14 +872,35 @@
     "href": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html",
     "title": "How to save or load data with Kedro?",
     "section": "",
-    "text": "The first answer that you may get is to use the DataCatalog, but what really is DataCatalog? Some may say it is the catalog.yml, there are some truth in it but it’s not an accurate answer.\nLet’s try a different explanation, forget about the existence of DataCatalog (you don’t even need to use this class in your Kedro Project). Instead, we focus on “how” to load or save data in a Kedro Project.\nFirst, we need a Python function that takes some inputs and outputs:\nimport pandas as pd\n\ndef dummy_func():\n    df = pd.DataFrame([{\"foo\": \"bar\"}])\n    # df.to_csv(\"my_data.csv\") # You don't need to save it explicitly\n    return df\nThis function takes no input but produce a DataFrame, how does Kedro know how to save this data? In Kedro, it uses Node instead of function. A Node is a Python function + inputs + outputs. The inputs and outputs is merely a name of the data rather than the actual object.\nfrom kedro.pipeline import node, pipeline\n\ndummy_node = node(func=dummy_func, inputs=None, outputs=\"my_data\")\nYou can call the node directly, but it’s not necessary because it is handled by Kedro Runner and Kedro Pipeline.\ndummy_func()\n\n\n\n\n\n\n\n\nfoo\n\n\n\n\n0\nbar\nresult = dummy_node()\nresult\n\n{'my_data':    foo\n 0  bar}\nIt saves the DataFrame inside a dictionary with the key “my_data” (the outputs defined in node). The last step is to save it as a file, which is where the DataCatalog or catalog.yml come into the picture.\nfrom kedro.io import DataCatalog\n\ncatalog_config = {\"my_data\":\n                        {\"type\": \"pandas.CSVDataset\",\n                         \"filepath\": \"my_csv.csv\"}\n                        }\ncatalog = DataCatalog.from_config(catalog_config)\ncatalog.save( \"my_data\", result[\"my_data\"])\nWe can check if the data is saved correctly:\npd.read_csv(\"my_csv.csv\")\n\n\n\n\n\n\n\n\nfoo\n\n\n\n\n0\nbar\n# Or use DataCatalog\ncatalog.load(\"my_data\")\n\n\n\n\n\n\n\n\nfoo\n\n\n\n\n0\nbar"
+    "text": "The first answer that you may get is to use the data catalog, but what really is data catalog? Some may say it is the catalog.yml, other may mentions the DataCatalog class. They are both true but it lacks a bit of context.\nLet’s focus on “how” to load or save data in a Kedro Project."
   },
   {
-    "objectID": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#catalog.yml",
-    "href": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#catalog.yml",
+    "objectID": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#create-a-kedro-node",
+    "href": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#create-a-kedro-node",
     "title": "How to save or load data with Kedro?",
-    "section": "catalog.yml",
-    "text": "catalog.yml\n\ncatalog_config = {\"my_data\":\n                        {\"type\": \"pandas.CSVDataset\",\n                         \"filepath\": \"my_csv.csv\"}\n                        }\ncatalog = DataCatalog.from_config(catalog_config)\n\nGoing back to this, catalog.yml is merely catalog_config but written in YAML.\n\ncatalog_yml = \"\"\"\nmy_data:\n  type: pandas.CSVDataset\n  filepath: my_csv.csv\n\"\"\"\n\nimport yaml\ncatalog_config = yaml.safe_load(catalog_yml)\nnew_catalog = DataCatalog.from_config(catalog_config)"
+    "section": "Create a Kedro Node",
+    "text": "Create a Kedro Node\nFirst, we need a Python function that takes some inputs and outputs:\n\nimport pandas as pd\n\ndef dummy_func():\n    df = pd.DataFrame([{\"foo\": \"bar\"}])\n    # df.to_csv(\"my_data.csv\") # You don't need to save it explicitly\n    return df\n\nThis function takes no input but produces a DataFrame, how does Kedro know how to save this data? In Kedro, it uses Node instead of function. A Node is a Python function + inputs + outputs. The inputs and outputs is merely a name of the data rather than the actual object.\n\nfrom kedro.pipeline import node, pipeline\n\ndummy_node = node(func=dummy_func, inputs=None, outputs=\"my_data\")\n\nYou can call the node directly, but it’s not necessary because it is handled by Kedro Runner and Kedro Pipeline.\n\ndummy_func()\n\n\n\n\n\n\n\n\nfoo\n\n\n\n\n0\nbar\n\n\n\n\n\n\n\n\nresult = dummy_node()\nresult\n\n{'my_data':    foo\n 0  bar}\n\n\nIt saves the DataFrame inside a dictionary with the key “my_data” (the outputs defined in node).\n\nresult[\"my_data\"]\n\n\n\n\n\n\n\n\nfoo\n\n\n\n\n0\nbar\n\n\n\n\n\n\n\n\npd.testing.assert_frame_equal(result[\"my_data\"], dummy_func()) # assertion pass"
+  },
+  {
+    "objectID": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#using-the-datacatalog-class-in-a-python-file",
+    "href": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#using-the-datacatalog-class-in-a-python-file",
+    "title": "How to save or load data with Kedro?",
+    "section": "Using the DataCatalog class in a Python file",
+    "text": "Using the DataCatalog class in a Python file\nThe last step is to save it as a file, which is where the DataCatalog or catalog.yml comes into the picture.\n\nfrom kedro.io import DataCatalog\n\ncatalog_config = {\"my_data\":\n                        {\"type\": \"pandas.CSVDataset\",\n                         \"filepath\": \"my_csv.csv\"}\n                        }\ncatalog = DataCatalog.from_config(catalog_config)\ncatalog.save( \"my_data\", result[\"my_data\"])\n\nWe can check if the data is saved correctly:\n\npd.read_csv(\"my_csv.csv\")\n\n\n\n\n\n\n\n\nfoo\n\n\n\n\n0\nbar\n\n\n\n\n\n\n\n\n# Or use DataCatalog\ncatalog.load(\"my_data\")\n\n\n\n\n\n\n\n\nfoo\n\n\n\n\n0\nbar"
+  },
+  {
+    "objectID": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#construct-the-datacatalog-class-with-catalog.yml",
+    "href": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#construct-the-datacatalog-class-with-catalog.yml",
+    "title": "How to save or load data with Kedro?",
+    "section": "Construct the DataCatalog class with catalog.yml",
+    "text": "Construct the DataCatalog class with catalog.yml\nGoing back to this, catalog.yml is merely catalog_config but written in YAML.\n\ncatalog_config = {\"my_data\":\n                        {\"type\": \"pandas.CSVDataset\",\n                         \"filepath\": \"my_csv.csv\"}\n                        }\ncatalog = DataCatalog.from_config(catalog_config)\n\nWe can replace the dictionary with catalog.yml.\n\n# Usually defined in a catalog.yml file\ncatalog_yml = \"\"\"\nmy_data:\n  type: pandas.CSVDataset\n  filepath: my_csv.csv\n\"\"\"\n\nimport yaml\ncatalog_config = yaml.safe_load(catalog_yml)\nnew_catalog = DataCatalog.from_config(catalog_config)"
+  },
+  {
+    "objectID": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#bonus---kedro-runner",
+    "href": "posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html#bonus---kedro-runner",
+    "title": "How to save or load data with Kedro?",
+    "section": "Bonus - Kedro Runner",
+    "text": "Bonus - Kedro Runner\nThere is one important component missing in this article, the Kedro Runner. During a kedro run, the Runner decide the order of executing the node, request data from DataCatalog, and save data with DataCatalog. The pseudocode of a kedro run is roughly like this:\nfor node in nodes:\n    run_node(node, catalog)\n\ndef run_node(node, catalog):\n    # Prepare Data\n    inputs = {}\n    for name in node.inputs:\n        inputs[name] = catalog.load(name)\n\n    # Execute Node\n    outputs = node.run(inputs)\n\n    # Save Data\n    for name in node.outputs:\n        catalog.save(outputs[name], name)"
   },
   {
     "objectID": "posts/2021-08-18-python-file-not-found-long-file-path-window.html",

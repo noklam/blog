@@ -19,10 +19,12 @@
 
 
 
-<p>The first answer that you may get is to use the <code>DataCatalog</code>, but what really is <code>DataCatalog</code>? Some may say it is the <code>catalog.yml</code>, there are some truth in it but it’s not an accurate answer.</p>
-<p>Let’s try a different explanation, forget about the existence of <code>DataCatalog</code> (you don’t even need to use this class in your Kedro Project). Instead, we focus on “how” to load or save data in a Kedro Project.</p>
+<p>The first answer that you may get is to use the data catalog, but what really is data catalog? Some may say it is the <code>catalog.yml</code>, other may mentions the <code>DataCatalog</code> class. They are both true but it lacks a bit of context.</p>
+<p>Let’s focus on “how” to load or save data in a Kedro Project.</p>
+<section id="create-a-kedro-node" class="level2">
+<h2 class="anchored" data-anchor-id="create-a-kedro-node">Create a Kedro Node</h2>
 <p>First, we need a Python function that takes some inputs and outputs:</p>
-<div class="cell" data-execution_count="5">
+<div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
@@ -46,8 +48,8 @@ font-style: inherit;"># df.to_csv("my_data.csv") # You don't need to save it exp
 background-color: null;
 font-style: inherit;">return</span> df</span></code></pre></div>
 </div>
-<p>This function takes no input but produce a DataFrame, how does Kedro know how to save this data? In Kedro, it uses <code>Node</code> instead of function. A Node is a Python function + inputs + outputs. The inputs and outputs is merely a name of the data rather than the actual object.</p>
-<div class="cell" data-execution_count="6">
+<p>This function takes no input but produces a DataFrame, how does Kedro know how to save this data? In Kedro, it uses <code>Node</code> instead of function. A Node is a Python function + inputs + outputs. The inputs and outputs is merely a name of the data rather than the actual object.</p>
+<div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> kedro.pipeline <span class="im" style="color: #00769E;
@@ -69,9 +71,9 @@ background-color: null;
 font-style: inherit;">"my_data"</span>)</span></code></pre></div>
 </div>
 <p>You can call the node directly, but it’s not necessary because it is handled by Kedro Runner and Kedro Pipeline.</p>
-<div class="cell" data-execution_count="11">
+<div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">dummy_func()</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <div>
 
 
@@ -93,44 +95,81 @@ font-style: inherit;">"my_data"</span>)</span></code></pre></div>
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="13">
+<div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">result <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> dummy_node()</span>
 <span id="cb4-2">result</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>{'my_data':    foo
  0  bar}</code></pre>
 </div>
 </div>
-<p>It saves the DataFrame inside a dictionary with the key “my_data” (the outputs defined in node). The last step is to save it as a file, which is where the <a href="https://docs.kedro.org/en/latest/data/data_catalog.html"><code>DataCatalog</code> or <code>catalog.yml</code></a> come into the picture.</p>
+<p>It saves the DataFrame inside a dictionary with the key “my_data” (the outputs defined in node).</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">result[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_data"</span>]</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">foo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>bar</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
 <div class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="im" style="color: #00769E;
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">pd.testing.assert_frame_equal(result[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"my_data"</span>], dummy_func()) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># assertion pass</span></span></code></pre></div>
+</div>
+</section>
+<section id="using-the-datacatalog-class-in-a-python-file" class="level2">
+<h2 class="anchored" data-anchor-id="using-the-datacatalog-class-in-a-python-file">Using the <code>DataCatalog</code> class in a Python file</h2>
+<p>The last step is to save it as a file, which is where the <a href="https://docs.kedro.org/en/latest/data/data_catalog.html"><code>DataCatalog</code> or <code>catalog.yml</code></a> comes into the picture.</p>
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> kedro.io <span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> DataCatalog</span>
-<span id="cb6-2"></span>
-<span id="cb6-3">catalog_config <span class="op" style="color: #5E5E5E;
+<span id="cb8-2"></span>
+<span id="cb8-3">catalog_config <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"my_data"</span>:</span>
-<span id="cb6-4">                        {<span class="st" style="color: #20794D;
+<span id="cb8-4">                        {<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"type"</span>: <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"pandas.CSVDataset"</span>,</span>
-<span id="cb6-5">                         <span class="st" style="color: #20794D;
+<span id="cb8-5">                         <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"filepath"</span>: <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"my_csv.csv"</span>}</span>
-<span id="cb6-6">                        }</span>
-<span id="cb6-7">catalog <span class="op" style="color: #5E5E5E;
+<span id="cb8-6">                        }</span>
+<span id="cb8-7">catalog <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataCatalog.from_config(catalog_config)</span>
-<span id="cb6-8">catalog.save( <span class="st" style="color: #20794D;
+<span id="cb8-8">catalog.save( <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"my_data"</span>, result[<span class="st" style="color: #20794D;
 background-color: null;
@@ -138,7 +177,7 @@ font-style: inherit;">"my_data"</span>])</span></code></pre></div>
 </div>
 <p>We can check if the data is saved correctly:</p>
 <div class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">pd.read_csv(<span class="st" style="color: #20794D;
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">pd.read_csv(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"my_csv.csv"</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
@@ -164,10 +203,10 @@ font-style: inherit;">"my_csv.csv"</span>)</span></code></pre></div>
 </div>
 </div>
 <div class="cell" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Or use DataCatalog</span></span>
-<span id="cb8-2">catalog.load(<span class="st" style="color: #20794D;
+<span id="cb10-2">catalog.load(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"my_data"</span>)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
@@ -192,69 +231,119 @@ font-style: inherit;">"my_data"</span>)</span></code></pre></div>
 </div>
 </div>
 </div>
-<section id="catalog.yml" class="level2">
-<h2 class="anchored" data-anchor-id="catalog.yml">catalog.yml</h2>
+</section>
+<section id="construct-the-datacatalog-class-with-catalog.yml" class="level2">
+<h2 class="anchored" data-anchor-id="construct-the-datacatalog-class-with-catalog.yml">Construct the <code>DataCatalog</code> class with <code>catalog.yml</code></h2>
+<p>Going back to this, <code>catalog.yml</code> is merely <code>catalog_config</code> but written in YAML.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">catalog_config <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">catalog_config <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"my_data"</span>:</span>
-<span id="cb9-2">                        {<span class="st" style="color: #20794D;
+<span id="cb11-2">                        {<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"type"</span>: <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"pandas.CSVDataset"</span>,</span>
-<span id="cb9-3">                         <span class="st" style="color: #20794D;
+<span id="cb11-3">                         <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"filepath"</span>: <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"my_csv.csv"</span>}</span>
-<span id="cb9-4">                        }</span>
-<span id="cb9-5">catalog <span class="op" style="color: #5E5E5E;
+<span id="cb11-4">                        }</span>
+<span id="cb11-5">catalog <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataCatalog.from_config(catalog_config)</span></code></pre></div>
 </div>
-<p>Going back to this, <code>catalog.yml</code> is merely <code>catalog_config</code> but written in YAML.</p>
+<p>We can replace the dictionary with <code>catalog.yml</code>.</p>
 <div class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">catalog_yml <span class="op" style="color: #5E5E5E;
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Usually defined in a catalog.yml file</span></span>
+<span id="cb12-2">catalog_yml <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"""</span></span>
-<span id="cb10-2"><span class="st" style="color: #20794D;
+<span id="cb12-3"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">my_data:</span></span>
-<span id="cb10-3"><span class="st" style="color: #20794D;
+<span id="cb12-4"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">  type: pandas.CSVDataset</span></span>
-<span id="cb10-4"><span class="st" style="color: #20794D;
+<span id="cb12-5"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">  filepath: my_csv.csv</span></span>
-<span id="cb10-5"><span class="st" style="color: #20794D;
+<span id="cb12-6"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"""</span></span>
-<span id="cb10-6"></span>
-<span id="cb10-7"><span class="im" style="color: #00769E;
+<span id="cb12-7"></span>
+<span id="cb12-8"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> yaml</span>
-<span id="cb10-8">catalog_config <span class="op" style="color: #5E5E5E;
+<span id="cb12-9">catalog_config <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> yaml.safe_load(catalog_yml)</span>
-<span id="cb10-9">new_catalog <span class="op" style="color: #5E5E5E;
+<span id="cb12-10">new_catalog <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> DataCatalog.from_config(catalog_config)</span></code></pre></div>
 </div>
 </section>
 <section id="summary" class="level1">
 <h1>Summary</h1>
-<p>These abstraction are usually hidden from the end users. You do not need to use the <code>DataCatalog</code> if you are working with a Kedro Project. Behind the scene, this is what happened.</p>
+<p>These abstractions are usually hidden from the end users. You do not need to use the <code>DataCatalog</code> if you are working with a Kedro Project. Behind the scenes, this is what happens.</p>
 <ol type="1">
 <li>Function signature (and outputs) are mapped according to the node definition.</li>
-<li><code>DataCatalog</code> load the data according to their name, and look that up from <code>catalog.yml</code> to figure out whether it should be load from a CSV or a parquet file</li>
+<li><code>DataCatalog</code> loads the data according to their name, and look that up from <code>catalog.yml</code> to figure out whether it should be load from a CSV or a parquet file</li>
 </ol>
+<section id="bonus---kedro-runner" class="level2">
+<h2 class="anchored" data-anchor-id="bonus---kedro-runner">Bonus - Kedro Runner</h2>
+<p>There is one important component missing in this article, the <a href="https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#runners">Kedro Runner</a>. During a <code>kedro run</code>, the <code>Runner</code> decide the order of executing the node, request data from <code>DataCatalog</code>, and save data with <code>DataCatalog</code>. The pseudocode of a <code>kedro run</code> is roughly like this:</p>
+<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> node <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> nodes:</span>
+<span id="cb13-2">    run_node(node, catalog)</span>
+<span id="cb13-3"></span>
+<span id="cb13-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> run_node(node, catalog):</span>
+<span id="cb13-5">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Prepare Data</span></span>
+<span id="cb13-6">    inputs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {}</span>
+<span id="cb13-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> name <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> node.inputs:</span>
+<span id="cb13-8">        inputs[name] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> catalog.load(name)</span>
+<span id="cb13-9"></span>
+<span id="cb13-10">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Execute Node</span></span>
+<span id="cb13-11">    outputs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> node.run(inputs)</span>
+<span id="cb13-12"></span>
+<span id="cb13-13">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Save Data</span></span>
+<span id="cb13-14">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> name <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> node.outputs:</span>
+<span id="cb13-15">        catalog.save(outputs[name], name)</span></code></pre></div>
 
 
+</section>
 </section>
 
  ]]></description>
@@ -2519,7 +2608,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/9971283d-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/0c51c2d0-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>
