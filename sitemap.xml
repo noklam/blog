@@ -2,166 +2,174 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://noklam.github.io/blog/about.html</loc>
-    <lastmod>2024-03-27T01:11:34.647Z</lastmod>
+    <lastmod>2024-05-31T14:26:42.624Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/enhance-debugging-experience-with-jupyter-magic/2024-02-20-Enhance-debugging-experience-with-jupyter-magic.html</loc>
-    <lastmod>2024-03-27T01:11:32.753Z</lastmod>
+    <lastmod>2024-05-31T14:26:40.335Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/python_expert/python-expert-decorator-generator-contextmanager.html</loc>
-    <lastmod>2024-03-27T01:11:32.105Z</lastmod>
+    <lastmod>2024-05-31T14:26:39.630Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/understand_namespace/2023-09-26-understand-kedro-namespace-pipeline.html</loc>
-    <lastmod>2024-03-27T01:11:31.470Z</lastmod>
+    <lastmod>2024-05-31T14:26:38.908Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/kedro_duckdb/kedro-duckdb.html</loc>
-    <lastmod>2024-03-27T01:11:30.767Z</lastmod>
+    <lastmod>2024-05-31T14:26:38.141Z</lastmod>
+  </url>
+  <url>
+    <loc>https://noklam.github.io/blog/posts/mini_kedro/2024-05-31-miniKedro-in-fify-lines-of-codes.html</loc>
+    <lastmod>2024-05-31T14:26:37.461Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/pandas_expert/kedro-meta-analysis.html</loc>
-    <lastmod>2024-03-27T01:11:30.052Z</lastmod>
+    <lastmod>2024-05-31T14:26:36.780Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2022-02-10-journey-of-understanding-python-and-programming-langauge.html</loc>
-    <lastmod>2024-03-27T01:11:29.198Z</lastmod>
+    <lastmod>2024-05-31T14:26:35.826Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2022-04-22-python-dataclass-partial-immutable.html</loc>
-    <lastmod>2024-03-27T01:11:28.619Z</lastmod>
+    <lastmod>2024-05-31T14:26:35.258Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2020-02-08-Config-Composition-with-Hydra-for-Machine-Learning-Experiments.html</loc>
-    <lastmod>2024-03-27T01:11:27.816Z</lastmod>
+    <lastmod>2024-05-31T14:26:34.514Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2022-05-30-mocking-with-pytest-patch.html</loc>
-    <lastmod>2024-03-27T01:11:27.170Z</lastmod>
+    <lastmod>2024-05-31T14:26:33.786Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/python_warning/2023-07-08-python-warning-test-version-switch-mock.html</loc>
-    <lastmod>2024-03-27T01:11:26.614Z</lastmod>
+    <lastmod>2024-05-31T14:26:33.148Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-11-18-what-can-we-learn-from-shipping-crisis-as-a-data-scientist.html</loc>
-    <lastmod>2024-03-27T01:11:25.952Z</lastmod>
+    <lastmod>2024-05-31T14:26:32.373Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-04-16-full-stack-deep-learning-lecture-03.html</loc>
-    <lastmod>2024-03-27T01:11:25.325Z</lastmod>
+    <lastmod>2024-05-31T14:26:31.700Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2020-04-10-Presentation-Ready-Chart.html</loc>
-    <lastmod>2024-03-27T01:11:24.652Z</lastmod>
+    <lastmod>2024-05-31T14:26:30.946Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2022-11-08-kedro-debugging.html</loc>
-    <lastmod>2024-03-27T01:11:24.016Z</lastmod>
+    <lastmod>2024-05-31T14:26:30.249Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/default_node_name/2024-02-08-default-node-name.html</loc>
-    <lastmod>2024-03-27T01:11:22.941Z</lastmod>
+    <lastmod>2024-05-31T14:26:28.988Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2019-01-01-codespace-template.html</loc>
-    <lastmod>2024-03-27T01:11:22.067Z</lastmod>
+    <lastmod>2024-05-31T14:26:27.995Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep.html</loc>
-    <lastmod>2024-03-27T01:11:21.287Z</lastmod>
+    <lastmod>2024-05-31T14:26:27.091Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2020-02-09-MixUp-and-Beta-Distribution.html</loc>
-    <lastmod>2024-03-27T01:11:20.078Z</lastmod>
+    <lastmod>2024-05-31T14:26:25.699Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-07-10-5minutes-data-science-design-pattern-callback.html</loc>
-    <lastmod>2024-03-27T01:11:19.515Z</lastmod>
+    <lastmod>2024-05-31T14:26:25.058Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-17-pytest-data-test-truncated-error.html</loc>
-    <lastmod>2024-03-27T01:11:18.858Z</lastmod>
+    <lastmod>2024-05-31T14:26:24.310Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/advance_pytest/2023-11-15-advance-pytest-fixtures-with-params.html</loc>
-    <lastmod>2024-03-27T01:11:18.310Z</lastmod>
+    <lastmod>2024-05-31T14:26:23.651Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-06-20-logging-config-dict-issue-kedro.html</loc>
-    <lastmod>2024-03-27T01:11:18.589Z</lastmod>
+    <lastmod>2024-05-31T14:26:24.003Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-05-29-python-internal-series-python-gil-and-memory.html</loc>
-    <lastmod>2024-03-27T01:11:19.156Z</lastmod>
+    <lastmod>2024-05-31T14:26:24.649Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2022-07-11-europython2022-summary.html</loc>
-    <lastmod>2024-03-27T01:11:20.539Z</lastmod>
+    <lastmod>2024-05-31T14:26:26.240Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-05-pyodbc-linux.html</loc>
-    <lastmod>2024-03-27T01:11:21.039Z</lastmod>
+    <lastmod>2024-05-31T14:26:26.827Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-19-deepcopy-lightgbm-and-🥒pickles.html</loc>
-    <lastmod>2024-03-27T01:11:21.631Z</lastmod>
+    <lastmod>2024-05-31T14:26:27.512Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/kedro-pipeline-slicing-pipeline/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html</loc>
-    <lastmod>2024-03-27T01:11:22.452Z</lastmod>
+    <lastmod>2024-05-31T14:26:28.431Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2020-04-13-Recreating-the-BBC-graphs-in-Python-plotnine-altair.html</loc>
-    <lastmod>2024-03-27T01:11:23.612Z</lastmod>
+    <lastmod>2024-05-31T14:26:29.764Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2019-10-19-Deskto-Notification.html</loc>
-    <lastmod>2024-03-27T01:11:24.313Z</lastmod>
+    <lastmod>2024-05-31T14:26:30.552Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-21-full-stack-deep-learning-lecture-01.html</loc>
-    <lastmod>2024-03-27T01:11:25.039Z</lastmod>
+    <lastmod>2024-05-31T14:26:31.380Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/python_single_dispatch/python-dispatch-typehint.html</loc>
-    <lastmod>2024-03-27T01:11:25.609Z</lastmod>
+    <lastmod>2024-05-31T14:26:32.007Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-06-26-jupyter-sql-notebook.html</loc>
-    <lastmod>2024-03-27T01:11:26.363Z</lastmod>
+    <lastmod>2024-05-31T14:26:32.862Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/rust_learning/2023-11-11-rust-learning.html</loc>
-    <lastmod>2024-03-27T01:11:26.860Z</lastmod>
+    <lastmod>2024-05-31T14:26:33.454Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-03-27-microsoft-azure-dp100.html</loc>
-    <lastmod>2024-03-27T01:11:27.540Z</lastmod>
+    <lastmod>2024-05-31T14:26:34.221Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html</loc>
-    <lastmod>2024-03-27T01:11:28.163Z</lastmod>
+    <lastmod>2024-05-31T14:26:34.878Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-08-18-python-file-not-found-long-file-path-window.html</loc>
-    <lastmod>2024-03-27T01:11:29.475Z</lastmod>
+    <lastmod>2024-05-31T14:26:36.149Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/kedro-debug-runner.html</loc>
-    <lastmod>2024-03-27T01:11:30.347Z</lastmod>
+    <lastmod>2024-05-31T14:26:37.095Z</lastmod>
+  </url>
+  <url>
+    <loc>https://noklam.github.io/blog/posts/mini_kedro/t.html</loc>
+    <lastmod>2024-05-31T14:26:37.695Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/2021-07-02-kedro-datacatalog.html</loc>
-    <lastmod>2024-03-27T01:11:31.848Z</lastmod>
+    <lastmod>2024-05-31T14:26:39.320Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/posts/kedro-with-databricks-asset-bundle/2024-02-21-kedro-with-databricks-asset.html</loc>
-    <lastmod>2024-03-27T01:11:32.391Z</lastmod>
+    <lastmod>2024-05-31T14:26:39.953Z</lastmod>
   </url>
   <url>
     <loc>https://noklam.github.io/blog/index.html</loc>
-    <lastmod>2024-03-27T01:11:34.413Z</lastmod>
+    <lastmod>2024-05-31T14:26:42.368Z</lastmod>
   </url>
 </urlset>

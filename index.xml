@@ -10,7 +10,262 @@
 <atom:link href="https://noklam.github.io/blog/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Tue, 26 Mar 2024 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 30 May 2024 23:00:00 GMT</lastBuildDate>
+<item>
+  <title>miniKedro</title>
+  <link>https://noklam.github.io/blog/posts/mini_kedro/2024-05-31-miniKedro-in-fify-lines-of-codes.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Reimplementing something is one of the best way to learn. Kedro is a data science &amp; data engineer pipeline library at heart. Under the hood, there are few core components such as <code>ConfigLoader</code>, <code>DataCatalog</code>. You may not notice these classes because the framework allows you to use them implicitly without the need to understand how it actually works.</p>
+<p>In this blog post, I am going to re-implement Kedro in 50 lines of code. I will start with the classic <code>spaceflights</code> tutorial, By the end of the blog post, you will have an overview of how Kedro works internally.</p>
+<section id="installation" class="level2">
+<h2 class="anchored" data-anchor-id="installation">Installation</h2>
+<p>First, clone this repository and install the module and its dependencies in editable mode - <code>git clone https://github.com/noklam/miniKedro.git</code> - <code>pip install -e .</code></p>
+<p>The repository is a simplified version of <code>spaceflights</code>, confirm that you can actually run the pipeline with this command: <code>kedro run</code></p>
+</section>
+<section id="running-the-pipeline-as-a-script" class="level2">
+<h2 class="anchored" data-anchor-id="running-the-pipeline-as-a-script">Running the pipeline as a script</h2>
+<p>The goal of this tutorial is replicate the feature of Kedro by slowly introduce new components. We will start with a pure Python script <code>run.py</code> that doesn’t have any Kedro dependencies.</p>
+<p>Execute this script with <code>python run.py</code></p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"__main__"</span>:</span>
+<span id="cb1-2">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Start Pipeline"</span>)</span>
+<span id="cb1-3">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> minikedro.pipelines.data_processing.nodes <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> (</span>
+<span id="cb1-4">        create_model_input_table,</span>
+<span id="cb1-5">        preprocess_companies,</span>
+<span id="cb1-6">        preprocess_shuttles,</span>
+<span id="cb1-7">    )</span>
+<span id="cb1-8">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> rich.logging <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> RichHandler</span>
+<span id="cb1-9">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> logging</span>
+<span id="cb1-10">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pd</span>
+<span id="cb1-11"></span>
+<span id="cb1-12">    logging.basicConfig(</span>
+<span id="cb1-13">        level<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>logging.INFO,</span>
+<span id="cb1-14">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">format</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%(asctime)s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> - </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%(name)s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> - </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%(levelname)s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> - </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%(message)s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>,</span>
+<span id="cb1-15">        handlers<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[RichHandler()],</span>
+<span id="cb1-16">    )</span>
+<span id="cb1-17">    logger <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logging.getLogger(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"minikedro"</span>)</span>
+<span id="cb1-18"></span>
+<span id="cb1-19">    companies <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/01_raw/companies.csv"</span>)</span>
+<span id="cb1-20">    reviews <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/01_raw/reviews.csv"</span>)</span>
+<span id="cb1-21">    shuttles <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_excel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/01_raw/shuttles.xlsx"</span>)</span>
+<span id="cb1-22"></span>
+<span id="cb1-23">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running preprocess_companies"</span>)</span>
+<span id="cb1-24">    processed_companies <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> preprocess_companies(companies)</span>
+<span id="cb1-25">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running preprocess_companies"</span>)</span>
+<span id="cb1-26">    processed_shuttles <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> preprocess_shuttles(shuttles)</span>
+<span id="cb1-27">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running create_model_input_table"</span>)</span>
+<span id="cb1-28">    model_input_table <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> create_model_input_table(</span>
+<span id="cb1-29">        processed_shuttles, processed_companies, reviews</span>
+<span id="cb1-30">    )</span></code></pre></div>
+<p>Note that we are still importing from <code>minikedro.pipelines.data_processing.nodes</code>, this is not cheating because it is just a collections of Python function and they can be used outside of Kedro pipeline. Let’s focus on this block of code first:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">    companies <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/01_raw/companies.csv"</span>)</span>
+<span id="cb2-2">    reviews <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/01_raw/reviews.csv"</span>)</span>
+<span id="cb2-3">    shuttles <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.read_excel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data/01_raw/shuttles.xlsx"</span>)</span>
+<span id="cb2-4"></span>
+<span id="cb2-5">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running preprocess_companies"</span>)</span>
+<span id="cb2-6">    processed_companies <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> preprocess_companies(companies)</span>
+<span id="cb2-7">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running preprocess_companies"</span>)</span>
+<span id="cb2-8">    processed_shuttles <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> preprocess_shuttles(shuttles)</span>
+<span id="cb2-9">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Running create_model_input_table"</span>)</span>
+<span id="cb2-10">    model_input_table <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> create_model_input_table(</span>
+<span id="cb2-11">        processed_shuttles, processed_companies, reviews</span>
+<span id="cb2-12">    )</span></code></pre></div>
+<p>The code is actually decently structured already, the first 3 lines of code prepare the data, after that there is a few function calls to chain these functions together.</p>
+</section>
+<section id="start-of-the-journey---step-1-extract-data-configuration" class="level2">
+<h2 class="anchored" data-anchor-id="start-of-the-journey---step-1-extract-data-configuration">Start of the Journey - Step 1: Extract data configuration</h2>
+<p>You can find the scripts and corresponding code in https://github.com/noklam/miniKedro/blob/main/run_v1.py. For step two, simply change the <code>v1</code> to <code>v2</code></p>
+<p>This is the change: <img src="https://noklam.github.io/blog/posts/mini_kedro/images/diff_v1.png" class="img-fluid" alt="diff v1"></p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> UserDict</span>
+<span id="cb3-2"></span>
+<span id="cb3-3"></span>
+<span id="cb3-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> ConfigLoader(UserDict): ...</span></code></pre></div>
+<p>First, we extract the configuration into a dictionary, and introduce a dictionary-like class called <code>ConfigLoader</code></p>
+</section>
+<section id="step-2---replace-shared-config-with-templated-value" class="level2">
+<h2 class="anchored" data-anchor-id="step-2---replace-shared-config-with-templated-value">Step 2 - Replace shared config with templated value</h2>
+<p>After extracting the configuration into <code>config</code>, notice that many of the filepath shared a similar pattern. It may make sense to extract that as a variable <code>_base_folder</code> so that it can be easily configure to be something else later (i.e.&nbsp;a s3 bucket).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://noklam.github.io/blog/posts/mini_kedro/images/diff_v2.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">diff_v2</figcaption>
+</figure>
+</div>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> ConfigLoader(UserDict):</span>
+<span id="cb4-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, data: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>):</span>
+<span id="cb4-3">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> OmegaConf.create(data)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># New</span></span></code></pre></div>
+<p><code>${_base_folder}</code> is a Jinja like syntax but we are using <code>OmegaConf</code> here, which is what Kedro use in its library. The idea is simple, all the value of <code>${_base_folder}</code> will be substituted as <code>data</code>. Kedro also support a lot more advance configuration feature, which you can find in the <a href="https://docs.kedro.org/en/stable/configuration/advanced_configuration.html">documentation</a>.</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">## Step 3 - Introducing `DataCatalog`</span></span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">## Step 4 - Saving data with `DataCatalog`</span></span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">## Step 5 - Extracting configuration again, this time for the functions</span></span></code></pre></div>
+</div>
+</section>
+<section id="step-6---iterating-through-the-steps" class="level2">
+<h2 class="anchored" data-anchor-id="step-6---iterating-through-the-steps">Step 6 - Iterating through the <code>steps</code></h2>
+</section>
+<section id="step-7---pipeline-and-node-as-a-thin-wrapper" class="level2">
+<h2 class="anchored" data-anchor-id="step-7---pipeline-and-node-as-a-thin-wrapper">Step 7 - <code>pipeline</code> and <code>node</code> as a thin wrapper</h2>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">## Step 8 - Replace functions with `node` and `pipeline`</span></span></code></pre></div>
+</div>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">## Step 9 - Extend Kedro with Hooks</span></span></code></pre></div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <category>python</category>
+  <category>kedro</category>
+  <category>databricks</category>
+  <guid>https://noklam.github.io/blog/posts/mini_kedro/2024-05-31-miniKedro-in-fify-lines-of-codes.html</guid>
+  <pubDate>Thu, 30 May 2024 23:00:00 GMT</pubDate>
+</item>
 <item>
   <title>How to save or load data with Kedro?</title>
   <link>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html</link>
@@ -2608,7 +2863,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/0c51c2d0-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/46357103-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>
@@ -8863,627 +9118,6 @@ _ipytesttmp.py::test_read_csv_invalid_method PASSED                      [100%]
   <category>python</category>
   <guid>https://noklam.github.io/blog/posts/2022-05-30-mocking-with-pytest-patch.html</guid>
   <pubDate>Sun, 29 May 2022 23:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>How to achieve Partial Immutability with Python? dataclasses or attrs?</title>
-  <dc:creator>noklam </dc:creator>
-  <link>https://noklam.github.io/blog/posts/2022-04-22-python-dataclass-partial-immutable.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="tldr" class="level1">
-<h1>TL;DR</h1>
-<p>This blog goes into detail with examples of using <code>dataclasses</code> and <code>attrs</code>, why and when you should consider to use it. This assume you already understand why dataclass and its variants are useful, so I am not trying to convince you that you should use dataclass, but WHICH libraries you may want to choose.</p>
-<p>If you are looking for a quick summary:</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th style="text-align: left;">Item</th>
-<th style="text-align: center;">dataclasses</th>
-<th style="text-align: right;">attrs</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Immutable Instance</td>
-<td style="text-align: center;">✅ <span class="citation" data-cites="dataclass">@dataclass</span>(frozen=True)</td>
-<td style="text-align: right;"><span class="citation" data-cites="define">@define</span>(frozen=True)</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Immutable Field</td>
-<td style="text-align: center;">❌</td>
-<td style="text-align: right;">✅</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Derived Attributes</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: right;">✅</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Derived Attributes + Immutability</td>
-<td style="text-align: center;">❌</td>
-<td style="text-align: right;">✅</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Dependencies</td>
-<td style="text-align: center;">✅ standard library</td>
-<td style="text-align: right;">✅ almost <a href="https://github.com/python-attrs/attrs/blob/a1053048f133608297b44c08360a8d295e1a2b94/pyproject.toml#L29">zero dependency</a></td>
-</tr>
-</tbody>
-</table>
-<section id="immutable-instance" class="level2">
-<h2 class="anchored" data-anchor-id="immutable-instance">Immutable Instance</h2>
-<p>With <code>dataclasses</code>, you can set <code>frozen=True</code> to ensure immutablilty. It throws an <code>FrozenInstanceError</code> when someone is trying to update an immutable object.</p>
-<div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> dataclasses <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> dataclass</span>
-<span id="cb1-2"></span>
-<span id="cb1-3"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@dataclass</span>(frozen<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb1-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> FrozenDataClass:</span>
-<span id="cb1-5">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb1-6">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb1-7"></span>
-<span id="cb1-8">frozen <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> FrozenDataClass(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb1-9">frozen.c <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span></span></code></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>FrozenInstanceError: cannot assign to field 'c'</code></pre>
-</div>
-</div>
-<p>With <code>attrs</code>, it’s mostly identical except that you use <code>@define(frozen=True)</code>.</p>
-<div class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> attrs <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> define</span>
-<span id="cb3-2"></span>
-<span id="cb3-3"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@define</span>(frozen<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb3-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> FrozenAttrs:</span>
-<span id="cb3-5">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb3-6"></span>
-<span id="cb3-7">frozen <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> FrozenAttrs(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb3-8">frozen.c <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span></span></code></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>FrozenInstanceError: </code></pre>
-</div>
-</div>
-</section>
-<section id="post_init-assignment-and-derived-attributes" class="level2">
-<h2 class="anchored" data-anchor-id="post_init-assignment-and-derived-attributes"><strong>post_init</strong> assignment and Derived Attributes</h2>
-</section>
-<section id="derived-attributes" class="level2">
-<h2 class="anchored" data-anchor-id="derived-attributes">Derived Attributes</h2>
-<p>Sometimes attribute are not defined during initialisation, but derived from other attribtues.</p>
-<div class="cell" data-execution_count="40">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@dataclass</span></span>
-<span id="cb5-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> DataClass:</span>
-<span id="cb5-3">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb5-4">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb5-5"></span>
-<span id="cb5-6">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> __post_init__(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb5-7">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.c <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.b</span>
-<span id="cb5-8">frozen <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> DataClass(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb5-9"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(frozen.c)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>3</code></pre>
-</div>
-</div>
-<p>Similarly, with <code>attrs</code>:</p>
-<div class="cell" data-execution_count="41">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> attrs <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> define, field</span>
-<span id="cb7-2"></span>
-<span id="cb7-3"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@define</span></span>
-<span id="cb7-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> AttrsDataClass:</span>
-<span id="cb7-5">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb7-6">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb7-7">    c: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> field(init<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>) <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># derived</span></span>
-<span id="cb7-8"></span>
-<span id="cb7-9">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> __attrs_post_init__(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb7-10">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.c <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.b</span>
-<span id="cb7-11"></span>
-<span id="cb7-12">attrs_dc <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> AttrsDataClass(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb7-13"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(attrs_dc.c)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>3</code></pre>
-</div>
-</div>
-</section>
-<section id="partial-immutable-data-class-at-field-level" class="level2">
-<h2 class="anchored" data-anchor-id="partial-immutable-data-class-at-field-level">Partial Immutable Data Class at field level</h2>
-<p><code>dataclasses</code> does not have this flexibility. Here is an example with <code>attrs</code>:</p>
-<div class="cell" data-execution_count="46">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> attrs <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> define, field</span>
-<span id="cb9-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> attrs <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> setters</span>
-<span id="cb9-3"></span>
-<span id="cb9-4"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@define</span></span>
-<span id="cb9-5"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> AttrsDataClass:</span>
-<span id="cb9-6">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb9-7">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> field(on_setattr<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>setters.frozen)</span>
-<span id="cb9-8">    c: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> field(init<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>) <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># derived</span></span>
-<span id="cb9-9"></span>
-<span id="cb9-10">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> __attrs_post_init__(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb9-11">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.c <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.b</span>
-<span id="cb9-12"></span>
-<span id="cb9-13">attrs_dc <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> AttrsDataClass(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span></code></pre></div>
-</div>
-<div class="cell" data-execution_count="47">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">attrs_dc.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># OK</span></span>
-<span id="cb10-2">attrs_dc.c <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># OK</span></span>
-<span id="cb10-3">attrs_dc.b <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Not OK</span></span></code></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>FrozenAttributeError: </code></pre>
-</div>
-</div>
-<p>Now you get a new <code>FrozenAttributeError</code> error. What if you want to set attributes on a frozen class?</p>
-</section>
-<section id="dataclass-post_init-assignment-in-a-frozen-dataclass" class="level2">
-<h2 class="anchored" data-anchor-id="dataclass-post_init-assignment-in-a-frozen-dataclass">dataclass <code>post_init</code> assignment in a frozen dataclass ✾</h2>
-<p>For those of you thinking about using derived attribute with <code>dataclass</code>, it doesn’t work.</p>
-<div class="cell" data-execution_count="56">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@dataclass</span>(frozen<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb12-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> FrozenDataClass:</span>
-<span id="cb12-3">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb12-4">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb12-5"></span>
-<span id="cb12-6">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> __post_init__(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb12-7">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.c <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.b</span>
-<span id="cb12-8">frozen <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> FrozenDataClass(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span></code></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>FrozenInstanceError: cannot assign to field 'c'</code></pre>
-</div>
-</div>
-<p>It doesn’t work! Because the frozen flag will block any assignment even in the <code>__post_init__</code> method assignment too.</p>
-<section id="the-object.__setattr__-trick" class="level3">
-<h3 class="anchored" data-anchor-id="the-object.__setattr__-trick">The <code>object.__setattr__</code> trick</h3>
-<p>All Python objects are just regular objects, thus they aren’t truely “immutable”. Most of the time, the libraries achieve the immutability via implementing the <code>__setattr__</code> method.</p>
-<div class="cell" data-execution_count="59">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@define</span>(frozen<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb14-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> FrozenAttrs:</span>
-<span id="cb14-3">  a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb14-4"></span>
-<span id="cb14-5">frozen_class <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> FrozenAttrs(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb14-6">frozen_class.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span></span></code></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>FrozenInstanceError: </code></pre>
-</div>
-</div>
-<p>It may seems like it is indeed immutable, but if you try hard enough you can always crack it.</p>
-<div class="cell" data-execution_count="61">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">object</span>.<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__setattr__</span>(frozen_class, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"a"</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>)</span>
-<span id="cb16-2">frozen_class.a</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="61">
-<pre><code>100</code></pre>
-</div>
-</div>
-<p>The <code>object</code> class is almost like the parent of all class. So that even though <code>frozen_class.__setattr__</code> works fine, you can still by pass this via this trick. In theory, you could also use this trick to achieve partial immutability with <code>dataclasses</code>.</p>
-<div class="cell" data-execution_count="62">
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@dataclass</span>(frozen<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb18-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> FrozenDataClass:</span>
-<span id="cb18-3">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb18-4">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb18-5"></span>
-<span id="cb18-6">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> __post_init__(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb18-7">        <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">object</span>.<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__setattr__</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'c'</span>, <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.b)</span>
-<span id="cb18-8"></span>
-<span id="cb18-9">frozen <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> FrozenDataClass(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb18-10">frozen.a, frozen.b, frozen.c</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="62">
-<pre><code>(1, 2, 3)</code></pre>
-</div>
-</div>
-</section>
-</section>
-<section id="derived-attribute-immutability" class="level2">
-<h2 class="anchored" data-anchor-id="derived-attribute-immutability">Derived Attribute + Immutability</h2>
-<p>We learnt that the frozen dataclass doesn’t work well with derived attributes with <code>dataclasses</code>. This is so common and probably easier to achieve via the good old <code>@property</code>. Does that mean dataclass are not useful? This is something that I found unclear when reading through the docs. Luckily <code>attrs</code> has a solution to this too:</p>
-<div class="cell" data-execution_count="70">
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> attrs</span>
-<span id="cb20-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> attrs <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> define</span>
-<span id="cb20-3"></span>
-<span id="cb20-4"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@define</span>(frozen<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb20-5"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> FrozenDerivedAttrs:</span>
-<span id="cb20-6">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb20-7">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb20-8">    c: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> field(init<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>)</span>
-<span id="cb20-9"></span>
-<span id="cb20-10">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@c.default</span></span>
-<span id="cb20-11">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> _default_value(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb20-12">         <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.b</span>
-<span id="cb20-13"></span>
-<span id="cb20-14">obj <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> FrozenDerivedAttrs(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb20-15">obj.c</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="70">
-<pre><code>3</code></pre>
-</div>
-</div>
-<p>The above method is more natural way of writing Python class, but there is another approach that are usually easier to test. Essentially, you use factory method to produce an immutable class.</p>
-<div class="cell" data-execution_count="72">
-<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@define</span>(frozen<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb22-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> FrozenDerivedAttrs:</span>
-<span id="cb22-3">    a: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb22-4">    b: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb22-5">    derived: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span></span>
-<span id="cb22-6"></span>
-<span id="cb22-7">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@classmethod</span></span>
-<span id="cb22-8">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> from_args(cls, a,b):</span>
-<span id="cb22-9">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> cls(a,b, a<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span>b)</span>
-<span id="cb22-10"></span>
-<span id="cb22-11">obj <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> FrozenDerivedAttrs.from_args(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb22-12">obj.derived</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="72">
-<pre><code>3</code></pre>
-</div>
-</div>
-</section>
-</section>
-<section id="conclusion" class="level1">
-<h1>Conclusion</h1>
-<p><code>attrs</code> offers a lot more flexibility compare to <code>dataclasses</code>, from frozen class, frozen field, derived attributes and a combination of them (there are a lot more, you should check out <a href="https://www.attrs.org/en/stable/examples.html">attrs by Example</a>). You may be able to achieve similar thing by using the <code>obejct.__setattr__</code> trick, but I’d also argue if you are trying so hard to fight with the library, you probably shouldn’t use it. I do feel that when I am writing class with <code>attrs</code> it feels slightly different in the beginning, but they also teach you how you should write your data class in the long run.</p>
-
-
-</section>
-
- ]]></description>
-  <category>python</category>
-  <category>dataclasses</category>
-  <category>attrs</category>
-  <guid>https://noklam.github.io/blog/posts/2022-04-22-python-dataclass-partial-immutable.html</guid>
-  <pubDate>Thu, 21 Apr 2022 23:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
