@@ -223,38 +223,195 @@ background-color: null;
 font-style: inherit;">=</span> OmegaConf.create(data)  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># New</span></span></code></pre></div>
-<p><code>${_base_folder}</code> is a Jinja like syntax but we are using <code>OmegaConf</code> here, which is what Kedro use in its library. The idea is simple, all the value of <code>${_base_folder}</code> will be substituted as <code>data</code>. Kedro also support a lot more advance configuration feature, which you can find in the <a href="https://docs.kedro.org/en/stable/configuration/advanced_configuration.html">documentation</a>.</p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
+<p>We introduce <code>OmegaConf</code> to support template value like <code>${_base_folder}</code> The idea is simple, all the value of <code>${_base_folder}</code> will be substituted as <code>data</code>. Kedro also support a lot more advance configuration feature, which you can find in the <a href="https://docs.kedro.org/en/stable/configuration/advanced_configuration.html">documentation</a>.</p>
+</section>
+<section id="step-3---introducing-datacatalog" class="level2">
+<h2 class="anchored" data-anchor-id="step-3---introducing-datacatalog">Step 3 - Introducing <code>DataCatalog</code></h2>
+<p>The next thing that we will do is to introduce the <code>DataCatalog</code> class. The <code>DataCatalog</code> class and <code>Dataset</code>. A <code>Dataset</code> is something that can <code>save</code> and <code>load</code>, and a <code>DataCatalog</code> is a container of a collections of <code>Dataset</code>(s). Here we leverage the fact that Kedro already has a lot of existing data connectors in <code>kedro-datasets</code>.</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">## Step 3 - Introducing `DataCatalog`</span></span></code></pre></div>
-</div>
+font-style: inherit;">class</span> AbstractDataset:</span>
+<span id="cb5-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> load(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb5-3">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">raise</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">NotImplementedError</span></span>
+<span id="cb5-4"></span>
+<span id="cb5-5">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> save(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, data):</span>
+<span id="cb5-6">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">raise</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">NotImplementedError</span></span>
+<span id="cb5-7"></span>
+<span id="cb5-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> DataCatalog:</span>
+<span id="cb5-9">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, config_catalog: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>):</span>
+<span id="cb5-10">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.datasets <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {}</span>
+<span id="cb5-11">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> dataset_name, config <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> config_catalog.items():</span>
+<span id="cb5-12">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">isinstance</span>(dataset_name, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>) <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">and</span> dataset_name.startswith(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"_"</span>):</span>
+<span id="cb5-13">                <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">continue</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># skip template value</span></span>
+<span id="cb5-14">            module <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> config.pop(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"type"</span>)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># pandas.CSVDataset</span></span>
+<span id="cb5-15"></span>
+<span id="cb5-16">            <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># CSVDataset(**config) in code</span></span>
+<span id="cb5-17">            mod, dataset <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> module.split(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"."</span>)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># pandas, CSVDataset</span></span>
+<span id="cb5-18">            mod <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> importlib.import_module(</span>
+<span id="cb5-19">                <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"kedro_datasets.</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>mod<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span>
+<span id="cb5-20">            )  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># kedro_datasets.pandas (module)</span></span>
+<span id="cb5-21">            class_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">getattr</span>(mod, dataset)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># kedro_datasets.pandas.CSVDataset</span></span>
+<span id="cb5-22">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.datasets[dataset_name] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> class_(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span>config)</span>
+<span id="cb5-23"></span>
+<span id="cb5-24">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> load(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, dataset_name):</span>
+<span id="cb5-25">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.datasets[dataset_name].load()  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># CSVDataset.load()</span></span></code></pre></div>
+<p>We introduced quite a lot of code here, but most of them are just parsing logic. What’s happening here is that the <code>DataCatalog</code> takes some configurations, and instantiate <code>Dataset</code> class from it.</p>
+<p>We can now replaced all the <code>pd</code> call with the <code>DataCatalog</code> instead: <img src="https://noklam.github.io/blog/posts/mini_kedro/images/diff_v3.png" class="img-fluid" alt="diff_v3"></p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">## Step 4 - Saving data with `DataCatalog`</span></span></code></pre></div>
+font-style: inherit;">## Step 4 - Saving data with `DataCatalog`</span></span>
+<span id="cb6-2"></span>
+<span id="cb6-3"></span>
+<span id="cb6-4"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>[diff_v4](images<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>diff_v4.png)</span></code></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">## Step 5 - Extracting configuration again, this time for the functions</span></span></code></pre></div>
+font-style: inherit;">## Step 5 - Extracting configuration again, this time for the functions</span></span>
+<span id="cb7-2"></span>
+<span id="cb7-3"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>[diff_v5](images<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>diff_v5.png)</span></code></pre></div>
 </div>
 </section>
 <section id="step-6---iterating-through-the-steps" class="level2">
 <h2 class="anchored" data-anchor-id="step-6---iterating-through-the-steps">Step 6 - Iterating through the <code>steps</code></h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://noklam.github.io/blog/posts/mini_kedro/images/diff_v6.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">diff_v6</figcaption>
+</figure>
+</div>
 </section>
 <section id="step-7---pipeline-and-node-as-a-thin-wrapper" class="level2">
 <h2 class="anchored" data-anchor-id="step-7---pipeline-and-node-as-a-thin-wrapper">Step 7 - <code>pipeline</code> and <code>node</code> as a thin wrapper</h2>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">## Step 8 - Replace functions with `node` and `pipeline`</span></span></code></pre></div>
+font-style: inherit;">## Step 8 - Replace functions with `node` and `pipeline`</span></span>
+<span id="cb8-2"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>[diff_v8](images<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>diff_v8.png)</span></code></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">## Step 9 - Extend Kedro with Hooks</span></span></code></pre></div>
+font-style: inherit;">## Step 9 - Extend Kedro with Hooks</span></span>
+<span id="cb9-2"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>[diff_v9](images<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>diff_v9.png)</span></code></pre></div>
 </div>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>We finish this with <a href="https://github.com/noklam/miniKedro/blob/main/src/minikedro/v9/__init__.py">about 50 lines of code</a> (ignore newline), and a library that looks very similar to Kedro. We have implemented a few components like: - <a href="https://docs.kedro.org/en/stable/configuration/index.html"><code>ConfigLoader</code></a> - <a href="https://docs.kedro.org/en/stable/data/index.html"><code>DataCatalog</code></a> - <a href="https://docs.kedro.org/en/stable/hooks/index.html"><code>Hook</code></a> - <a href="https://docs.kedro.org/en/stable/nodes_and_pipelines/index.html"><code>pipeline</code> and <code>node</code></a></p>
 
 
 </section>
@@ -2863,7 +3020,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/46357103-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/43d29d87-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>

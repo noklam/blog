@@ -197,8 +197,10 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   <li><a href="#running-the-pipeline-as-a-script" id="toc-running-the-pipeline-as-a-script" class="nav-link" data-scroll-target="#running-the-pipeline-as-a-script">Running the pipeline as a script</a></li>
   <li><a href="#start-of-the-journey---step-1-extract-data-configuration" id="toc-start-of-the-journey---step-1-extract-data-configuration" class="nav-link" data-scroll-target="#start-of-the-journey---step-1-extract-data-configuration">Start of the Journey - Step 1: Extract data configuration</a></li>
   <li><a href="#step-2---replace-shared-config-with-templated-value" id="toc-step-2---replace-shared-config-with-templated-value" class="nav-link" data-scroll-target="#step-2---replace-shared-config-with-templated-value">Step 2 - Replace shared config with templated value</a></li>
+  <li><a href="#step-3---introducing-datacatalog" id="toc-step-3---introducing-datacatalog" class="nav-link" data-scroll-target="#step-3---introducing-datacatalog">Step 3 - Introducing <code>DataCatalog</code></a></li>
   <li><a href="#step-6---iterating-through-the-steps" id="toc-step-6---iterating-through-the-steps" class="nav-link" data-scroll-target="#step-6---iterating-through-the-steps">Step 6 - Iterating through the <code>steps</code></a></li>
   <li><a href="#step-7---pipeline-and-node-as-a-thin-wrapper" id="toc-step-7---pipeline-and-node-as-a-thin-wrapper" class="nav-link" data-scroll-target="#step-7---pipeline-and-node-as-a-thin-wrapper">Step 7 - <code>pipeline</code> and <code>node</code> as a thin wrapper</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -286,28 +288,73 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConfigLoader(UserDict):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, data: <span class="bu">dict</span>):</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.data <span class="op">=</span> OmegaConf.create(data)  <span class="co"># New</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><code>${_base_folder}</code> is a Jinja like syntax but we are using <code>OmegaConf</code> here, which is what Kedro use in its library. The idea is simple, all the value of <code>${_base_folder}</code> will be substituted as <code>data</code>. Kedro also support a lot more advance configuration feature, which you can find in the <a href="https://docs.kedro.org/en/stable/configuration/advanced_configuration.html">documentation</a>.</p>
+<p>We introduce <code>OmegaConf</code> to support template value like <code>${_base_folder}</code> The idea is simple, all the value of <code>${_base_folder}</code> will be substituted as <code>data</code>. Kedro also support a lot more advance configuration feature, which you can find in the <a href="https://docs.kedro.org/en/stable/configuration/advanced_configuration.html">documentation</a>.</p>
+</section>
+<section id="step-3---introducing-datacatalog" class="level2">
+<h2 class="anchored" data-anchor-id="step-3---introducing-datacatalog">Step 3 - Introducing <code>DataCatalog</code></h2>
+<p>The next thing that we will do is to introduce the <code>DataCatalog</code> class. The <code>DataCatalog</code> class and <code>Dataset</code>. A <code>Dataset</code> is something that can <code>save</code> and <code>load</code>, and a <code>DataCatalog</code> is a container of a collections of <code>Dataset</code>(s). Here we leverage the fact that Kedro already has a lot of existing data connectors in <code>kedro-datasets</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AbstractDataset:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> load(<span class="va">self</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">NotImplementedError</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> save(<span class="va">self</span>, data):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">NotImplementedError</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DataCatalog:</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config_catalog: <span class="bu">dict</span>):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.datasets <span class="op">=</span> {}</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> dataset_name, config <span class="kw">in</span> config_catalog.items():</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">isinstance</span>(dataset_name, <span class="bu">str</span>) <span class="kw">and</span> dataset_name.startswith(<span class="st">"_"</span>):</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span>  <span class="co"># skip template value</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            module <span class="op">=</span> config.pop(<span class="st">"type"</span>)  <span class="co"># pandas.CSVDataset</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            <span class="co"># CSVDataset(**config) in code</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            mod, dataset <span class="op">=</span> module.split(<span class="st">"."</span>)  <span class="co"># pandas, CSVDataset</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            mod <span class="op">=</span> importlib.import_module(</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"kedro_datasets.</span><span class="sc">{</span>mod<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>            )  <span class="co"># kedro_datasets.pandas (module)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            class_ <span class="op">=</span> <span class="bu">getattr</span>(mod, dataset)  <span class="co"># kedro_datasets.pandas.CSVDataset</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.datasets[dataset_name] <span class="op">=</span> class_(<span class="op">**</span>config)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> load(<span class="va">self</span>, dataset_name):</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.datasets[dataset_name].load()  <span class="co"># CSVDataset.load()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We introduced quite a lot of code here, but most of them are just parsing logic. What’s happening here is that the <code>DataCatalog</code> takes some configurations, and instantiate <code>Dataset</code> class from it.</p>
+<p>We can now replaced all the <code>pd</code> call with the <code>DataCatalog</code> instead: <img src="images/diff_v3.png" class="img-fluid" alt="diff_v3"></p>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 3 - Introducing `DataCatalog`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 4 - Saving data with `DataCatalog`</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[diff_v4](images<span class="op">/</span>diff_v4.png)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 4 - Saving data with `DataCatalog`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 5 - Extracting configuration again, this time for the functions</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 5 - Extracting configuration again, this time for the functions</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[diff_v5](images<span class="op">/</span>diff_v5.png)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="step-6---iterating-through-the-steps" class="level2">
 <h2 class="anchored" data-anchor-id="step-6---iterating-through-the-steps">Step 6 - Iterating through the <code>steps</code></h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/diff_v6.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">diff_v6</figcaption>
+</figure>
+</div>
 </section>
 <section id="step-7---pipeline-and-node-as-a-thin-wrapper" class="level2">
 <h2 class="anchored" data-anchor-id="step-7---pipeline-and-node-as-a-thin-wrapper">Step 7 - <code>pipeline</code> and <code>node</code> as a thin wrapper</h2>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 8 - Replace functions with `node` and `pipeline`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 8 - Replace functions with `node` and `pipeline`</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[diff_v8](images<span class="op">/</span>diff_v8.png)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 9 - Extend Kedro with Hooks</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Step 9 - Extend Kedro with Hooks</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[diff_v9](images<span class="op">/</span>diff_v9.png)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>We finish this with <a href="https://github.com/noklam/miniKedro/blob/main/src/minikedro/v9/__init__.py">about 50 lines of code</a> (ignore newline), and a library that looks very similar to Kedro. We have implemented a few components like: - <a href="https://docs.kedro.org/en/stable/configuration/index.html"><code>ConfigLoader</code></a> - <a href="https://docs.kedro.org/en/stable/data/index.html"><code>DataCatalog</code></a> - <a href="https://docs.kedro.org/en/stable/hooks/index.html"><code>Hook</code></a> - <a href="https://docs.kedro.org/en/stable/nodes_and_pipelines/index.html"><code>pipeline</code> and <code>node</code></a></p>
 
 
 </section>

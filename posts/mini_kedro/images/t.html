@@ -6,11 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="noklam">
-<meta name="dcterms.date" content="2023-11-16">
-<meta name="description" content="Kedro Config Loader, resolution order">
 
-<title>blog - How Kedro Config Loader works</title>
+<title>blog – t</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -26,22 +23,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -73,17 +70,17 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 </script>
 
 
-<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../../styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="../../../index.html">
     <span class="navbar-title">blog</span>
     </a>
   </div>
@@ -94,7 +91,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html" rel="" target="">
+    <a class="nav-link" href="../../../about.html" rel="" target="">
  <span class="menu-text">Hi! This is Nok</span></a>
   </li>  
   <li class="nav-item compact">
@@ -108,7 +105,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="../../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+    <a class="nav-link" href="../../../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -120,79 +117,19 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">How Kedro Config Loader works</h1>
-                  <div>
-        <div class="description">
-          Kedro Config Loader, resolution order
-        </div>
-      </div>
-                          <div class="quarto-categories">
-                <div class="quarto-category">python</div>
-                <div class="quarto-category">kedro</div>
-              </div>
-                  </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>noklam </p>
-            </div>
-    </div>
-      
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">November 16, 2023</p>
-      </div>
-    </div>
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#config-resolution-without-globals" id="toc-config-resolution-without-globals" class="nav-link active" data-scroll-target="#config-resolution-without-globals">Config Resolution (Without Globals)</a></li>
-  <li><a href="#config-resolution-with-globals" id="toc-config-resolution-with-globals" class="nav-link" data-scroll-target="#config-resolution-with-globals">Config Resolution (With Globals)</a></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
-
-<p>Kedro offers a <a href="https://docs.kedro.org/en/stable/configuration/index.html">configuration system</a>, it involves concepts such as - environment (it can be multiple files) - variable interpolation (advance templating) - globals - custom resolvers - runtime parameters (override via CLI or programatically)</p>
-<p>The official documentation has plenty of examples, so I am going to focus on explaining the internals.</p>
-<section id="config-resolution-without-globals" class="level1">
-<h1>Config Resolution (Without Globals)</h1>
-<p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="2023-11-16-kedro-config-loader-dive-deep_files/figure-html/43d29d87-1-image.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">image.png</figcaption>
-</figure>
-</div>
-</section>
-<section id="config-resolution-with-globals" class="level1">
-<h1>Config Resolution (With Globals)</h1>
+<p><img src="image-1.png" class="img-fluid" alt="alt text"><img src="image.png" class="img-fluid" alt="alt text"><img src="image.png" class="img-fluid" alt="alt text"><img src="image.png" class="img-fluid" alt="alt text"><img src="image.png" class="img-fluid" alt="alt text"></p>
+<p><img src="image.png" class="img-fluid" alt="alt text"><img src="image.png" class="img-fluid" alt="alt text"> <img src="image.png" class="img-fluid" alt="alt text"> <img src="image.png" class="img-fluid" alt="alt text"></p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
