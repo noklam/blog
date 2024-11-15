@@ -8,6 +8,7 @@ website:
   navbar:
     right:
       - about.qmd
+      - present.qmd
       - icon: github
         href: https://github.com/noklam
       - icon: twitter

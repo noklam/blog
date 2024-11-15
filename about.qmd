@@ -16,4 +16,4 @@ about:
 
 ---
 
-Hello! My name is Nok, right now I am working as a senior software engineer in the [Kedro](https://github/kedro-org/kedro) team (It's open source project!). I am intersted in anything data.
+Hello! My name is Nok, right now I am working as a senior software engineer in the [Kedro](https://github.com/kedro-org/kedro) team (It's open source project!). I am intersted in anything data.

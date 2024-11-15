@@ -1,0 +1,12 @@
+---
+title: "PyConHK 2024 - Sparkless Local Data Stack in 2024"
+format: html
+date: '2024-11-16'
+---
+
+GitHub Repo: [https://github.com/noklam/pyconhk-2024](https://github.com/noklam/pyconhk-2024)
+
+In this presentation, I talk about the change in the data ecosystem. Instead of suggests that we should avoid using Spark as a hammer for everything. In addition, I intrdouced `sqlglot`, `sqlframe`, `ibis` which are all Python libraries that helps developer to utilise the most suitable tools for specific workload.
+
+
+Video: tbd
