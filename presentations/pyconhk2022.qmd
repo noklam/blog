@@ -2,6 +2,7 @@
 title: "PyConHK 2022 - Building Data Pipeline with Python (Kedro)"
 format: html
 date: '2022-11-05'
+image: images/kedro.jpg
 ---
 
 Link: https://pycon.hk/2022/pycon-hk-x-coscup-2022-online-special-track-introduction-to-kedro-building-data-pipeline-with-python/

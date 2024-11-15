@@ -2,6 +2,7 @@
 title: "PyConHK 2024 - Sparkless Local Data Stack in 2024"
 format: html
 date: '2024-11-16'
+image: images/spark-hammer.jpg
 ---
 
 GitHub Repo: [https://github.com/noklam/pyconhk-2024](https://github.com/noklam/pyconhk-2024)

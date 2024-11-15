@@ -2,6 +2,6 @@
 title: "Presentations"
 listing:
   contents: presentations
-  type: table
+  type: grid
 ---
 
