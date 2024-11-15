@@ -71,9 +71,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
+      valueNames: ['listing-title','listing-author','listing-date','listing-image','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author"],
+      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -182,73 +182,59 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
-<div class="listing-actions-group">
-   <div class="input-group input-group-sm quarto-listing-sort">
-     <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
-     <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
-       <option value="" disabled="" selected="" hidden="">Order By</option>
-       <option value="index" data-direction="asc">Default</option>
-         <option value="listing-date-sort" data-direction="asc">
-          Date - Oldest
-        </option>
-         <option value="listing-date-sort" data-direction="desc">
-          Date - Newest
-        </option>
-         <option value="listing-title-sort" data-direction="asc">
-          Title
-        </option>
-         <option value="listing-author" data-direction="asc">
-          Author
-        </option>
-     </select>
-  </div>
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
-    </div>
+<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
+<div class="list grid quarto-listing-cols-3">
+<div class="g-col-1" data-index="0" data-listing-date-sort="1667577600000" data-listing-file-modified-sort="1731644273756" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1">
+<a href="./presentations/pyconhk2022.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top">
+<img src="./presentations/images/kedro.jpg" class="thumbnail-image card-img" style="height: 150px;">
+</p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+PyConHK 2022 - Building Data Pipeline with Python (Kedro)
+</h5>
+<div class="card-text listing-description">
+Link: https://pycon.hk/2022/pycon-hk-x-coscup-2022-online-special-track-introduction-to-kedro-building-data-pipeline-with-python/
 </div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
 
-<table class="quarto-listing-table table">
-<thead>
-<tr>
-<th>
-<a class="sort" data-sort="listing-date-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Date</a>
-</th>
-<th>
-<a class="sort" data-sort="listing-title-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Title</a>
-</th>
-<th>
-<a class="sort" data-sort="listing-author" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Author</a>
-</th>
-</tr>
-</thead>
-<tbody class="list">
-<tr data-index="0" data-listing-date-sort="1667577600000" data-listing-file-modified-sort="1731633587946" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="PyConHK 2022 - Building Data Pipeline with Python (Kedro)" data-listing-filename-sort="pyconhk2022.qmd">
-<td>
-<span class="listing-date">Nov 5, 2022</span>
-</td>
-<td>
-<a href="./presentations/pyconhk2022.html" class="title listing-title">PyConHK 2022 - Building Data Pipeline with Python (Kedro)</a>
-</td>
-<td>
-<span class="listing-author"></span>
-</td>
-</tr>
-<tr data-index="1" data-listing-date-sort="1731686400000" data-listing-file-modified-sort="1731633505626" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="PyConHK 2024 - Sparkless Local Data Stack in 2024" data-listing-filename-sort="pyconhk2024.qmd">
-<td>
-<span class="listing-date">Nov 16, 2024</span>
-</td>
-<td>
-<a href="./presentations/pyconhk2024.html" class="title listing-title">PyConHK 2024 - Sparkless Local Data Stack in 2024</a>
-</td>
-<td>
-<span class="listing-author"></span>
-</td>
-</tr>
-</tbody>
+</div>
+<div class="listing-date">
+Nov 5, 2022
+</div>
+</div>
+</div>
+</div>
+</a>
+</div>
+<div class="g-col-1" data-index="1" data-listing-date-sort="1731686400000" data-listing-file-modified-sort="1731644278939" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1">
+<a href="./presentations/pyconhk2024.html" class="quarto-grid-link">
+<div class="quarto-grid-item card h-100 card-left">
+<p class="card-img-top">
+<img src="./presentations/images/spark-hammer.jpg" class="thumbnail-image card-img" style="height: 150px;">
+</p>
+<div class="card-body post-contents">
+<h5 class="no-anchor card-title listing-title">
+PyConHK 2024 - Sparkless Local Data Stack in 2024
+</h5>
+<div class="card-text listing-description">
+GitHub Repo: https://github.com/noklam/pyconhk-2024
+</div>
+<div class="card-attribution card-text-small justify">
+<div class="listing-author">
 
-</table>
+</div>
+<div class="listing-date">
+Nov 16, 2024
+</div>
+</div>
+</div>
+</div>
+</a>
+</div>
+</div>
 <div class="listing-no-matching d-none">
 No matching items
 </div>
