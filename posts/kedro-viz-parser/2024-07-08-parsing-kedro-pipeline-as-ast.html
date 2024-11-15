@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2024-07-08">
 
-<title>blog - The Problem</title>
+<title>blog - Achieve (Almost) dependencies-free Kedro Viz Pipeline</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -107,7 +108,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -126,7 +127,11 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
     <a class="nav-link" href="../../about.html" rel="" target="">
- <span class="menu-text">Hi! This is Nok</span></a>
+ <span class="menu-text">About me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../present.html" rel="" target="">
+ <span class="menu-text">Presentations</span></a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/noklam" rel="" target=""><i class="bi bi-github" role="img">
@@ -154,14 +159,24 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">The Problem</h1>
-                      </div>
+      <h1 class="title">Achieve (Almost) dependencies-free Kedro Viz Pipeline</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">kedro</div>
+              </div>
+                  </div>
   </div>
     
   
   <div class="quarto-title-meta">
 
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 8, 2024</p>
+      </div>
+    </div>
     
       
     </div>
@@ -170,7 +185,29 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-problem" id="toc-the-problem" class="nav-link active" data-scroll-target="#the-problem">The Problem</a></li>
+  <li><a href="#solution" id="toc-solution" class="nav-link" data-scroll-target="#solution">Solution</a></li>
+  <li><a href="#how-this-work" id="toc-how-this-work" class="nav-link" data-scroll-target="#how-this-work">How this work?</a>
+  <ul class="collapse">
+  <li><a href="#python-as-an-interpreted-language" id="toc-python-as-an-interpreted-language" class="nav-link" data-scroll-target="#python-as-an-interpreted-language">Python as an Interpreted Language</a></li>
+  </ul></li>
+  <li><a href="#problem---create-flowchart-with-missing-dependencies" id="toc-problem---create-flowchart-with-missing-dependencies" class="nav-link" data-scroll-target="#problem---create-flowchart-with-missing-dependencies">Problem - Create flowchart with missing dependencies</a>
+  <ul class="collapse">
+  <li><a href="#parsing-with-ast" id="toc-parsing-with-ast" class="nav-link" data-scroll-target="#parsing-with-ast">Parsing with AST</a></li>
+  </ul></li>
+  <li><a href="#implement-a-kedropipelinefinder-to-find-the-pipeline-defintion" id="toc-implement-a-kedropipelinefinder-to-find-the-pipeline-defintion" class="nav-link" data-scroll-target="#implement-a-kedropipelinefinder-to-find-the-pipeline-defintion">Implement a KedroPipelineFinder to find the pipeline defintion</a>
+  <ul class="collapse">
+  <li><a href="#step-1---parsing-function-that-has-a-name-create_pipeline" id="toc-step-1---parsing-function-that-has-a-name-create_pipeline" class="nav-link" data-scroll-target="#step-1---parsing-function-that-has-a-name-create_pipeline">Step 1 - Parsing function that has a name <code>create_pipeline</code></a></li>
+  <li><a href="#step-2---build-kedro-pipeline-object" id="toc-step-2---build-kedro-pipeline-object" class="nav-link" data-scroll-target="#step-2---build-kedro-pipeline-object">Step 2 - Build Kedro Pipeline object</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
@@ -189,7 +226,11 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<section id="the-problem" class="level1">
+<h1>The Problem</h1>
 <p>Kedro viz is a visualisation tools for Kedro. It creates an interactive flow chart that visualize Kedro’s pipeline in a web app. One of the issue is that Kedro-Viz requires loading a Kedro project, this creates frictions as Kedro-Viz is often used for onboarding and installing all dependencies correctly could be a big challenge.</p>
+<p>(note: It’s available in <code>kedro-viz</code> now as <code>kedro viz --lite</code>)</p>
+</section>
 <section id="solution" class="level1">
 <h1>Solution</h1>
 <p>If we focus only on the interactive flowchart of Kedro-Viz, it’s possible to get rid of the dependencies, and the key is to use Abstract Syntax Tree (AST) to parse Kedro pipeline instead actually loading the module.</p>
@@ -340,16 +381,16 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="st">                   )"""</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><code>ast</code> library provides an useful class <code>ast.NodeVisitor</code>, instead of implementing the entire AST, you only need to implement the relevant part that you care. It implement a method called <code>ast.visit</code>, and you only need to implement the relevant part in your class, i.e.&nbsp;<code>visit_&lt;class_name&gt;</code>. You can find the full list of <code>&lt;class_name&gt;</code> in the <a href="https://docs.python.org/3/library/ast.html#abstract-grammar">AST Grammar</a>.</p>
-<div class="cell" data-execution_count="195">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FunctionDefPrinter(ast.NodeVisitor):</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#     def generic_visit(self, node):</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#         print(type(node).__name__)</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#         super().generic_visit(node)</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> visit_Import(<span class="va">self</span>, node):</span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(node.names)</span>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"print everytime something is imported"</span>)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#         print(dir(node))</span></span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>v <span class="op">=</span> FunctionDefPrinter()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -363,15 +404,15 @@ print everytime something is imported</code></pre>
 </div>
 <section id="step-1---parsing-function-that-has-a-name-create_pipeline" class="level2">
 <h2 class="anchored" data-anchor-id="step-1---parsing-function-that-has-a-name-create_pipeline">Step 1 - Parsing function that has a name <code>create_pipeline</code></h2>
-<div class="cell" data-execution_count="208">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> KedroPipelineFinder(ast.NodeVisitor):</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline_def <span class="op">=</span> []</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generic_visit(<span class="va">self</span>, node):</span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ast.NodeVisitor.generic_visit(<span class="va">self</span>,node):</span>
 <span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"Got something!"</span>)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> visit_FunctionDef(<span class="va">self</span>, node):</span>
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node.name <span class="op">==</span> <span class="st">"create_pipeline"</span>:</span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"found a create_pipeline()"</span>)</span>
@@ -430,23 +471,22 @@ print everytime something is imported</code></pre>
 </section>
 <section id="step-2---build-kedro-pipeline-object" class="level2">
 <h2 class="anchored" data-anchor-id="step-2---build-kedro-pipeline-object">Step 2 - Build Kedro Pipeline object</h2>
-<div class="cell" data-execution_count="213">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> KedroPipelineBuilder(ast.NodeVisitor):</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, pipeline_def: <span class="bu">list</span>):</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pipeline_def <span class="op">=</span> pipeline_def</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> build(<span class="va">self</span>, node):</span>
 <span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.generic_visit(node)</span>
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ...</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> visit_Call(<span class="va">self</span>, node):</span>
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Assume it is return from a create_pipeline</span></span>
 <span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="co">        def create_pipeline():</span></span>
 <span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co">           return pipeline(node(...), node(...), node(...)) or</span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co">           </span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="co">         pipeline object that is imported from other module won't be captured.    </span></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="co">       """</span></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>        </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="co">         pipeline object that is imported from other module won't be captured.</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="co">       """</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="184">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>create_pipeline_def</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

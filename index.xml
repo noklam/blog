@@ -10,9 +10,737 @@
 <atom:link href="https://noklam.github.io/blog/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Thu, 30 May 2024 23:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 07 Jul 2024 16:00:00 GMT</lastBuildDate>
 <item>
-  <title>miniKedro</title>
+  <title>Achieve (Almost) dependencies-free Kedro Viz Pipeline</title>
+  <link>https://noklam.github.io/blog/posts/kedro-viz-parser/2024-07-08-parsing-kedro-pipeline-as-ast.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ast</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> logging</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> defaultdict</span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> pathlib <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Path</span>
+<span id="cb1-5"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> typing <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Dict, Iterable, List</span>
+<span id="cb1-6"></span>
+<span id="cb1-7"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> kedro.pipeline.modular_pipeline <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> pipeline <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> ModularPipeline</span>
+<span id="cb1-8"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> kedro.pipeline.pipeline <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Node, Pipeline</span>
+<span id="cb1-9"></span>
+<span id="cb1-10">logger <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logging.getLogger(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span>)</span></code></pre></div>
+</div>
+<section id="the-problem" class="level1">
+<h1>The Problem</h1>
+<p>Kedro viz is a visualisation tools for Kedro. It creates an interactive flow chart that visualize Kedro’s pipeline in a web app. One of the issue is that Kedro-Viz requires loading a Kedro project, this creates frictions as Kedro-Viz is often used for onboarding and installing all dependencies correctly could be a big challenge.</p>
+<p>(note: It’s available in <code>kedro-viz</code> now as <code>kedro viz --lite</code>)</p>
+</section>
+<section id="solution" class="level1">
+<h1>Solution</h1>
+<p>If we focus only on the interactive flowchart of Kedro-Viz, it’s possible to get rid of the dependencies, and the key is to use Abstract Syntax Tree (AST) to parse Kedro pipeline instead actually loading the module.</p>
+</section>
+<section id="how-this-work" class="level1">
+<h1>How this work?</h1>
+<section id="python-as-an-interpreted-language" class="level2">
+<h2 class="anchored" data-anchor-id="python-as-an-interpreted-language">Python as an Interpreted Language</h2>
+<p>Python is often considered as “interpreted” rather than “compiled”. In fact, compilation still happens in Python but it’s a lot simpler compare to other language like C++.</p>
+<p>The things that happens is usually</p>
+<p>Parsing a text file -&gt; AST -&gt; Bytecode (i.e.&nbsp;the .pyc file) -&gt; Machine code</p>
+<p>Before this, we need to understand what <code>AST</code> is and how can we leverage the <code>ast</code> Python library. AST is a data structure that represent your code in a tree-like structure. For example, consider the snippet below:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> time</span>
+<span id="cb2-2"></span>
+<span id="cb2-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># A simple time program</span></span>
+<span id="cb2-4">start_time <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> time.time()</span>
+<span id="cb2-5">time.sleep(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb2-6">now <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> time.time()</span>
+<span id="cb2-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Time spent:"</span>, now <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> start_time)</span></code></pre></div>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">snippet <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""import time</span></span>
+<span id="cb3-2"></span>
+<span id="cb3-3"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;"># A simple time program</span></span>
+<span id="cb3-4"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">start_time = time.time()</span></span>
+<span id="cb3-5"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">time.sleep(1)</span></span>
+<span id="cb3-6"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">now = time.time()</span></span>
+<span id="cb3-7"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">print("Time spent:", now - start_time)"""</span></span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="104">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ast</span>
+<span id="cb4-2"></span>
+<span id="cb4-3">parsed <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ast.parse(snippet)</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="105">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(parsed.body)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[&lt;ast.Import object at 0x127acdea0&gt;, &lt;ast.Assign object at 0x127acd960&gt;, &lt;ast.Expr object at 0x127c2ee00&gt;, &lt;ast.Assign object at 0x127c2ed40&gt;, &lt;ast.Expr object at 0x1270ba020&gt;]</code></pre>
+</div>
+</div>
+<p>We can use a library called <code>ast.dump</code> to visualise the tree better.</p>
+<div class="cell" data-scrolled="true" data-execution_count="106">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(ast.dump(parsed, indent<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Module(
+    body=[
+        Import(
+            names=[
+                alias(name='time')]),
+        Assign(
+            targets=[
+                Name(id='start_time', ctx=Store())],
+            value=Call(
+                func=Attribute(
+                    value=Name(id='time', ctx=Load()),
+                    attr='time',
+                    ctx=Load()),
+                args=[],
+                keywords=[])),
+        Expr(
+            value=Call(
+                func=Attribute(
+                    value=Name(id='time', ctx=Load()),
+                    attr='sleep',
+                    ctx=Load()),
+                args=[
+                    Constant(value=1)],
+                keywords=[])),
+        Assign(
+            targets=[
+                Name(id='now', ctx=Store())],
+            value=Call(
+                func=Attribute(
+                    value=Name(id='time', ctx=Load()),
+                    attr='time',
+                    ctx=Load()),
+                args=[],
+                keywords=[])),
+        Expr(
+            value=Call(
+                func=Name(id='print', ctx=Load()),
+                args=[
+                    Constant(value='Time spent:'),
+                    BinOp(
+                        left=Name(id='now', ctx=Load()),
+                        op=Sub(),
+                        right=Name(id='start_time', ctx=Load()))],
+                keywords=[]))],
+    type_ignores=[])</code></pre>
+</div>
+</div>
+<p>For example, this is corresponding to <code>start_time = time.time()</code></p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">        Assign(</span>
+<span id="cb9-2">            targets<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[</span>
+<span id="cb9-3">                Name(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">id</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'start_time'</span>, ctx<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Store())],</span>
+<span id="cb9-4">            value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Call(</span>
+<span id="cb9-5">                func<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Attribute(</span>
+<span id="cb9-6">                    value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Name(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">id</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'time'</span>, ctx<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Load()),</span>
+<span id="cb9-7">                    attr<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'time'</span>,</span>
+<span id="cb9-8">                    ctx<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Load()),</span>
+<span id="cb9-9">                args<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[],</span>
+<span id="cb9-10">                keywords<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[]))</span>
+<span id="cb9-11">    </span></code></pre></div>
+<p>There is one thing that is missing from the snippet, which is the comment. As the interpreter does not care about this information, so it is thrown away during the process. If you care about preserving comments, you may consider <code>CST</code> or other parser which keep the information.</p>
+</section>
+</section>
+<section id="problem---create-flowchart-with-missing-dependencies" class="level1">
+<h1>Problem - Create flowchart with missing dependencies</h1>
+<p>Consider this pipeline which requires <code>spark</code> as a dependency.</p>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># from nodes.py</span></span>
+<span id="cb10-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> spark</span>
+<span id="cb10-3"></span>
+<span id="cb10-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> my_spark_etl_func():</span>
+<span id="cb10-5">    spark...</span></code></pre></div>
+<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># from pipeline.py</span></span>
+<span id="cb11-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> kedro.pipeline <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> pipeline, node</span>
+<span id="cb11-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> .nodes <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> my_spark_etl_func</span>
+<span id="cb11-4"></span>
+<span id="cb11-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> create_pipeline():</span>
+<span id="cb11-6">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> pipeline(node(my_spark_etl_func,</span>
+<span id="cb11-7">                         inputs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dataset_1"</span>,<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dataset_2"</span>],</span>
+<span id="cb11-8">                         outputs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"output_dataset_1"</span>]</span>
+<span id="cb11-9">                        )</span>
+<span id="cb11-10">                   )</span></code></pre></div>
+<section id="parsing-with-ast" class="level2">
+<h2 class="anchored" data-anchor-id="parsing-with-ast">Parsing with AST</h2>
+<p>From kedro viz perspective, this is the problematic part because this will cause a <code>ImportError</code>:</p>
+<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> .nodes <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> my_spark_etl_func</span></code></pre></div>
+<p>As Kedro-viz does not execute these function, it would be nice if we can parse the second part out and ignore the rest of the file. This is where <code>ast</code> will be useful.</p>
+<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> create_pipeline():</span>
+<span id="cb13-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> pipeline(node(my_spark_etl_func,</span>
+<span id="cb13-3">                         inputs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dataset_1"</span>,<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dataset_2"</span>],</span>
+<span id="cb13-4">                         outputs<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"output_dataset_1"</span>]</span>
+<span id="cb13-5">                        )</span>
+<span id="cb13-6">                   )</span></code></pre></div>
+</section>
+</section>
+<section id="implement-a-kedropipelinefinder-to-find-the-pipeline-defintion" class="level1">
+<h1>Implement a KedroPipelineFinder to find the pipeline defintion</h1>
+<div class="cell" data-execution_count="194">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">kedro_pipeline_text <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""from kedro.pipeline import pipeline, node</span></span>
+<span id="cb14-2"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">from .nodes import my_spark_etl_func</span></span>
+<span id="cb14-3"></span>
+<span id="cb14-4"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">def create_pipeline():</span></span>
+<span id="cb14-5"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    return pipeline(node(my_spark_etl_func,</span></span>
+<span id="cb14-6"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                         inputs=["dataset_1","dataset_2"],</span></span>
+<span id="cb14-7"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                         outputs=["output_dataset_1"]</span></span>
+<span id="cb14-8"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                        )</span></span>
+<span id="cb14-9"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                   )"""</span></span></code></pre></div>
+</div>
+<p><code>ast</code> library provides an useful class <code>ast.NodeVisitor</code>, instead of implementing the entire AST, you only need to implement the relevant part that you care. It implement a method called <code>ast.visit</code>, and you only need to implement the relevant part in your class, i.e.&nbsp;<code>visit_&lt;class_name&gt;</code>. You can find the full list of <code>&lt;class_name&gt;</code> in the <a href="https://docs.python.org/3/library/ast.html#abstract-grammar">AST Grammar</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> FunctionDefPrinter(ast.NodeVisitor):</span>
+<span id="cb15-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     def generic_visit(self, node):</span></span>
+<span id="cb15-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#         print(type(node).__name__)</span></span>
+<span id="cb15-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#         super().generic_visit(node)</span></span>
+<span id="cb15-5"></span>
+<span id="cb15-6">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> visit_Import(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, node):</span>
+<span id="cb15-7">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(node.names)</span>
+<span id="cb15-8">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"print everytime something is imported"</span>)</span>
+<span id="cb15-9"></span>
+<span id="cb15-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#         print(dir(node))</span></span>
+<span id="cb15-11">v <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> FunctionDefPrinter()</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="169">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">parsed <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ast.parse(snippet)</span>
+<span id="cb16-2">v.visit(parsed)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[&lt;ast.alias object at 0x132fec1c0&gt;]
+print everytime something is imported</code></pre>
+</div>
+</div>
+<section id="step-1---parsing-function-that-has-a-name-create_pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="step-1---parsing-function-that-has-a-name-create_pipeline">Step 1 - Parsing function that has a name <code>create_pipeline</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> KedroPipelineFinder(ast.NodeVisitor):</span>
+<span id="cb18-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="cb18-3">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pipeline_def <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []</span>
+<span id="cb18-4"></span>
+<span id="cb18-5">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> generic_visit(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, node):</span>
+<span id="cb18-6">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> ast.NodeVisitor.generic_visit(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>,node):</span>
+<span id="cb18-7">            <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Got something!"</span>)</span>
+<span id="cb18-8"></span>
+<span id="cb18-9">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> visit_FunctionDef(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, node):</span>
+<span id="cb18-10">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> node.name <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"create_pipeline"</span>:</span>
+<span id="cb18-11">            <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"found a create_pipeline()"</span>)</span>
+<span id="cb18-12">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pipeline_def.append(node)</span>
+<span id="cb18-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#             return node</span></span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="209">
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">kpf <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> KedroPipelineFinder()</span>
+<span id="cb19-2">parsed <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ast.parse(kedro_pipeline_text)</span>
+<span id="cb19-3">kpf.visit(parsed)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>found a create_pipeline()</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="178">
+<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">create_pipeline_def <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> parsed.body[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>]</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="191">
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(ast.dump(create_pipeline_def, indent<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FunctionDef(
+    name='create_pipeline',
+    args=arguments(
+        posonlyargs=[],
+        args=[],
+        kwonlyargs=[],
+        kw_defaults=[],
+        defaults=[]),
+    body=[
+        Return(
+            value=Call(
+                func=Name(id='pipeline', ctx=Load()),
+                args=[
+                    Call(
+                        func=Name(id='node', ctx=Load()),
+                        args=[
+                            Name(id='my_spark_etl_func', ctx=Load())],
+                        keywords=[
+                            keyword(
+                                arg='inputs',
+                                value=List(
+                                    elts=[
+                                        Constant(value='dataset_1'),
+                                        Constant(value='dataset_2')],
+                                    ctx=Load())),
+                            keyword(
+                                arg='outputs',
+                                value=List(
+                                    elts=[
+                                        Constant(value='output_dataset_1')],
+                                    ctx=Load()))])],
+                keywords=[]))],
+    decorator_list=[])</code></pre>
+</div>
+</div>
+</section>
+<section id="step-2---build-kedro-pipeline-object" class="level2">
+<h2 class="anchored" data-anchor-id="step-2---build-kedro-pipeline-object">Step 2 - Build Kedro Pipeline object</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> KedroPipelineBuilder(ast.NodeVisitor):</span>
+<span id="cb24-2">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, pipeline_def: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>):</span>
+<span id="cb24-3">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.pipeline_def <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pipeline_def</span>
+<span id="cb24-4"></span>
+<span id="cb24-5">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> build(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, node):</span>
+<span id="cb24-6">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.generic_visit(node)</span>
+<span id="cb24-7">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> ...</span>
+<span id="cb24-8"></span>
+<span id="cb24-9">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> visit_Call(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, node):</span>
+<span id="cb24-10">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Assume it is return from a create_pipeline</span></span>
+<span id="cb24-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        def create_pipeline():</span></span>
+<span id="cb24-12"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">           return pipeline(node(...), node(...), node(...)) or</span></span>
+<span id="cb24-13"></span>
+<span id="cb24-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">         pipeline object that is imported from other module won't be captured.</span></span>
+<span id="cb24-15"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">       """</span></span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="184">
+<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">create_pipeline_def</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="184">
+<pre><code>&lt;ast.FunctionDef at 0x132fb3b20&gt;</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="188">
+<div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">create_pipeline_def.body[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].value</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="188">
+<pre><code>&lt;ast.Call at 0x132fb3bb0&gt;</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="220">
+<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1">call <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> create_pipeline_def.body[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].value</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="224">
+<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(call.args)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[&lt;ast.Call object at 0x132fb24a0&gt;]</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="226">
+<div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1">call_args <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> call.args</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="230">
+<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="231">
+<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1">call_arg <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> call_args[i]</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="236">
+<div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1">fun_name <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> call_arg.args[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">id</span></span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="238">
+<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1">call_arg.args[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="238">
+<pre><code>&lt;ast.Name at 0x132fb2a70&gt;</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="243">
+<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1">ast.unparse(create_pipeline_def)</span></code></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="243">
+<pre><code>"def create_pipeline():\n    return pipeline(node(my_spark_etl_func, inputs=['dataset_1', 'dataset_2'], outputs=['output_dataset_1']))"</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="241">
+<div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(ast.dump(call_arg, indent<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call(
+   func=Name(id='node', ctx=Load()),
+   args=[
+      Name(id='my_spark_etl_func', ctx=Load())],
+   keywords=[
+      keyword(
+         arg='inputs',
+         value=List(
+            elts=[
+               Constant(value='dataset_1'),
+               Constant(value='dataset_2')],
+            ctx=Load())),
+      keyword(
+         arg='outputs',
+         value=List(
+            elts=[
+               Constant(value='output_dataset_1')],
+            ctx=Load()))])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1">inputs <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> call_arg.args</span></code></pre></div>
+</div>
+<div class="cell" data-execution_count="217">
+<div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(ast.dump(create_pipeline_def, indent<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>FunctionDef(
+  name='create_pipeline',
+  args=arguments(
+    posonlyargs=[],
+    args=[],
+    kwonlyargs=[],
+    kw_defaults=[],
+    defaults=[]),
+  body=[
+    Return(
+      value=Call(
+        func=Name(id='pipeline', ctx=Load()),
+        args=[
+          Call(
+            func=Name(id='node', ctx=Load()),
+            args=[
+              Name(id='my_spark_etl_func', ctx=Load())],
+            keywords=[
+              keyword(
+                arg='inputs',
+                value=List(
+                  elts=[
+                    Constant(value='dataset_1'),
+                    Constant(value='dataset_2')],
+                  ctx=Load())),
+              keyword(
+                arg='outputs',
+                value=List(
+                  elts=[
+                    Constant(value='output_dataset_1')],
+                  ctx=Load()))])],
+        keywords=[]))],
+  decorator_list=[])</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>python</category>
+  <category>kedro</category>
+  <guid>https://noklam.github.io/blog/posts/kedro-viz-parser/2024-07-08-parsing-kedro-pipeline-as-ast.html</guid>
+  <pubDate>Sun, 07 Jul 2024 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>miniKedro - A minimal Kedro implementation</title>
   <link>https://noklam.github.io/blog/posts/mini_kedro/2024-05-31-miniKedro-in-fify-lines-of-codes.html</link>
   <description><![CDATA[ 
 
@@ -421,10 +1149,10 @@ font-style: inherit;">/</span>diff_v9.png)</span></code></pre></div>
   <category>kedro</category>
   <category>databricks</category>
   <guid>https://noklam.github.io/blog/posts/mini_kedro/2024-05-31-miniKedro-in-fify-lines-of-codes.html</guid>
-  <pubDate>Thu, 30 May 2024 23:00:00 GMT</pubDate>
+  <pubDate>Thu, 30 May 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>How to save or load data with Kedro?</title>
+  <title>How to save or load data using Kedro classes directly?</title>
   <link>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html</link>
   <description><![CDATA[ 
 
@@ -762,7 +1490,7 @@ font-style: inherit;">in</span> node.outputs:</span>
   <category>python</category>
   <category>kedro</category>
   <guid>https://noklam.github.io/blog/posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html</guid>
-  <pubDate>Tue, 26 Mar 2024 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 25 Mar 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Kedro Pipeline (1) - Slicing Pipeline Effortlessly 🍕</title>
@@ -1474,7 +2202,7 @@ Type:      function</code></pre>
   <category>kedro</category>
   <category>databricks</category>
   <guid>https://noklam.github.io/blog/posts/kedro-pipeline-slicing-pipeline/2024-03-06-Kedro-Pipeline-Slicing-Pipeline.html</guid>
-  <pubDate>Wed, 06 Mar 2024 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 05 Mar 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Kedro with Databricks Assets Bundle</title>
@@ -1621,7 +2349,7 @@ font-style: inherit;">"main=my_project.main:main"</span></span>
   <category>kedro</category>
   <category>databricks</category>
   <guid>https://noklam.github.io/blog/posts/kedro-with-databricks-asset-bundle/2024-02-21-kedro-with-databricks-asset.html</guid>
-  <pubDate>Wed, 21 Feb 2024 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 20 Feb 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Enhancing Debugging experience with Jupyter Magic</title>
@@ -1854,7 +2582,7 @@ font-style: inherit;">return</span> c</span>
   <category>kedro</category>
   <category>jupyter</category>
   <guid>https://noklam.github.io/blog/posts/enhance-debugging-experience-with-jupyter-magic/2024-02-20-Enhance-debugging-experience-with-jupyter-magic.html</guid>
-  <pubDate>Tue, 20 Feb 2024 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 19 Feb 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Investigation of the Kedro default node names</title>
@@ -2612,7 +3340,7 @@ font-style: inherit;">return</span> node_name    </span></code></pre></div>
   <category>python</category>
   <category>kedro</category>
   <guid>https://noklam.github.io/blog/posts/default_node_name/2024-02-08-default-node-name.html</guid>
-  <pubDate>Thu, 08 Feb 2024 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 07 Feb 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Making Powerpoint Ready Chart with matplotlib</title>
@@ -3002,7 +3730,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
  ]]></description>
   <category>python</category>
   <guid>https://noklam.github.io/blog/posts/2020-04-10-Presentation-Ready-Chart.html</guid>
-  <pubDate>Thu, 08 Feb 2024 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 07 Feb 2024 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>How Kedro Config Loader works</title>
@@ -3020,7 +3748,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/43d29d87-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/00d2afcf-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>
@@ -3035,7 +3763,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
   <category>python</category>
   <category>kedro</category>
   <guid>https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep.html</guid>
-  <pubDate>Thu, 16 Nov 2023 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 15 Nov 2023 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Advance Pytest - parameterize your fixture</title>
@@ -3221,7 +3949,7 @@ font-style: inherit;">print</span>()</span></code></pre></div>
  ]]></description>
   <category>pytest</category>
   <guid>https://noklam.github.io/blog/posts/advance_pytest/2023-11-15-advance-pytest-fixtures-with-params.html</guid>
-  <pubDate>Wed, 15 Nov 2023 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 14 Nov 2023 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Experimenting Rust with Python</title>
@@ -3288,7 +4016,7 @@ font-style: inherit;">'sum_as_string'</span>]</span></code></pre></div>
  ]]></description>
   <category>rust</category>
   <guid>https://noklam.github.io/blog/posts/rust_learning/2023-11-11-rust-learning.html</guid>
-  <pubDate>Sat, 11 Nov 2023 00:00:00 GMT</pubDate>
+  <pubDate>Fri, 10 Nov 2023 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>A Guide to Kedro Namespace Pipelines for Time Series Forecasting</title>
@@ -3538,7 +4266,7 @@ Node(make_monthly_predictions, ['mar.input_data'], ['apr.input_data'], None)
  ]]></description>
   <category>kedro</category>
   <guid>https://noklam.github.io/blog/posts/understand_namespace/2023-09-26-understand-kedro-namespace-pipeline.html</guid>
-  <pubDate>Mon, 25 Sep 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 25 Sep 2023 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Function overloading - singledispatch in Python with type hint</title>
@@ -3748,7 +4476,7 @@ font-style: inherit;">else</span>:</span>
  ]]></description>
   <category>python</category>
   <guid>https://noklam.github.io/blog/posts/python_single_dispatch/python-dispatch-typehint.html</guid>
-  <pubDate>Wed, 16 Nov 2022 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 15 Nov 2022 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Mocking Python version for testing, use of Python Warning to raise error for specific Python Version</title>
@@ -3774,7 +4502,7 @@ font-style: inherit;">else</span>:</span>
  ]]></description>
   <category>python</category>
   <guid>https://noklam.github.io/blog/posts/python_warning/2023-07-08-python-warning-test-version-switch-mock.html</guid>
-  <pubDate>Wed, 16 Nov 2022 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 15 Nov 2022 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Kedro DuckDB</title>
@@ -5621,7 +6349,7 @@ font-style: inherit;">## Part IV - Create the DuckDB Transformer</span></span></
  ]]></description>
   <category>python</category>
   <guid>https://noklam.github.io/blog/posts/kedro_duckdb/kedro-duckdb.html</guid>
-  <pubDate>Tue, 15 Nov 2022 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 14 Nov 2022 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Understanding the Kedro codebase - A quick dirty meta-analysis - (Part I)</title>
@@ -6592,7 +7320,7 @@ font-style: inherit;">sum</span>()</span></code></pre></div>
  ]]></description>
   <category>kedro</category>
   <guid>https://noklam.github.io/blog/posts/pandas_expert/kedro-meta-analysis.html</guid>
-  <pubDate>Sun, 13 Nov 2022 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 12 Nov 2022 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Being Python Expert</title>
@@ -6774,7 +7502,7 @@ Drop Table</code></pre>
  ]]></description>
   <category>python</category>
   <guid>https://noklam.github.io/blog/posts/python_expert/python-expert-decorator-generator-contextmanager.html</guid>
-  <pubDate>Thu, 10 Nov 2022 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 09 Nov 2022 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Demo of debugging Kedro pipeline with noetebook</title>
@@ -7631,7 +8359,7 @@ font-style: inherit;">%</span>reload_kedro</span>
   <category>python</category>
   <category>kedro</category>
   <guid>https://noklam.github.io/blog/posts/2022-11-08-kedro-debugging.html</guid>
-  <pubDate>Tue, 08 Nov 2022 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 07 Nov 2022 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Quick implementation of Kedro DebugRunner</title>
@@ -8540,7 +9268,7 @@ font-style: inherit;">;</span> nbdev.nbdev_export()</span></code></pre></div>
  ]]></description>
   <category>europython</category>
   <guid>https://noklam.github.io/blog/posts/kedro-debug-runner.html</guid>
-  <pubDate>Tue, 01 Nov 2022 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 31 Oct 2022 16:00:00 GMT</pubDate>
 </item>
 <item>
   <title>EuroPython 2022 - Conference Notes &amp; Summary</title>
@@ -8884,397 +9612,8 @@ font-style: inherit;">and</span> cause some problem</span></code></pre></div>
  ]]></description>
   <category>europython</category>
   <guid>https://noklam.github.io/blog/posts/2022-07-11-europython2022-summary.html</guid>
-  <pubDate>Sun, 10 Jul 2022 23:00:00 GMT</pubDate>
+  <pubDate>Sun, 10 Jul 2022 16:00:00 GMT</pubDate>
   <media:content url="https://noklam.github.io/blog/posts/europython.jpg" medium="image" type="image/jpeg"/>
-</item>
-<item>
-  <title>Testing with Mocking</title>
-  <dc:creator>noklam </dc:creator>
-  <link>https://noklam.github.io/blog/posts/2022-05-30-mocking-with-pytest-patch.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="what-is-mocking" class="level1">
-<h1>What is Mocking?</h1>
-</section>
-<section id="pytest-mock" class="level1">
-<h1>pytest-mock</h1>
-<p>One of the mainstream mocking library is the standard one from <code>unittest</code>, there are also pytest plugin <code>pytest-mock</code> which wraps on <code>unittest</code>.</p>
-<div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%</span>load_ext ipython_pytest</span></code></pre></div>
-</div>
-<div class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%%</span>pytest</span>
-<span id="cb2-2"></span>
-<span id="cb2-3"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> test_sum():</span>
-<span id="cb2-4">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">assert</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>============================= test session starts =============================
-platform win32 -- Python 3.8.5, pytest-6.2.5, py-1.11.0, pluggy-1.0.0
-rootdir: C:\Users\lrcno\AppData\Local\Temp\tmpiih077gv
-plugins: anyio-3.5.0, cov-3.0.0, mock-1.13.0
-collected 1 item
-
-_ipytesttmp.py .                                                         [100%]
-
-============================== 1 passed in 0.06s ==============================</code></pre>
-</div>
-</div>
-<p>Mocking is important for a few reasons. * You want to have fast unittest (within second) * You don’t want to put loading or have any side-effect to your actual servers/database (e.g.&nbsp;mock writing to a database)</p>
-</section>
-<section id="mock-and-magicmock" class="level1">
-<h1><code>Mock</code> and <code>MagicMock</code></h1>
-<p>There are two main mock object you can used with the standard <code>unittest</code> library from <code>unittest.mock</code>.</p>
-<div class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> unittest.mock <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> Mock, MagicMock, patch</span></code></pre></div>
-</div>
-<section id="mock" class="level2">
-<h2 class="anchored" data-anchor-id="mock">Mock</h2>
-<div class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">mock <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Mock()</span></code></pre></div>
-</div>
-<p>With the <code>Mock</code> object, you can treat it like a magic object that have any attributes or methods.</p>
-<div class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">mock.super_method(), mock.attribute_that_does_not_exist_at_all</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="20">
-<pre><code>(&lt;Mock name='mock.super_method()' id='1587554283232'&gt;,
- &lt;Mock name='mock.attribute_that_does_not_exist_at_all' id='1587554282512'&gt;)</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>(mock)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="22">
-<pre><code>"&lt;Mock id='1587554282848'&gt;"</code></pre>
-</div>
-</div>
-</section>
-<section id="magicmock" class="level2">
-<h2 class="anchored" data-anchor-id="magicmock">MagicMock</h2>
-<p>The “magic” comes from the magic methods of python object, for example, when you add two object together, it is calling the <code>__add__</code> magic method under the hook.</p>
-<div class="cell" data-execution_count="31">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">mock <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> mock</span></code></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>TypeError: unsupported operand type(s) for +: 'Mock' and 'Mock'</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">magic_mock <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> MagicMock()</span></code></pre></div>
-</div>
-<div class="cell" data-execution_count="32">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">magic_mock <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> magic_mock</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="32">
-<pre><code>&lt;MagicMock name='mock.__add__()' id='1587563722784'&gt;</code></pre>
-</div>
-</div>
-<p>With <code>MagicMock</code>, you get these magic methods for free, this is why adding two mock will not throw an error but adding two <code>Mock</code> will result in a <code>TypeError</code></p>
-<p>Let say we want to mock the <code>pandas.read_csv</code> function, because we don’t actually want it to read a data, but just return some mock data whenever it is called. It’s easier to explain with an example.</p>
-</section>
-</section>
-<section id="mocking-with-real-library" class="level1">
-<h1>Mocking with real library</h1>
-<div class="cell" data-execution_count="42">
-<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%%</span>pytest</span>
-<span id="cb15-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb15-3"></span>
-<span id="cb15-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> test_read_csv(mocker):  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># mocker is a special pytest fixture, so even though we haven't define it here but pytest understands it.</span></span>
-<span id="cb15-5">    mocker.patch(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pandas.read_csv"</span>, return_value <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fake_data"</span>)</span>
-<span id="cb15-6">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">assert</span> pd.read_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"some_data"</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fake_data"</span></span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>============================= test session starts =============================
-platform win32 -- Python 3.8.5, pytest-6.2.5, py-1.11.0, pluggy-1.0.0
-rootdir: C:\Users\lrcno\AppData\Local\Temp\tmpka9zv6ev
-plugins: anyio-3.5.0, cov-3.0.0, mock-1.13.0
-collected 1 item
-
-_ipytesttmp.py .                                                         [100%]
-
-============================== 1 passed in 0.09s ==============================</code></pre>
-</div>
-</div>
-<p>In reality, you should get a <code>Dataframe</code> object, but here we mock the return value to return a <code>str</code>, and you can see the test actually pass.</p>
-<section id="mocker.patch-with-createtrue" class="level2">
-<h2 class="anchored" data-anchor-id="mocker.patch-with-createtrue"><code>mocker.patch</code> with <code>create=True</code></h2>
-<div class="cell" data-execution_count="46">
-<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%%</span>pytest</span>
-<span id="cb17-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb17-3"></span>
-<span id="cb17-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> test_read_csv(mocker):  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># mocker is a special pytest fixture, so even though we haven't define it here but pytest understands it.</span></span>
-<span id="cb17-5">    mocker.patch(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pandas.read_special_csv"</span>, return_value <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fake_data"</span>, create<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>)</span>
-<span id="cb17-6">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">assert</span> pd.read_special_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"some_data"</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fake_data"</span></span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>============================= test session starts =============================
-platform win32 -- Python 3.8.5, pytest-6.2.5, py-1.11.0, pluggy-1.0.0
-rootdir: C:\Users\lrcno\AppData\Local\Temp\tmpzbddlxxg
-plugins: anyio-3.5.0, cov-3.0.0, mock-1.13.0
-collected 1 item
-
-_ipytesttmp.py F                                                         [100%]
-
-================================== FAILURES ===================================
-________________________________ test_read_csv ________________________________
-
-mocker = &lt;pytest_mock.plugin.MockFixture object at 0x00000171B28B1820&gt;
-
-    def test_read_csv(mocker):  # mocker is a special pytest fixture, so even though we haven't define it here but pytest understands it.
-&gt;       mocker.patch("pandas.read_special_csv", return_value = "fake_data", create=False)
-
-_ipytesttmp.py:4: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-..\..\..\..\miniconda3\lib\site-packages\pytest_mock\plugin.py:193: in __call__
-    return self._start_patch(self.mock_module.patch, *args, **kwargs)
-..\..\..\..\miniconda3\lib\site-packages\pytest_mock\plugin.py:157: in _start_patch
-    mocked = p.start()
-..\..\..\..\miniconda3\lib\unittest\mock.py:1529: in start
-    result = self.__enter__()
-..\..\..\..\miniconda3\lib\unittest\mock.py:1393: in __enter__
-    original, local = self.get_original()
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-
-self = &lt;unittest.mock._patch object at 0x00000171B28B10D0&gt;
-
-    def get_original(self):
-        target = self.getter()
-        name = self.attribute
-    
-        original = DEFAULT
-        local = False
-    
-        try:
-            original = target.__dict__[name]
-        except (AttributeError, KeyError):
-            original = getattr(target, name, DEFAULT)
-        else:
-            local = True
-    
-        if name in _builtins and isinstance(target, ModuleType):
-            self.create = True
-    
-        if not self.create and original is DEFAULT:
-&gt;           raise AttributeError(
-                "%s does not have the attribute %r" % (target, name)
-            )
-E           AttributeError: &lt;module 'pandas' from 'c:\\users\\lrcno\\miniconda3\\lib\\site-packages\\pandas\\__init__.py'&gt; does not have the attribute 'read_special_csv'
-
-..\..\..\..\miniconda3\lib\unittest\mock.py:1366: AttributeError
-=========================== short test summary info ===========================
-FAILED _ipytesttmp.py::test_read_csv - AttributeError: &lt;module 'pandas' from ...
-============================== 1 failed in 0.43s ==============================</code></pre>
-</div>
-</div>
-<p>Now we fail the test because <code>pandas.read_special_csv</code> does not exist. However, with <code>create=True</code> you can make the test pass again. Normally you won’t want to do this, but it is an option that available.</p>
-<div class="cell" data-execution_count="48">
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%%</span>pytest</span>
-<span id="cb19-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb19-3"></span>
-<span id="cb19-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> test_read_csv(mocker):  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># mocker is a special pytest fixture, so even though we haven't define it here but pytest understands it.</span></span>
-<span id="cb19-5">    mocker.patch(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pandas.read_special_csv"</span>, return_value <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fake_data"</span>, create<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb19-6">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">assert</span> pd.read_special_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"some_data"</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fake_data"</span></span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>============================= test session starts =============================
-platform win32 -- Python 3.8.5, pytest-6.2.5, py-1.11.0, pluggy-1.0.0
-rootdir: C:\Users\lrcno\AppData\Local\Temp\tmphqbckliw
-plugins: anyio-3.5.0, cov-3.0.0, mock-1.13.0
-collected 1 item
-
-_ipytesttmp.py .                                                         [100%]
-
-============================== 1 passed in 0.10s ==============================</code></pre>
-</div>
-</div>
-<p>More often, you would want your mock resemble your real object, which means it has the same attributes and method, but it should fails when the method being called isn’t valid. You may specify the <code>return_value</code> with the mock type</p>
-<div class="cell" data-execution_count="76">
-<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%%</span>pytest <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>vvv</span>
-<span id="cb21-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb21-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> unittest.mock <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> Mock</span>
-<span id="cb21-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pytest</span>
-<span id="cb21-5"></span>
-<span id="cb21-6"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> test_read_csv_valid_method(mocker):  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># mocker is a special pytest fixture, so even though we haven't define it here but pytest understands it.</span></span>
-<span id="cb21-7">    mocker.patch(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pandas.read_csv"</span>, return_value <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Mock(pd.DataFrame))</span>
-<span id="cb21-8">    df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>  pd.read_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"some_data"</span>)</span>
-<span id="cb21-9">    df.mean()  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># A DataFrame method</span></span>
-<span id="cb21-10"></span>
-<span id="cb21-11"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> test_read_csv_invalid_method(mocker):  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># mocker is a special pytest fixture, so even though we haven't define it here but pytest understands it.</span></span>
-<span id="cb21-12">    mocker.patch(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pandas.read_csv"</span>, return_value <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Mock(pd.DataFrame))</span>
-<span id="cb21-13">    df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>  pd.read_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"some_data"</span>)</span>
-<span id="cb21-14">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">with</span> pytest.raises(<span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Exception</span>):</span>
-<span id="cb21-15">        df.not_a_dataframe_method()</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>============================= test session starts =============================
-platform win32 -- Python 3.8.5, pytest-6.2.5, py-1.11.0, pluggy-1.0.0 -- c:\users\lrcno\miniconda3\python.exe
-cachedir: .pytest_cache
-rootdir: C:\Users\lrcno\AppData\Local\Temp\tmpyfiqtkoy
-plugins: anyio-3.5.0, cov-3.0.0, mock-1.13.0
-collecting ... collected 2 items
-
-_ipytesttmp.py::test_read_csv_valid_method PASSED                        [ 50%]
-_ipytesttmp.py::test_read_csv_invalid_method PASSED                      [100%]
-
-============================== 2 passed in 0.16s ==============================</code></pre>
-</div>
-</div>
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>python</category>
-  <guid>https://noklam.github.io/blog/posts/2022-05-30-mocking-with-pytest-patch.html</guid>
-  <pubDate>Sun, 29 May 2022 23:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
