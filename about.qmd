@@ -1,12 +1,12 @@
 ---
-title: "Hi! This is Nok"
+title: "About me"
 image: profile.jpg
 about:
   template: jolla
   links:
     - icon: twitter
       text: Twitter
-      href: https://twitter.com
+      href: https://twitter.com/mediumnok
     - icon: linkedin
       text: LinkedIn
       href: https://linkedin.com/noklamchan
@@ -16,4 +16,4 @@ about:
 
 ---
 
-About this blog
+Hello! My name is Nok, right now I am working as a senior software engineer in the [Kedro](https://github/kedro-org/kedro) team (It's open source project!). I am intersted in anything data.
