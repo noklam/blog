@@ -10,6 +10,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/2022-04-22-python-dataclass-partial-immutable.html",
+      "/posts/pyiceberg/2024-11-18-PyIcebergDataset.html",
       "/posts/kedro-viz-parser/2024-07-08-parsing-kedro-pipeline-as-ast.html",
       "/posts/mini_kedro/2024-05-31-miniKedro-in-fify-lines-of-codes.html",
       "/posts/kedro_data_catalog/2024-03-26-Kedro-Catalog-Explained.html",
