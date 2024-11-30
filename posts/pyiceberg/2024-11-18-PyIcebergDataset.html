@@ -200,6 +200,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   <li><a href="#inspecting-snapshots" id="toc-inspecting-snapshots" class="nav-link" data-scroll-target="#inspecting-snapshots">Inspecting Snapshots</a></li>
   <li><a href="#load-iceberg-table-with-snapshot_id" id="toc-load-iceberg-table-with-snapshot_id" class="nav-link" data-scroll-target="#load-iceberg-table-with-snapshot_id">Load Iceberg table with snapshot_id</a></li>
   </ul></li>
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions">Questions</a></li>
   </ul>
 </nav>
     </div>
@@ -824,9 +825,18 @@ Type:      method</code></pre>
 </div>
 </div>
 </div>
-
-
 </section>
+</section>
+<section id="questions" class="level1">
+<h1>Questions</h1>
+<ul>
+<li>What does it means when we said ” if we can use Iceberg to map a single version number to code, parameters, and I/O data within Kedro and how it aligns with Kedro’s workflow.” Versioning code &amp; parameters sounds more like versioning artifacts.</li>
+<li>How to efficiently version data? <code>overwrite</code> is a completely re-write. For SQL engine this is implemented by the engine that utilise API like <code>append</code>, <code>replace</code>. With pandas/polars it is unclear if it’s possible. (Maybe be possible if it’s using something like <code>ibis</code>)</li>
+<li>Incremental pipeline (and incremental data)</li>
+<li>Version non-table type, i.e.&nbsp;parameters, code(?), Iceberg support only these three formats out of the box: Apache Parquet, Apache ORC, and Apache Avro. Parquet is the first-class citizen and the only format that people use in practice.</li>
+</ul>
+
+
 </section>
 
 </main> <!-- /main -->

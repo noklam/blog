@@ -6,11 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="noklam">
-<meta name="dcterms.date" content="2023-11-16">
-<meta name="description" content="Kedro Config Loader, resolution order">
+<meta name="dcterms.date" content="2024-12-01">
+<meta name="description" content="Integrate Kedro with Logfire">
 
-<title>blog - How Kedro Config Loader works</title>
+<title>blog - Kedro + Logfire is Easy (One Configuration Change only!)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -127,15 +126,16 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">How Kedro Config Loader works</h1>
+      <h1 class="title">Kedro + Logfire is Easy (One Configuration Change only!)</h1>
                   <div>
         <div class="description">
-          Kedro Config Loader, resolution order
+          Integrate Kedro with Logfire
         </div>
       </div>
                           <div class="quarto-categories">
                 <div class="quarto-category">python</div>
                 <div class="quarto-category">kedro</div>
+                <div class="quarto-category">logfire</div>
               </div>
                   </div>
   </div>
@@ -143,17 +143,11 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   
   <div class="quarto-title-meta">
 
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>noklam </p>
-            </div>
-    </div>
       
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 16, 2023</p>
+        <p class="date">December 1, 2024</p>
       </div>
     </div>
     
@@ -169,8 +163,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#config-resolution-without-globals" id="toc-config-resolution-without-globals" class="nav-link active" data-scroll-target="#config-resolution-without-globals">Config Resolution (Without Globals)</a></li>
-  <li><a href="#config-resolution-with-globals" id="toc-config-resolution-with-globals" class="nav-link" data-scroll-target="#config-resolution-with-globals">Config Resolution (With Globals)</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link active" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -180,20 +173,30 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<p>Kedro offers a <a href="https://docs.kedro.org/en/stable/configuration/index.html">configuration system</a>, it involves concepts such as - environment (it can be multiple files) - variable interpolation (advance templating) - globals - custom resolvers - runtime parameters (override via CLI or programatically)</p>
-<p>The official documentation has plenty of examples, so I am going to focus on explaining the internals.</p>
-<section id="config-resolution-without-globals" class="level1">
-<h1>Config Resolution (Without Globals)</h1>
-<p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="2023-11-16-kedro-config-loader-dive-deep_files/figure-html/539b7c6c-1-image.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">image.png</figcaption>
-</figure>
-</div>
-</section>
-<section id="config-resolution-with-globals" class="level1">
-<h1>Config Resolution (With Globals)</h1>
+<p>Full code example on GitHub: https://github.com/noklam/kedro-logfire-example</p>
+<p>I started exploring observability tools lately and naturally I encounter Logfire, an Python observability library that is built by the Pydantic team. I was wondering how hard it is to integrate Kedro with it and whether it needs a seperate plugin. To my surprise, it’s pretty easy to get started.</p>
+<p>The only thing you need is to update the <code>logging.yml</code> (make sure you choose <code>logging</code> when you start a new project), otherwise you can grab it from the <a href="https://github.com/kedro-org/kedro-starters/blob/main/spaceflights-pandas/%7B%7B%20cookiecutter.repo_name%20%7D%7D/conf/logging.yml">template <code>logging.yml</code></a>.</p>
+<p>````diff handlers: … + logfire: + class: logfire.LogfireLoggingHandler</p>
+<ul>
+<li>rich:</li>
+<li>class: kedro.logging.RichHandler</li>
+<li>rich_tracebacks: True</li>
+<li><h1 id="advance-options-for-customisation.">Advance options for customisation.</h1></li>
+<li><h1 id="see-httpsdocs.kedro.orgenstablelogginglogging.htmlproject-side-logging-configuration">See https://docs.kedro.org/en/stable/logging/logging.html#project-side-logging-configuration</h1></li>
+<li><h1 id="tracebacks_show_locals-false">tracebacks_show_locals: False</h1></li>
+</ul>
+<pre><code>
+Once you have configure the logging setting, you can start a run with:
+
+```bash
+kedro run</code></pre>
+<p>Then you may see the log messages in the console. (You will see a different link, make sure you also create an account on Logfire and authenticate first)</p>
+<pre class="log"><code>Logfire project URL: https://logfire.pydantic.dev/noklam/kedrologfireexample
+16:10:10.321 Using synchronous mode for loading and saving data. Use the --async flag for potential performance gains. https://docs.kedro.org/en/stable/nodes_and_pipelines/run_a_pipeline.html#load-and-save-asynchronously</code></pre>
+<p>It works quite seemlessly and I can see live log on Logfire platform immediately. <img src="./logfire-kedro.png" class="img-fluid" alt="logfire-kedro.png"></p>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>It’s quite easy to get started with Logfire and Kedro. Next time I’d like to dive deeper into Logfire’s features.</p>
 
 
 </section>
