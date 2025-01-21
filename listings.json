@@ -10,6 +10,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/2022-04-22-python-dataclass-partial-immutable.html",
+      "/posts/python_pass_by_value/2025-01-21-Is-Python-Pass-By-Reference-or-Pass-By-Value.html",
       "/posts/kedro_logfire/2024-12-01-kedro-with-logfire.html",
       "/posts/pyiceberg/2024-11-18-PyIcebergDataset.html",
       "/posts/kedro-viz-parser/2024-07-08-parsing-kedro-pipeline-as-ast.html",
