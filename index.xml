@@ -10,7 +10,134 @@
 <atom:link href="https://noklam.github.io/blog/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Tue, 21 Jan 2025 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 05 Feb 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Deep Dive into Ruff: PartI - Implementing First Version of Ruff in Python</title>
+  <link>https://noklam.github.io/blog/posts/ruff_in_python/2025-02-05-dive-deep-into-ruff-reimplement-ruff-in-python.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Inspired by a blog post highlighting the first version of <code>ruff</code>, I am motivated to learn Rust. I thought it would be a good idea to understand <code>ruff</code>, a Python linter that I use daily. This blog will focus on the implementation of <code>ruff</code>, with an emphasis on AST and parsing rather than the Rust language. In Part II, I will attempt to implement the same program in Rust.</p>
+<section id="messages" class="level2">
+<h2 class="anchored" data-anchor-id="messages">Messages</h2>
+<p>Messages are classes that store specific types of lint errors. For example, using <code>if</code> with a <code>tuple</code> as an expression will always result in <code>True</code>. Therefore, there is an existing rule implemented in Flake8, known as rule <code>F643</code>, which is implemented as follows:</p>
+</section>
+<section id="ast" class="level2">
+<h2 class="anchored" data-anchor-id="ast">AST</h2>
+<p>Parsing is its own topic, but in Python this is easy because the standard library has implemented this for us. We can use <code>ast</code> directly. In rust, there is <code>rustpython_parser</code>.</p>
+<p>We use AST to understand the structure of the code. For example, we can detect the rule <code>F634</code> described above.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1">if_tuple <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-2"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">if (False, False,):</span></span>
+<span id="cb1-3"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        pass</span></span>
+<span id="cb1-4"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-5"></span>
+<span id="cb1-6"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ast</span>
+<span id="cb1-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(ast.dump(ast.parse(if_tuple), indent<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Module(
+  body=[
+    If(
+      test=Tuple(
+        elts=[
+          Constant(value=False),
+          Constant(value=False)],
+        ctx=Load()),
+      body=[
+        Pass()],
+      orelse=[])],
+  type_ignores=[])</code></pre>
+</div>
+</div>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">  body<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[</span>
+<span id="cb3-2">    If(</span>
+<span id="cb3-3">      test<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Tuple(</span>
+<span id="cb3-4">        elts<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[</span>
+<span id="cb3-5">          Constant(value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>),</span>
+<span id="cb3-6">          Constant(value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)],</span>
+<span id="cb3-7">        ctx<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>Load()),</span></code></pre></div>
+<p>This is the basic idea of linter. It takes these steps: 1. Define a set of rules 2. Parse a file into AST 3. Walk through the AST, identify errors if it matches a rule. 4. Report the errors at the end</p>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>rust</category>
+  <guid>https://noklam.github.io/blog/posts/ruff_in_python/2025-02-05-dive-deep-into-ruff-reimplement-ruff-in-python.html</guid>
+  <pubDate>Wed, 05 Feb 2025 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Day 1 into LLMs</title>
+  <link>https://noklam.github.io/blog/posts/claude_mcp/2025-02-24-Claude-MCP-Obsidian.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="whats-the-model-context-protocolmcp" class="level1">
+<h1>What’s the Model Context Protocol(MCP)?</h1>
+<p>Model Context Protocol is a bit like the Language Server Protocol (LSP) that I have worked with recently. In simplified words, it’s a set of specification that defines how a server communicate to a client. A server can be a web server, and a client could be a Desktop application for example.</p>
+<p>The benefit of having protocols is that you can reuse the majority of the code to avoid the M*N integration problem (M server, N client). Essentially, you build the server once, then build up a thin client (think VSCode, Claude Desktop, Cursor).</p>
+<p>I have been very hesitate towards the LLM wave, partly because of my prior experience (moving from ML to software engineering). However, I think the application space is now mature enough to actually build something with it. There are so many fuss around LLM/Agents or what so ever, but (surprisingly), the most effective way to learn this is sit down for a few hours and actually build something with it.</p>
+</section>
+<section id="obisidian" class="level1">
+<h1>Obisidian</h1>
+<p>I have been an user of Obsidian, a markdown based editor. I was never a good note taker or religous about cleaning up my notes, so I write a lot of them but I barely spend time to organise them. So, when I think of learning this MCP thing, I ask myself, can I build something that query my own notes?</p>
+<p>This would takes: - Building a MCP server for obsidian - A MCP client / plugin for Obsidian (If it does not exist yet, I have no idea now)</p>
+</section>
+<section id="reference" class="level1">
+<h1>Reference</h1>
+<ul>
+<li>https://docs.anthropic.com/en/docs/build-with-claude/mcp</li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>llm</category>
+  <guid>https://noklam.github.io/blog/posts/claude_mcp/2025-02-24-Claude-MCP-Obsidian.html</guid>
+  <pubDate>Wed, 05 Feb 2025 00:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Is Python a pass-by-reference or pass-by-value?</title>
   <link>https://noklam.github.io/blog/posts/python_pass_by_value/2025-01-21-Is-Python-Pass-By-Reference-or-Pass-By-Value.html</link>
@@ -5003,7 +5130,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/1cc40560-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/2c29ed81-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>
@@ -7605,1159 +7732,6 @@ font-style: inherit;">## Part IV - Create the DuckDB Transformer</span></span></
   <category>python</category>
   <guid>https://noklam.github.io/blog/posts/kedro_duckdb/kedro-duckdb.html</guid>
   <pubDate>Tue, 15 Nov 2022 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Understanding the Kedro codebase - A quick dirty meta-analysis - (Part I)</title>
-  <link>https://noklam.github.io/blog/posts/pandas_expert/kedro-meta-analysis.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/pjq3QOxl9Ok" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
-<p>Inspired by this talk</p>
-<section id="how-many-lines-of-code-in-kedro" class="level1">
-<h1>How many lines of code in Kedro?</h1>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> pathlib <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> Path</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pd</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> Counter</span></code></pre></div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">REPO_PATH <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Path(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"/Users/Nok_Lam_Chan/GitHub/kedro"</span>)</span>
-<span id="cb2-2"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">list</span>(REPO_PATH.iterdir())</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>[PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test_requirements.txt'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/CODE_OF_CONDUCT.md'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/LICENSE.md'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tools'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro_technical_charter.pdf'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.DS_Store'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.pytest_cache'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/derby.log'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro.egg-info'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.pre-commit-config.yaml'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.coverage'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/Makefile'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/CITATION.cff'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/CODEOWNERS'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/pyproject.toml'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/trufflehog-ignore.txt'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/dependency'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/MANIFEST.in'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/docs'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.readthedocs.yml'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/dep_tree.log'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/README.md'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/RELEASE.md'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/setup.py'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/demo-project'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/logs'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.mypy_cache'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.gitignore'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/static'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/CONTRIBUTING.md'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/behave.ini'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.github'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.gitpod.yml'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/info.log'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/coverage.xml'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/errors.log'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.git'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/htmlcov'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.vscode'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/data'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/conf'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.circleci'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/import.log'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/notebooks'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.run'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/.idea'),
- PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/src')]</code></pre>
-</div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> count_effective_line(counter, fn):</span>
-<span id="cb4-2">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">with</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">open</span> (fn) <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> f:</span>
-<span id="cb4-3">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> line <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">in</span> f:</span>
-<span id="cb4-4">            counter[fn] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span></code></pre></div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">lines_count <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Counter()</span>
-<span id="cb5-2"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> fn <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">in</span> REPO_PATH.rglob(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"*/*.py"</span>):</span>
-<span id="cb5-3"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#     print(fn)</span></span>
-<span id="cb5-4">    count_effective_line(lines_count, fn)</span>
-<span id="cb5-5"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(lines_count)</span>
-<span id="cb5-6">            </span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Counter({PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/spark/test_spark_dataset.py'): 984, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/pipeline/test_pipeline.py'): 940, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/pipeline/pipeline.py'): 926, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/session/test_session.py'): 891, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/micropkg.py'): 854, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/micropkg/test_micropkg_pull.py'): 846, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/io/core.py'): 748, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/test_cli.py'): 730, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/io/test_data_catalog.py'): 685, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/test_starters.py'): 639, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/cli_steps.py'): 623, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/pipeline/node.py'): 612, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/docs/conf.py'): 598, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/io/data_catalog.py'): 594, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/docs/build/conf.py'): 587, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/micropkg/test_micropkg_package.py'): 581, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/session/test_session_extension_hooks.py'): 576, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/io/test_partitioned_dataset.py'): 565, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/starters.py'): 552, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/io/partitioned_dataset.py'): 551, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/pipeline/test_pipeline.py'): 522, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/io/test_incremental_dataset.py'): 503, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/context/test_context.py'): 485, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/config/test_templated_config.py'): 482, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/test_project.py'): 479, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/test_jupyter.py'): 470, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/utils.py'): 469, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/runner/runner.py'): 456, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/tensorflow/test_tensorflow_model_dataset.py'): 441, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/sql_dataset.py'): 438, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/matplotlib/test_matplotlib_writer.py'): 436, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/pipeline/test_node.py'): 434, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/session/session.py'): 423, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/spark/spark_dataset.py'): 422, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/pipeline/test_modular_pipeline.py'): 418, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/runner/test_parallel_runner.py'): 401, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/project.py'): 392, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/pipeline/test_pipeline_with_transcoding.py'): 391, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_generic_dataset.py'): 383, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/session/conftest.py'): 381, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_sql_dataset.py'): 374, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/project/__init__.py'): 369, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/config/test_config.py'): 354, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/runner/parallel_runner.py'): 353, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/context/context.py'): 345, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_parquet_dataset.py'): 344, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/pipeline.py'): 336, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_gbq_dataset.py'): 315, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/spark/test_spark_hive_dataset.py'): 314, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/gbq_dataset.py'): 314, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/test_catalog.py'): 305, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/ipython/test_ipython.py'): 304, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_csv_dataset.py'): 300, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/hooks/specs.py'): 296, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/pipeline/modular_pipeline.py'): 290, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/jupyter.py'): 282, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_excel_dataset.py'): 281, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/config/templated_config.py'): 281, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/build/lib/resume_kedro/dagascii.py'): 275, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/runner/test_sequential_runner.py'): 273, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pickle/test_pickle_dataset.py'): 269, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/micropkg/test_micropkg_requirements.py'): 266, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/project/test_pipeline_discovery.py'): 260, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/excel_dataset.py'): 254, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/test_startup.py'): 250, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/config/common.py'): 248, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/generic_dataset.py'): 246, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_hdf_dataset.py'): 245, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/matplotlib/matplotlib_writer.py'): 243, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pickle/pickle_dataset.py'): 243, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_xml_dataset.py'): 241, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_json_dataset.py'): 241, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/geojson/test_geojson_dataset.py'): 232, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pillow/test_image_dataset.py'): 231, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/parquet_dataset.py'): 230, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/pipeline/test_pipeline_from_missing.py'): 227, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/io/test_memory_dataset.py'): 226, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/networkx/test_json_dataset.py'): 226, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/email/test_message_dataset.py'): 226, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/docs/source/conf.py'): 225, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/docs/source/conf.py'): 225, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/docs/source/conf.py'): 225, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test/docs/source/conf.py'): 224, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/project/{{ cookiecutter.repo_name }}/docs/source/conf.py'): 224, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/docs/source/conf.py'): 222, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/holoviews/test_holoviews_writer.py'): 220, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/pandas/test_feather_dataset.py'): 220, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/spark/spark_hive_dataset.py'): 220, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/runner/test_thread_runner.py'): 213, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/cli.py'): 211, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/yaml/test_yaml_dataset.py'): 210, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/hdf_dataset.py'): 204, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/json/test_json_dataset.py'): 200, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/io/test_lambda_dataset.py'): 194, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/tracking/test_metrics_dataset.py'): 194, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/csv_dataset.py'): 194, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/feather_dataset.py'): 191, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/redis/redis_dataset.py'): 189, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/networkx/test_gml_dataset.py'): 188, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/networkx/test_graphml_dataset.py'): 188, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/tensorflow/tensorflow_model_dataset.py'): 188, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/email/message_dataset.py'): 188, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/text/test_text_dataset.py'): 187, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/json_dataset.py'): 187, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/tracking/test_json_dataset.py'): 185, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/catalog.py'): 176, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/spark/spark_jdbc_dataset.py'): 175, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/xml_dataset.py'): 171, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/api/test_api_dataset.py'): 170, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/runner/conftest.py'): 168, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/redis/test_redis_dataset.py'): 165, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/ipython/__init__.py'): 164, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/dask/test_parquet_dataset.py'): 162, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/json/json_dataset.py'): 160, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/conftest.py'): 159, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/geopandas/geojson_dataset.py'): 157, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/startup.py'): 156, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/runner/thread_runner.py'): 156, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/yaml/yaml_dataset.py'): 155, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/tools/test_cli.py'): 154, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/plotly/json_dataset.py'): 154, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/networkx/json_dataset.py'): 150, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/networkx/gml_dataset.py'): 145, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/networkx/graphml_dataset.py'): 143, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/io/test_cached_dataset.py'): 142, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pillow/image_dataset.py'): 142, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/api/api_dataset.py'): 142, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/pipeline/test_node_run.py'): 141, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/biosequence/biosequence_dataset.py'): 137, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/holoviews/holoviews_writer.py'): 137, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/dask/parquet_dataset.py'): 136, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/config/config.py'): 134, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/io/memory_dataset.py'): 132, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/text/text_dataset.py'): 131, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/environment.py'): 128, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/test_cli_hooks.py'): 128, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/session/test_session_hook_manager.py'): 126, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/spark/test_spark_jdbc_dataset.py'): 121, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/plotly/plotly_dataset.py'): 117, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/io/cached_dataset.py'): 113, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/io/lambda_dataset.py'): 113, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/plotly/test_plotly_dataset.py'): 108, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/spark/deltatable_dataset.py'): 108, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/bioinformatics/test_biosequence_dataset.py'): 107, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/hooks/manager.py'): 106, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/sh_run.py'): 105, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/project/test_settings.py'): 102, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/plotly/test_json_dataset.py'): 101, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/io/test_core.py'): 96, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/logging/color_logger.py'): 95, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/conftest.py'): 89, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/session/test_store.py'): 89, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/spark/test_deltatable_dataset.py'): 89, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/test_registry.py'): 88, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/runner/sequential_runner.py'): 87, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/util.py'): 84, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/pipeline/test_pipeline_integration.py'): 84, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/pipeline/conftest.py'): 84, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipelines/data_science/nodes.py'): 80, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/project/test_pipeline_registry.py'): 79, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/micropkg/conftest.py'): 79, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/hooks/test_manager.py'): 75, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/iris/nodes.py'): 74, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/iris_demo/nodes.py'): 74, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/resume_kedro/nodes.py'): 74, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/build/lib/resume_kedro/nodes.py'): 74, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/tracking/metrics_dataset.py'): 68, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/spark/test_memory_dataset.py'): 67, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tools/cli.py'): 62, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/iris_demo/settings.py'): 62, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/project/test_logging.py'): 58, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/build/lib/resume_kedro/settings.py'): 56, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipelines/data_engineering/nodes.py'): 51, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/registry.py'): 50, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/hooks/manager.py'): 49, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test/src/test/__main__.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/iris/__main__.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/iris_demo/__main__.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/__main__.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/resume_kedro/__main__.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/build/lib/resume_kedro/__main__.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/project/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/__main__.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/tracking/json_dataset.py'): 47, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/hooks/specs.py'): 46, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/session/shelvestore.py'): 43, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test/src/tests/test_run.py'): 41, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/spark/conftest.py'): 41, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/project/{{ cookiecutter.repo_name }}/src/tests/test_run.py'): 41, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/tests/test_run.py'): 40, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test/src/setup.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/tests/test_run.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/setup.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/tests/test_run.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/setup.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/settings.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/tests/test_run.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/resume_kedro/pipeline.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/config/abstract_config.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/session/store.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/project/{{ cookiecutter.repo_name }}/src/setup.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/project/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/settings.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pandas/__init__.py'): 39, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/build/lib/resume_kedro/pipeline.py'): 38, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test/src/test/settings.py'): 37, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/setup.py'): 37, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/iris/settings.py'): 37, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/setup.py'): 37, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/datasets/conftest.py'): 35, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/iris/pipeline.py'): 33, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/iris_demo/pipeline.py'): 33, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/io/__init__.py'): 33, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/test_utils.py'): 30, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/utils.py'): 28, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_plugin/plugin.py'): 27, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipelines/data_science/pipeline.py'): 27, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tools/circleci/github_scripts/kedro_version.py'): 26, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipelines/data_engineering/pipeline.py'): 26, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/settings.py'): 24, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/framework/cli/hooks/test_manager.py'): 22, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/extensions/ipython.py'): 22, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py'): 19, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/config/__init__.py'): 19, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/iris/pipeline_registry.py'): 18, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/iris_demo/pipeline_registry.py'): 18, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/resume_kedro/pipeline_registry.py'): 18, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/build/lib/resume_kedro/pipeline_registry.py'): 18, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/tests/extras/logging/test_color_logger.py'): 16, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/runner/__init__.py'): 16, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/project/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipeline_registry.py'): 16, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/logging/__init__.py'): 15, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/networkx/__init__.py'): 15, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/spark/__init__.py'): 14, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test/src/test/pipeline_registry.py'): 13, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_plugin/setup.py'): 12, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/__init__.py'): 11, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/hooks/markers.py'): 11, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/plotly/__init__.py'): 11, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/api/__init__.py'): 11, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/tracking/__init__.py'): 11, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/__main__.py'): 10, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/hooks/markers.py'): 10, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/pipeline/{{ cookiecutter.pipeline_name }}/__init__.py'): 10, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/pipeline/{{ cookiecutter.pipeline_name }}/pipeline.py'): 10, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/tests/test_pipeline.py'): 9, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/tests/test_pipeline.py'): 9, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/tests/test_pipeline.py'): 9, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/pipeline/__init__.py'): 9, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/pipeline/{{ cookiecutter.pipeline_name }}/tests/test_pipeline.py'): 9, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/dask/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/redis/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/geopandas/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pillow/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/json/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/biosequence/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/tensorflow/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/matplotlib/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/yaml/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/pickle/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/text/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/holoviews/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/email/__init__.py'): 8, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipelines/data_science/__init__.py'): 7, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/pipelines/data_engineering/__init__.py'): 7, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/context/__init__.py'): 7, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/__init__.py'): 7, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/session/__init__.py'): 6, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/hooks/__init__.py'): 5, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/cli/hooks/__init__.py'): 5, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/test/src/test/__init__.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris/src/iris/__init__.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/iris-demo/src/iris_demo/__init__.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/features/steps/test_starter/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/__init__.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/resume_kedro/__init__.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/build/lib/resume_kedro/__init__.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/pipeline/{{ cookiecutter.pipeline_name }}/nodes.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/templates/project/{{ cookiecutter.repo_name }}/src/{{ cookiecutter.python_package }}/__init__.py'): 4, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/resume-kedro/src/resume_kedro/settings.py'): 3, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/datasets/__init__.py'): 3, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/extensions/__init__.py'): 3, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/extras/__init__.py'): 2, PosixPath('/Users/Nok_Lam_Chan/GitHub/kedro/kedro/framework/__init__.py'): 1})</code></pre>
-</div>
-</div>
-</section>
-<section id="clean-up-the-dictionary-a-little-bit" class="level1">
-<h1>Clean up the dictionary a little bit</h1>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">line_counts_df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.DataFrame(lines_count.items(), columns<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fullpath"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"line_of_code"</span>])</span>
-<span id="cb7-2">line_counts_df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fullpath"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> line_counts_df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fullpath"</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">apply</span>(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>)</span>
-<span id="cb7-3">line_counts_df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fullpath"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>  line_counts_df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fullpath"</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>.replace(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"/Users/Nok_Lam_Chan/GitHub/kedro/"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>)</span>
-<span id="cb7-4">line_counts_df.head(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">fullpath</th>
-<th data-quarto-table-cell-role="th">line_of_code</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>tools/cli.py</td>
-<td>62</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>features/environment.py</td>
-<td>128</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">line_counts_df[[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"toplevel"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"submodule"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"filename"</span>]] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> line_counts_df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"fullpath"</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>.split(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"/"</span>,expand<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, n<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">line_counts_df</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">fullpath</th>
-<th data-quarto-table-cell-role="th">line_of_code</th>
-<th data-quarto-table-cell-role="th">toplevel</th>
-<th data-quarto-table-cell-role="th">module</th>
-<th data-quarto-table-cell-role="th">submodule</th>
-<th data-quarto-table-cell-role="th">filename</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>tools/cli.py</td>
-<td>62</td>
-<td>tools</td>
-<td>cli.py</td>
-<td>None</td>
-<td>None</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>features/environment.py</td>
-<td>128</td>
-<td>features</td>
-<td>environment.py</td>
-<td>None</td>
-<td>None</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>tests/test_utils.py</td>
-<td>30</td>
-<td>tests</td>
-<td>test_utils.py</td>
-<td>None</td>
-<td>None</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td>tests/conftest.py</td>
-<td>89</td>
-<td>tests</td>
-<td>conftest.py</td>
-<td>None</td>
-<td>None</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
-<td>docs/conf.py</td>
-<td>598</td>
-<td>docs</td>
-<td>conf.py</td>
-<td>None</td>
-<td>None</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">276</td>
-<td>kedro/extras/datasets/pandas/feather_dataset.py</td>
-<td>191</td>
-<td>kedro</td>
-<td>extras</td>
-<td>datasets</td>
-<td>pandas/feather_dataset.py</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">277</td>
-<td>kedro/extras/datasets/pandas/hdf_dataset.py</td>
-<td>204</td>
-<td>kedro</td>
-<td>extras</td>
-<td>datasets</td>
-<td>pandas/hdf_dataset.py</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">278</td>
-<td>kedro/extras/datasets/pandas/csv_dataset.py</td>
-<td>194</td>
-<td>kedro</td>
-<td>extras</td>
-<td>datasets</td>
-<td>pandas/csv_dataset.py</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">279</td>
-<td>kedro/extras/datasets/pandas/excel_dataset.py</td>
-<td>254</td>
-<td>kedro</td>
-<td>extras</td>
-<td>datasets</td>
-<td>pandas/excel_dataset.py</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">280</td>
-<td>kedro/extras/datasets/pandas/gbq_dataset.py</td>
-<td>314</td>
-<td>kedro</td>
-<td>extras</td>
-<td>datasets</td>
-<td>pandas/gbq_dataset.py</td>
-</tr>
-</tbody>
-</table>
-
-<p>281 rows × 6 columns</p>
-</div>
-</div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">## Sort by Top level module</span></span>
-<span id="cb10-2">line_counts_df.groupby([<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"toplevel"</span>]).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>().sort_values(ascending<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>, by <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"line_of_code"</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">line_of_code</th>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">toplevel</th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">tests</td>
-<td>25341</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">kedro</td>
-<td>18683</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">features</td>
-<td>1587</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">docs</td>
-<td>1185</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">resume-kedro</td>
-<td>1007</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">iris-demo</td>
-<td>550</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">iris</td>
-<td>547</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">test</td>
-<td>405</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">tools</td>
-<td>88</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>Interstingly we have roughly a 1:1 ratio between <code>tests</code> and <code>kedro</code></p>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">line_counts_df.groupby([<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"submodule"</span>]).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>().sort_values(ascending<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>, by <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"line_of_code"</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">line_of_code</th>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">module</th>
-<th data-quarto-table-cell-role="th">submodule</th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">extras</td>
-<td data-quarto-table-cell-role="th">datasets</td>
-<td>15775</td>
-</tr>
-<tr class="even">
-<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">framework</td>
-<td data-quarto-table-cell-role="th">cli</td>
-<td>8837</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">session</td>
-<td>2574</td>
-</tr>
-<tr class="even">
-<td rowspan="2" data-quarto-table-cell-role="th" data-valign="top">pipeline</td>
-<td data-quarto-table-cell-role="th">test_pipeline.py</td>
-<td>940</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">pipeline.py</td>
-<td>926</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">...</td>
-<td data-quarto-table-cell-role="th">...</td>
-<td>...</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">config</td>
-<td data-quarto-table-cell-role="th">__init__.py</td>
-<td>19</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">runner</td>
-<td data-quarto-table-cell-role="th">__init__.py</td>
-<td>16</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">pipeline</td>
-<td data-quarto-table-cell-role="th">__init__.py</td>
-<td>9</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">extras</td>
-<td data-quarto-table-cell-role="th">__init__.py</td>
-<td>2</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">framework</td>
-<td data-quarto-table-cell-role="th">__init__.py</td>
-<td>1</td>
-</tr>
-</tbody>
-</table>
-
-<p>74 rows × 1 columns</p>
-</div>
-</div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">## Sort by Sub-module</span></span>
-<span id="cb12-2">kedro_line_counts_df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> line_counts_df[line_counts_df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"toplevel"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"kedro"</span>]</span>
-<span id="cb12-3">tmp <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> kedro_line_counts_df.groupby(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module"</span>).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>().rename(mapper<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>{<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"line_of_code"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module_line_of_code"</span>},axis<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> )</span>
-<span id="cb12-4">kedro_line_counts_df_group <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> kedro_line_counts_df.groupby([<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"submodule"</span>]).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>().reset_index().merge(tmp, left_on<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module"</span>, right_on<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module"</span>)</span>
-<span id="cb12-5"></span>
-<span id="cb12-6"></span>
-<span id="cb12-7"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># .sort_values(ascending=False, by ="line_of_code")</span></span></code></pre></div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">kedro_line_counts_df.groupby([<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module"</span>]).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>().sort_values(ascending<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>, by <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"line_of_code"</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">line_of_code</th>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">module</th>
-<th data-quarto-table-cell-role="th"></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">extras</td>
-<td>6871</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">framework</td>
-<td>5246</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">io</td>
-<td>2284</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">pipeline</td>
-<td>1837</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">runner</td>
-<td>1068</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">config</td>
-<td>721</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">templates</td>
-<td>443</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">ipython</td>
-<td>164</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">utils.py</td>
-<td>28</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">__init__.py</td>
-<td>11</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">__main__.py</td>
-<td>10</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Sort by file </span></span>
-<span id="cb14-2">kedro_line_counts_df_group.sort_values(ascending<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>, by <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"module_line_of_code"</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"line_of_code"</span>])</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-
-
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">module</th>
-<th data-quarto-table-cell-role="th">submodule</th>
-<th data-quarto-table-cell-role="th">line_of_code</th>
-<th data-quarto-table-cell-role="th">module_line_of_code</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">6</td>
-<td>extras</td>
-<td>datasets</td>
-<td>6734</td>
-<td>6871</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">8</td>
-<td>extras</td>
-<td>logging</td>
-<td>110</td>
-<td>6871</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">7</td>
-<td>extras</td>
-<td>extensions</td>
-<td>25</td>
-<td>6871</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">5</td>
-<td>extras</td>
-<td>__init__.py</td>
-<td>2</td>
-<td>6871</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">10</td>
-<td>framework</td>
-<td>cli</td>
-<td>3439</td>
-<td>5246</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">14</td>
-<td>framework</td>
-<td>session</td>
-<td>511</td>
-<td>5246</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">12</td>
-<td>framework</td>
-<td>hooks</td>
-<td>418</td>
-<td>5246</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">13</td>
-<td>framework</td>
-<td>project</td>
-<td>369</td>
-<td>5246</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">11</td>
-<td>framework</td>
-<td>context</td>
-<td>352</td>
-<td>5246</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">15</td>
-<td>framework</td>
-<td>startup.py</td>
-<td>156</td>
-<td>5246</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">9</td>
-<td>framework</td>
-<td>__init__.py</td>
-<td>1</td>
-<td>5246</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">18</td>
-<td>io</td>
-<td>core.py</td>
-<td>748</td>
-<td>2284</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">19</td>
-<td>io</td>
-<td>data_catalog.py</td>
-<td>594</td>
-<td>2284</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">22</td>
-<td>io</td>
-<td>partitioned_dataset.py</td>
-<td>551</td>
-<td>2284</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">21</td>
-<td>io</td>
-<td>memory_dataset.py</td>
-<td>132</td>
-<td>2284</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">17</td>
-<td>io</td>
-<td>cached_dataset.py</td>
-<td>113</td>
-<td>2284</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">20</td>
-<td>io</td>
-<td>lambda_dataset.py</td>
-<td>113</td>
-<td>2284</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">16</td>
-<td>io</td>
-<td>__init__.py</td>
-<td>33</td>
-<td>2284</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">27</td>
-<td>pipeline</td>
-<td>pipeline.py</td>
-<td>926</td>
-<td>1837</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">26</td>
-<td>pipeline</td>
-<td>node.py</td>
-<td>612</td>
-<td>1837</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">25</td>
-<td>pipeline</td>
-<td>modular_pipeline.py</td>
-<td>290</td>
-<td>1837</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">24</td>
-<td>pipeline</td>
-<td>__init__.py</td>
-<td>9</td>
-<td>1837</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">30</td>
-<td>runner</td>
-<td>runner.py</td>
-<td>456</td>
-<td>1068</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">29</td>
-<td>runner</td>
-<td>parallel_runner.py</td>
-<td>353</td>
-<td>1068</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">32</td>
-<td>runner</td>
-<td>thread_runner.py</td>
-<td>156</td>
-<td>1068</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">31</td>
-<td>runner</td>
-<td>sequential_runner.py</td>
-<td>87</td>
-<td>1068</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">28</td>
-<td>runner</td>
-<td>__init__.py</td>
-<td>16</td>
-<td>1068</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">4</td>
-<td>config</td>
-<td>templated_config.py</td>
-<td>281</td>
-<td>721</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>config</td>
-<td>common.py</td>
-<td>248</td>
-<td>721</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
-<td>config</td>
-<td>config.py</td>
-<td>134</td>
-<td>721</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">1</td>
-<td>config</td>
-<td>abstract_config.py</td>
-<td>39</td>
-<td>721</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">0</td>
-<td>config</td>
-<td>__init__.py</td>
-<td>19</td>
-<td>721</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">34</td>
-<td>templates</td>
-<td>project</td>
-<td>410</td>
-<td>443</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">33</td>
-<td>templates</td>
-<td>pipeline</td>
-<td>33</td>
-<td>443</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">23</td>
-<td>ipython</td>
-<td>__init__.py</td>
-<td>164</td>
-<td>164</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;python&quot;}">
-<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Total number of LOC</span></span>
-<span id="cb15-2">kedro_line_counts_df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"line_of_code"</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>()</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>18683</code></pre>
-</div>
-</div>
-</section>
-<section id="conclusion" class="level1">
-<h1>Conclusion</h1>
-<p>The kedro codebase is not huge, roughly 20000 line of code, compare to pandas which has &gt; 250000 of code, 10x smaller. The <code>datasets</code> and <code>framework</code> code is the largest module which isn’t surprise to me. The more surprising is how small <code>config</code> actually is, but it creates huge complexity in terms of a kedro project. The <code>cli</code> is also relatively huge as it takes ~3000 lines of code which I didn’t expected.</p>
-
-
-</section>
-
- ]]></description>
-  <category>kedro</category>
-  <guid>https://noklam.github.io/blog/posts/pandas_expert/kedro-meta-analysis.html</guid>
-  <pubDate>Sun, 13 Nov 2022 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Being Python Expert</title>
-  <link>https://noklam.github.io/blog/posts/python_expert/python-expert-decorator-generator-contextmanager.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/cKPlPJyQrt4" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
-<p>This presentation introduce three concepts, <code>decorator</code>, <code>generator</code> and <code>contextmanager</code>. The presenter explains that Python is a Protocol oriented langauge brilliantly and put these three concepts together to illustrate a story. Ultimately, being a Python expert doesn’t mean that you write advance syntax, but using these pattern wisely with simple code. These three concepts both serves its own puprose and are orthogonal to each other, yet working nicely when they are composed together.</p>
-<section id="meet-the-python-data-model" class="level2">
-<h2 class="anchored" data-anchor-id="meet-the-python-data-model">Meet the Python Data Model</h2>
-<p>With python, there are almost always a lower level <code>__</code> method corresponds to a higher-level function/syntax. It’s useful to change these behavior and understand how the Python Data Model work. You can find all the dunder <code>__</code> method here. https://docs.python.org/3/reference/datamodel.html</p>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"> x <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> y   <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">--&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__add__</span></span>
-<span id="cb1-2"> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">repr</span>(s) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">--&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__repr__</span></span>
-<span id="cb1-3"> x()     <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">--&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__call__</span></span></code></pre></div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">## Metaclasses</span></span>
-<span id="cb2-2">`metaclass` exists to allow library code works nicely <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">with</span> user code. For example, how can a library author ensure that its user will follow its protocol <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">and</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">not</span> using it wrongly? Again you can dive into `__new__` <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> ensuring that. In practice, the code <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">is</span> already written <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> `abc` <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">and</span> people use `<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">@</span>abstractmethod` `abc.ABCMeta`</span></code></pre></div>
-</div>
-<div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Meet the `__builtins__` library</span></span>
-<span id="cb3-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> builtins</span>
-<span id="cb3-3">__build_class__</span>
-<span id="cb3-4"></span>
-<span id="cb3-5"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> Nok:</span>
-<span id="cb3-6">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">pass</span></span>
-<span id="cb3-7"></span>
-<span id="cb3-8">Nok() <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># This is possible because class is a Python keyword</span></span>
-<span id="cb3-9"></span>
-<span id="cb3-10"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># You can actually construct a class with a function.</span></span>
-<span id="cb3-11">builtins.__build_class__(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Nok"</span>)</span></code></pre></div>
-<div class="cell-output cell-output-error">
-<pre><code>TypeError: __build_class__: not enough arguments</code></pre>
-</div>
-</div>
-</section>
-<section id="generator" class="level2">
-<h2 class="anchored" data-anchor-id="generator">Generator</h2>
-<ul>
-<li>Eager vs Lazy</li>
-<li>Process when data comes - memory efficient and no wait.</li>
-<li><code>yield</code> control - interleaving. Idea of executing some code, then passing the output back to user, do something and continue.</li>
-</ul>
-<div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> temptable(cur):</span>
-<span id="cb5-2">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Create Table"</span>)</span>
-<span id="cb5-3">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">yield</span></span>
-<span id="cb5-4">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Drop Table"</span>)</span>
-<span id="cb5-5"></span>
-<span id="cb5-6"></span>
-<span id="cb5-7"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> T:</span>
-<span id="cb5-8">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__enter__</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>):</span>
-<span id="cb5-9">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.gen <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> temptable(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"123"</span>)</span>
-<span id="cb5-10">        <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">next</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.gen)</span>
-<span id="cb5-11">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span></span>
-<span id="cb5-12"></span>
-<span id="cb5-13">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__exit__</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>args):</span>
-<span id="cb5-14">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">next</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.gen, <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">None</span>)</span>
-<span id="cb5-15"></span>
-<span id="cb5-16"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">with</span> T():</span>
-<span id="cb5-17">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Finish"</span>)</span>
-<span id="cb5-18"></span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Create Table
-Finish
-Drop Table</code></pre>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>python</category>
-  <guid>https://noklam.github.io/blog/posts/python_expert/python-expert-decorator-generator-contextmanager.html</guid>
-  <pubDate>Thu, 10 Nov 2022 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

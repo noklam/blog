@@ -6,11 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="noklam">
-<meta name="dcterms.date" content="2023-11-16">
-<meta name="description" content="Kedro Config Loader, resolution order">
+<meta name="dcterms.date" content="2025-02-05">
 
-<title>blog - How Kedro Config Loader works</title>
+<title>blog - Day 1 into LLMs</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -127,15 +125,9 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">How Kedro Config Loader works</h1>
-                  <div>
-        <div class="description">
-          Kedro Config Loader, resolution order
-        </div>
-      </div>
-                          <div class="quarto-categories">
-                <div class="quarto-category">python</div>
-                <div class="quarto-category">kedro</div>
+      <h1 class="title">Day 1 into LLMs</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">llm</div>
               </div>
                   </div>
   </div>
@@ -143,17 +135,11 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   
   <div class="quarto-title-meta">
 
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>noklam </p>
-            </div>
-    </div>
       
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 16, 2023</p>
+        <p class="date">February 5, 2025</p>
       </div>
     </div>
     
@@ -169,8 +155,9 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#config-resolution-without-globals" id="toc-config-resolution-without-globals" class="nav-link active" data-scroll-target="#config-resolution-without-globals">Config Resolution (Without Globals)</a></li>
-  <li><a href="#config-resolution-with-globals" id="toc-config-resolution-with-globals" class="nav-link" data-scroll-target="#config-resolution-with-globals">Config Resolution (With Globals)</a></li>
+  <li><a href="#whats-the-model-context-protocolmcp" id="toc-whats-the-model-context-protocolmcp" class="nav-link active" data-scroll-target="#whats-the-model-context-protocolmcp">What’s the Model Context Protocol(MCP)?</a></li>
+  <li><a href="#obisidian" id="toc-obisidian" class="nav-link" data-scroll-target="#obisidian">Obisidian</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
   </ul>
 </nav>
     </div>
@@ -180,20 +167,22 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<p>Kedro offers a <a href="https://docs.kedro.org/en/stable/configuration/index.html">configuration system</a>, it involves concepts such as - environment (it can be multiple files) - variable interpolation (advance templating) - globals - custom resolvers - runtime parameters (override via CLI or programatically)</p>
-<p>The official documentation has plenty of examples, so I am going to focus on explaining the internals.</p>
-<section id="config-resolution-without-globals" class="level1">
-<h1>Config Resolution (Without Globals)</h1>
-<p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="2023-11-16-kedro-config-loader-dive-deep_files/figure-html/2c29ed81-1-image.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">image.png</figcaption>
-</figure>
-</div>
+<section id="whats-the-model-context-protocolmcp" class="level1">
+<h1>What’s the Model Context Protocol(MCP)?</h1>
+<p>Model Context Protocol is a bit like the Language Server Protocol (LSP) that I have worked with recently. In simplified words, it’s a set of specification that defines how a server communicate to a client. A server can be a web server, and a client could be a Desktop application for example.</p>
+<p>The benefit of having protocols is that you can reuse the majority of the code to avoid the M*N integration problem (M server, N client). Essentially, you build the server once, then build up a thin client (think VSCode, Claude Desktop, Cursor).</p>
+<p>I have been very hesitate towards the LLM wave, partly because of my prior experience (moving from ML to software engineering). However, I think the application space is now mature enough to actually build something with it. There are so many fuss around LLM/Agents or what so ever, but (surprisingly), the most effective way to learn this is sit down for a few hours and actually build something with it.</p>
 </section>
-<section id="config-resolution-with-globals" class="level1">
-<h1>Config Resolution (With Globals)</h1>
+<section id="obisidian" class="level1">
+<h1>Obisidian</h1>
+<p>I have been an user of Obsidian, a markdown based editor. I was never a good note taker or religous about cleaning up my notes, so I write a lot of them but I barely spend time to organise them. So, when I think of learning this MCP thing, I ask myself, can I build something that query my own notes?</p>
+<p>This would takes: - Building a MCP server for obsidian - A MCP client / plugin for Obsidian (If it does not exist yet, I have no idea now)</p>
+</section>
+<section id="reference" class="level1">
+<h1>Reference</h1>
+<ul>
+<li>https://docs.anthropic.com/en/docs/build-with-claude/mcp</li>
+</ul>
 
 
 </section>
