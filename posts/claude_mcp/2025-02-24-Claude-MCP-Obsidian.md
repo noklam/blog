@@ -17,7 +17,25 @@ Model Context Protocol is a bit like the Language Server Protocol (LSP) that I h
 The benefit of having protocols is that you can reuse the majority of the code to avoid the M*N integration problem (M server, N client). Essentially, you build the server once, then build up a thin client (think VSCode, Claude Desktop, Cursor).
 
 I have been very hesitate towards the LLM wave, partly because of my prior experience (moving from ML to software engineering). However, I think the application space is now mature enough to actually build something with it. There are so many fuss around LLM/Agents or what so ever, but (surprisingly), the most effective way to learn this is sit down for a few hours and actually build something with it.
+## The weather MCP
+Following the tutorial do build a [simple MCP for weather alert](https://modelcontextprotocol.io/quickstart/server), it is relative simple with some decorators.
 
+### MCP weather: spawn uv ENOENT
+I did run into a little issue when I first spin up the MCP server. It took me a while but the fix is simple.
+
+```json
+{
+  "mcpServers": {
+    "weather": {
+      "command": "uv",
+      "args": [
+            ...
+      ]
+    }
+  }
+}
+```
+The fix for me is to change the `command` to an absolute path. For some reason Claude Desktop does not find the `uv` command and gives the cryptic error.
 
 # Obisidian
 I have been an user of Obsidian, a markdown based editor. I was never a good note taker or religous about cleaning up my notes, so I write a lot of them but I barely spend time to organise them. So, when I think of learning this MCP thing, I ask myself, can I build something that query my own notes?
