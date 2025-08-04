@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2025-08-03">
+<meta name="description" content="Ever wondered how AI models like ChatGPT can seamlessly chat in English, then switch to Chinese in the same conversation? Learn how UTF-8 encoding and BPE tokenization work together to create universal tokenizers that handle any language.">
+
+<title>blog - How AI Models Handle English and Chinese Text: The Same Tokenizer for Different Languages</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-28PTCJ2ELM"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
+</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../present.html" rel="" target="">
+ <span class="menu-text">Presentations</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/noklam" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">How AI Models Handle English and Chinese Text: The Same Tokenizer for Different Languages</h1>
+                  <div>
+        <div class="description">
+          Ever wondered how AI models like ChatGPT can seamlessly chat in English, then switch to Chinese in the same conversation? Learn how UTF-8 encoding and BPE tokenization work together to create universal tokenizers that handle any language.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 3, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#part-1-the-universal-language-of-computers---utf-8" id="toc-part-1-the-universal-language-of-computers---utf-8" class="nav-link active" data-scroll-target="#part-1-the-universal-language-of-computers---utf-8">Part 1: The Universal Language of Computers - UTF-8</a>
+  <ul class="collapse">
+  <li><a href="#the-challenge-different-languages-same-computer" id="toc-the-challenge-different-languages-same-computer" class="nav-link" data-scroll-target="#the-challenge-different-languages-same-computer">The Challenge: Different Languages, Same Computer</a></li>
+  </ul></li>
+  <li><a href="#part-2-from-bytes-to-tokens---how-ai-models-see-text" id="toc-part-2-from-bytes-to-tokens---how-ai-models-see-text" class="nav-link" data-scroll-target="#part-2-from-bytes-to-tokens---how-ai-models-see-text">Part 2: From Bytes to Tokens - How AI Models See Text</a>
+  <ul class="collapse">
+  <li><a href="#what-are-tokens" id="toc-what-are-tokens" class="nav-link" data-scroll-target="#what-are-tokens">What are Tokens?</a></li>
+  <li><a href="#how-bpe-byte-pair-encoding-creates-a-universal-tokenizer" id="toc-how-bpe-byte-pair-encoding-creates-a-universal-tokenizer" class="nav-link" data-scroll-target="#how-bpe-byte-pair-encoding-creates-a-universal-tokenizer">How BPE (Byte Pair Encoding) Creates a Universal Tokenizer</a></li>
+  <li><a href="#token-boundaries-vs-character-boundaries" id="toc-token-boundaries-vs-character-boundaries" class="nav-link" data-scroll-target="#token-boundaries-vs-character-boundaries">Token Boundaries vs Character Boundaries</a></li>
+  </ul></li>
+  <li><a href="#part-3-the-magic-behind-utf-8---how-computers-know-where-characters-end" id="toc-part-3-the-magic-behind-utf-8---how-computers-know-where-characters-end" class="nav-link" data-scroll-target="#part-3-the-magic-behind-utf-8---how-computers-know-where-characters-end">Part 3: The Magic Behind UTF-8 - How Computers Know Where Characters End</a>
+  <ul class="collapse">
+  <li><a href="#utf-8s-clever-bit-pattern-system" id="toc-utf-8s-clever-bit-pattern-system" class="nav-link" data-scroll-target="#utf-8s-clever-bit-pattern-system">UTF-8’s Clever Bit Pattern System</a></li>
+  </ul></li>
+  <li><a href="#summary-the-elegant-solution" id="toc-summary-the-elegant-solution" class="nav-link" data-scroll-target="#summary-the-elegant-solution">Summary: The Elegant Solution</a>
+  <ul class="collapse">
+  <li><a href="#the-two-layer-system" id="toc-the-two-layer-system" class="nav-link" data-scroll-target="#the-two-layer-system">The Two-Layer System:</a></li>
+  <li><a href="#why-this-works" id="toc-why-this-works" class="nav-link" data-scroll-target="#why-this-works">Why This Works:</a></li>
+  <li><a href="#practical-implications" id="toc-practical-implications" class="nav-link" data-scroll-target="#practical-implications">Practical Implications:</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./bpe.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">bpe.png</figcaption>
+</figure>
+</div>
+<p>Ever wondered how AI models like ChatGPT can seamlessly chat in English, then switch to Chinese in the same conversation? How can one tokenizer handle both “Hello” and “你好” (Hello in Chinese)? Why does Chinese text cost more tokens than English?</p>
+<p>The secret lies in a clever combination of <strong>UTF-8 encoding</strong> and <strong>Byte Pair Encoding (BPE)</strong>. This notebook will show you exactly how it works, step by step.</p>
+<section id="part-1-the-universal-language-of-computers---utf-8" class="level2">
+<h2 class="anchored" data-anchor-id="part-1-the-universal-language-of-computers---utf-8">Part 1: The Universal Language of Computers - UTF-8</h2>
+<section id="the-challenge-different-languages-same-computer" class="level3">
+<h3 class="anchored" data-anchor-id="the-challenge-different-languages-same-computer">The Challenge: Different Languages, Same Computer</h3>
+<p>Computers natively understand only numbers (0s and 1s). English fits nicely into ASCII’s 128 characters, but what about Chinese? Arabic? Emoji?</p>
+<p><strong>UTF-8</strong> is the universal solution that lets computers represent any character from any language using the same system.</p>
+<p>Let’s see how English and Chinese characters are stored differently:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's explore how different languages are encoded in UTF-8</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare English and Chinese characters</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>chars <span class="op">=</span> [<span class="st">'H'</span>, <span class="st">'i'</span>, <span class="st">'諾'</span>, <span class="st">'林'</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> char <span class="kw">in</span> chars:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    utf8_bytes <span class="op">=</span> char.encode(<span class="st">'utf-8'</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    language <span class="op">=</span> <span class="st">"English"</span> <span class="cf">if</span> <span class="bu">ord</span>(char) <span class="op">&lt;</span> <span class="dv">128</span> <span class="cf">else</span> <span class="st">"Chinese"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"""Character: '</span><span class="sc">{</span>char<span class="sc">}</span><span class="ss">' (</span><span class="sc">{</span>language<span class="sc">}</span><span class="ss">)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="ss">UTF-8 bytes: </span><span class="sc">{</span><span class="bu">list</span>(utf8_bytes)<span class="sc">}</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ss">Number of bytes: </span><span class="sc">{</span><span class="bu">len</span>(utf8_bytes)<span class="sc">}</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span><span class="st">'-'</span> <span class="op">*</span> <span class="dv">40</span><span class="sc">}</span><span class="ss">"""</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Character: 'H' (English)
+UTF-8 bytes: [72]
+Number of bytes: 1
+----------------------------------------
+Character: 'i' (English)
+UTF-8 bytes: [105]
+Number of bytes: 1
+----------------------------------------
+Character: '諾' (Chinese)
+UTF-8 bytes: [232, 171, 190]
+Number of bytes: 3
+----------------------------------------
+Character: '林' (Chinese)
+UTF-8 bytes: [230, 158, 151]
+Number of bytes: 3
+----------------------------------------</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">bytes</span>(<span class="st">"諾"</span>, <span class="st">"utf-8"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<pre><code>b'\xe8\xab\xbe'</code></pre>
+</div>
+</div>
+<p><code>b'\xe8\xab\xbe'</code> can be read as <code>e8</code>, <code>ab</code>, <code>be</code>, the <code>\x</code> is just stating that it is a hex representaiton (base16)</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Hex Pair</th>
+<th>Calculation</th>
+<th>Decimal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>e8</td>
+<td>e×16¹ + 8×16⁰ = 14×16 + 8×1 = 224 + 8</td>
+<td>232</td>
+</tr>
+<tr class="even">
+<td>ab</td>
+<td>a×16¹ + b×16⁰ = 10×16 + 11×1 = 160 + 11</td>
+<td>171</td>
+</tr>
+<tr class="odd">
+<td>be</td>
+<td>b×16¹ + e×16⁰ = 11×16 + 14×1 = 176 + 14</td>
+<td>190</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="part-2-from-bytes-to-tokens---how-ai-models-see-text" class="level2">
+<h2 class="anchored" data-anchor-id="part-2-from-bytes-to-tokens---how-ai-models-see-text">Part 2: From Bytes to Tokens - How AI Models See Text</h2>
+<p>Now here’s the crucial part: <strong>AI models don’t work with characters or words directly. They work with “tokens”.</strong></p>
+<section id="what-are-tokens" class="level3">
+<h3 class="anchored" data-anchor-id="what-are-tokens">What are Tokens?</h3>
+<p>Think of tokens as the “vocabulary units” that AI models understand. A token might be: - A common word (like “the” or “and”) - Part of a word (like “un-” in “unhappy”) - A single character - Even punctuation</p>
+<p>The key insight: <strong>All text, regardless of language, gets converted to numbers (tokens) that the AI model can process.</strong></p>
+</section>
+<section id="how-bpe-byte-pair-encoding-creates-a-universal-tokenizer" class="level3">
+<h3 class="anchored" data-anchor-id="how-bpe-byte-pair-encoding-creates-a-universal-tokenizer">How BPE (Byte Pair Encoding) Creates a Universal Tokenizer</h3>
+<p>BPE is the algorithm that makes it possible for one tokenizer to handle all languages:</p>
+<p>Step 1: Start with all possible bytes (0-255) as initial tokens.<br>
+Step 2: Find the most frequently occurring pairs of tokens in training data<br>
+Step 3: Merge frequent pairs into single tokens.<br>
+Step 4: Repeat until you have ~50,000 tokens total.</p>
+<p>Another way of think of it, your model is actually learning <code>utf-8</code>, rather than “word” that you normally think of. This allow a single tokenizer to handle different langauges.</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># BPE tokenization with actual results</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tiktoken</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create tokenizers for different models</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>tokenizer_gpt2 <span class="op">=</span> tiktoken.encoding_for_model(<span class="st">"gpt-2"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>tokenizer_gpt3 <span class="op">=</span> tiktoken.encoding_for_model(<span class="st">"gpt-3.5-turbo"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Test with English and Chinese</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>test_texts <span class="op">=</span> [<span class="st">'Hello'</span>, <span class="st">'諾林'</span>]</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> text <span class="kw">in</span> test_texts:</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    utf8_bytes <span class="op">=</span> text.encode(<span class="st">'utf-8'</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    gpt2_tokens <span class="op">=</span> tokenizer_gpt2.encode(text)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    gpt3_tokens <span class="op">=</span> tokenizer_gpt3.encode(text)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    language <span class="op">=</span> <span class="st">"English"</span> <span class="cf">if</span> <span class="bu">all</span>(<span class="bu">ord</span>(c) <span class="op">&lt;</span> <span class="dv">128</span> <span class="cf">for</span> c <span class="kw">in</span> text) <span class="cf">else</span> <span class="st">"Chinese"</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"""Text: '</span><span class="sc">{</span>text<span class="sc">}</span><span class="ss">' (</span><span class="sc">{</span>language<span class="sc">}</span><span class="ss">)</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="ss">UTF-8 bytes: </span><span class="sc">{</span><span class="bu">list</span>(utf8_bytes)<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="bu">len</span>(utf8_bytes)<span class="sc">}</span><span class="ss"> bytes)</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="ss">GPT-2 tokens: </span><span class="sc">{</span>gpt2_tokens<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="bu">len</span>(gpt2_tokens)<span class="sc">}</span><span class="ss"> tokens)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="ss">GPT-3.5 tokens: </span><span class="sc">{</span>gpt3_tokens<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="bu">len</span>(gpt3_tokens)<span class="sc">}</span><span class="ss"> tokens)</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="ss">Bytes per token: </span><span class="sc">{</span><span class="bu">len</span>(utf8_bytes)<span class="op">/</span><span class="bu">len</span>(gpt2_tokens)<span class="sc">:.1f}</span><span class="ss"> (GPT-2)</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="sc">{</span><span class="st">'-'</span> <span class="op">*</span> <span class="dv">50</span><span class="sc">}</span><span class="ss">"""</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Text: 'Hello' (English)
+UTF-8 bytes: [72, 101, 108, 108, 111] (5 bytes)
+GPT-2 tokens: [15496] (1 tokens)
+GPT-3.5 tokens: [9906] (1 tokens)
+Bytes per token: 5.0 (GPT-2)
+--------------------------------------------------
+Text: '諾林' (Chinese)
+UTF-8 bytes: [232, 171, 190, 230, 158, 151] (6 bytes)
+GPT-2 tokens: [164, 104, 122, 162, 252, 245] (6 tokens)
+GPT-3.5 tokens: [164, 104, 122, 20119, 245] (5 tokens)
+Bytes per token: 1.0 (GPT-2)
+--------------------------------------------------</code></pre>
+</div>
+</div>
+<p>Although BPE works for any language, the efficiency varies: - Same BPE algorithm works for any language - English: Often 1 token = 1 word (efficient) - Chinese: Often 1 token = part of 1 character (less efficient) - Efficiency depends on training data frequency</p>
+</section>
+<section id="token-boundaries-vs-character-boundaries" class="level3">
+<h3 class="anchored" data-anchor-id="token-boundaries-vs-character-boundaries">Token Boundaries vs Character Boundaries</h3>
+<p>Here’s where it gets interesting: <strong>token boundaries don’t align with character boundaries!</strong></p>
+<p>Let’s visualize this with a combined example:</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Token boundaries vs character boundaries visualization</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tiktoken</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> tiktoken.encoding_for_model(<span class="st">"gpt-3.5-turbo"</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">'諾林'</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>utf8_bytes <span class="op">=</span> text.encode(<span class="st">'utf-8'</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>tokens <span class="op">=</span> tokenizer.encode(text)  <span class="co"># Expected: [164, 104, 122, 20119, 245]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"""TOKEN vs CHARACTER BOUNDARIES</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ss">==================================================</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ss">Text: </span><span class="sc">{</span>text<span class="sc">}</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ss">UTF-8 bytes: </span><span class="sc">{</span><span class="bu">list</span>(utf8_bytes)<span class="sc">}</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="ss">Tokens: </span><span class="sc">{</span>tokens<span class="sc">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="ss">VISUAL REPRESENTATION:</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="ss">UTF-8 bytes:</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="ss">┌─────┬─────┬─────┬─────┬─────┬─────┐</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="ss">│ 232 │ 171 │ 190 │ 230 │ 158 │ 151 │</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="ss">└─────┴─────┴─────┴─────┴─────┴─────┘</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="ss">CHARACTER boundaries (UTF-8 rules):</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="ss">┌─────────────────┬─────────────────┐</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="ss">│       諾        │       林        │</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="ss">│  (3 bytes)      │  (3 bytes)      │</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="ss">└─────────────────┴─────────────────┘</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="ss">TOKEN boundaries (BPE learned):"""</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(tokens) <span class="op">==</span> <span class="dv">5</span>:  <span class="co"># Expected pattern for GPT-3.5</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"""┌─────┬─────┬─────┬───────────┬─────┐</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="ss">│ </span><span class="sc">{</span>tokens[<span class="dv">0</span>]<span class="sc">:3d}</span><span class="ss"> │ </span><span class="sc">{</span>tokens[<span class="dv">1</span>]<span class="sc">:3d}</span><span class="ss"> │ </span><span class="sc">{</span>tokens[<span class="dv">2</span>]<span class="sc">:3d}</span><span class="ss"> │   </span><span class="sc">{</span>tokens[<span class="dv">3</span>]<span class="sc">:5d}</span><span class="ss">   │ </span><span class="sc">{</span>tokens[<span class="dv">4</span>]<span class="sc">:3d}</span><span class="ss"> │</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="ss">└─────┴─────┴─────┴───────────┴─────┘</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="ss">│← Tokens for 諾 →│←─ For 林 ─→│"""</span>)  <span class="co"># [164, 104, 122, 20119, 245]</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"""Actual tokens: </span><span class="sc">{</span>tokens<span class="sc">}</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="ss">(Token boundaries may vary)"""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>TOKEN vs CHARACTER BOUNDARIES
+==================================================
+Text: 諾林
+UTF-8 bytes: [232, 171, 190, 230, 158, 151]
+Tokens: [164, 104, 122, 20119, 245]
+
+VISUAL REPRESENTATION:
+
+UTF-8 bytes:
+┌─────┬─────┬─────┬─────┬─────┬─────┐
+│ 232 │ 171 │ 190 │ 230 │ 158 │ 151 │
+└─────┴─────┴─────┴─────┴─────┴─────┘
+
+CHARACTER boundaries (UTF-8 rules):
+┌─────────────────┬─────────────────┐
+│       諾        │       林        │
+│  (3 bytes)      │  (3 bytes)      │
+└─────────────────┴─────────────────┘
+
+TOKEN boundaries (BPE learned):
+┌─────┬─────┬─────┬───────────┬─────┐
+│ 164 │ 104 │ 122 │   20119   │ 245 │
+└─────┴─────┴─────┴───────────┴─────┘
+│← Tokens for 諾 →│←─ For 林 ─→│</code></pre>
+</div>
+</div>
+<p>🚨 KEY INSIGHT: - Character boundaries = Fixed by UTF-8 encoding - Token boundaries = Learned from training data frequency - They DON’T align!</p>
+</section>
+</section>
+<section id="part-3-the-magic-behind-utf-8---how-computers-know-where-characters-end" class="level2">
+<h2 class="anchored" data-anchor-id="part-3-the-magic-behind-utf-8---how-computers-know-where-characters-end">Part 3: The Magic Behind UTF-8 - How Computers Know Where Characters End</h2>
+<p>Here’s a fascinating question: Given a stream of bytes like <code>[232, 171, 190, 230, 158, 151]</code>, how does your computer know this represents two Chinese characters and not six random bytes?</p>
+<section id="utf-8s-clever-bit-pattern-system" class="level3">
+<h3 class="anchored" data-anchor-id="utf-8s-clever-bit-pattern-system">UTF-8’s Clever Bit Pattern System</h3>
+<p>UTF-8 uses the first few bits of each byte as “metadata” to mark character boundaries:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>First Bits</th>
+<th>Meaning</th>
+<th>Total Bytes for Character</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>0xxxxxxx</code></td>
+<td>Complete ASCII character</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><code>110xxxxx</code></td>
+<td><strong>START</strong> of 2-byte character</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><code>1110xxxx</code></td>
+<td><strong>START</strong> of 3-byte character</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td><code>11110xxx</code></td>
+<td><strong>START</strong> of 4-byte character</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td><code>10xxxxxx</code></td>
+<td><strong>CONTINUATION</strong> byte</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>This is why UTF-8 can handle any language while remaining backward-compatible with ASCII!</p>
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#hide</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> analyze_utf8_byte(byte_val):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Analyze a UTF-8 byte and return its type"""</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    binary <span class="op">=</span> <span class="bu">format</span>(byte_val, <span class="st">'08b'</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (byte_val <span class="op">&amp;</span> <span class="bn">0b10000000</span>) <span class="op">==</span> <span class="bn">0b00000000</span>:</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> binary, <span class="st">'ASCII (complete)'</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> (byte_val <span class="op">&amp;</span> <span class="bn">0b11100000</span>) <span class="op">==</span> <span class="bn">0b11000000</span>:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> binary, <span class="st">'START of 2-byte char'</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> (byte_val <span class="op">&amp;</span> <span class="bn">0b11110000</span>) <span class="op">==</span> <span class="bn">0b11100000</span>:</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> binary, <span class="st">'START of 3-byte char'</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> (byte_val <span class="op">&amp;</span> <span class="bn">0b11111000</span>) <span class="op">==</span> <span class="bn">0b11110000</span>:</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> binary, <span class="st">'START of 4-byte char'</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> (byte_val <span class="op">&amp;</span> <span class="bn">0b11000000</span>) <span class="op">==</span> <span class="bn">0b10000000</span>:</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> binary, <span class="st">'CONTINUATION'</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> binary, <span class="st">'INVALID'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#hide-input</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Analyzing UTF-8 bit patterns</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> <span class="st">'諾林'</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>utf8_bytes <span class="op">=</span> text.encode(<span class="st">'utf-8'</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"UTF-8 bytes: </span><span class="sc">{</span><span class="bu">list</span>(utf8_bytes)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, byte_val <span class="kw">in</span> <span class="bu">enumerate</span>(utf8_bytes):</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    binary, description <span class="op">=</span> analyze_utf8_byte(byte_val)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Byte </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>byte_val<span class="sc">}</span><span class="ss"> = </span><span class="sc">{</span>binary<span class="sc">}</span><span class="ss"> → </span><span class="sc">{</span>description<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"""</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="st">Decoding:</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="st">Byte 0 (232): 1110xxxx → START of 3-byte char</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="st">Byte 1 (171): 10xxxxxx → CONTINUATION (1/2)</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="st">Byte 2 (190): 10xxxxxx → CONTINUATION (2/2) → Character complete: 諾</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="st">Byte 3 (230): 1110xxxx → START of 3-byte char</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="st">Byte 4 (158): 10xxxxxx → CONTINUATION (1/2)</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="st">Byte 5 (151): 10xxxxxx → CONTINUATION (2/2) → Character complete: 林"""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>UTF-8 bytes: [232, 171, 190, 230, 158, 151]
+
+Byte 0: 232 = 11101000 → START of 3-byte char
+Byte 1: 171 = 10101011 → CONTINUATION
+Byte 2: 190 = 10111110 → CONTINUATION
+Byte 3: 230 = 11100110 → START of 3-byte char
+Byte 4: 158 = 10011110 → CONTINUATION
+Byte 5: 151 = 10010111 → CONTINUATION
+
+Decoding:
+Byte 0 (232): 1110xxxx → START of 3-byte char
+Byte 1 (171): 10xxxxxx → CONTINUATION (1/2)
+Byte 2 (190): 10xxxxxx → CONTINUATION (2/2) → Character complete: 諾
+
+Byte 3 (230): 1110xxxx → START of 3-byte char
+Byte 4 (158): 10xxxxxx → CONTINUATION (1/2)
+Byte 5 (151): 10xxxxxx → CONTINUATION (2/2) → Character complete: 林</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="summary-the-elegant-solution" class="level2">
+<h2 class="anchored" data-anchor-id="summary-the-elegant-solution">Summary: The Elegant Solution</h2>
+<p>Now you understand how AI models can handle any language with a single tokenizer:</p>
+<section id="the-two-layer-system" class="level3">
+<h3 class="anchored" data-anchor-id="the-two-layer-system">The Two-Layer System:</h3>
+<ol type="1">
+<li><strong>UTF-8 Layer</strong>: Converts any text to bytes using smart bit patterns</li>
+<li><strong>BPE Layer</strong>: Learns byte patterns from multilingual training data</li>
+</ol>
+</section>
+<section id="why-this-works" class="level3">
+<h3 class="anchored" data-anchor-id="why-this-works">Why This Works:</h3>
+<ul>
+<li><strong>Universal encoding</strong>: UTF-8 handles all languages uniformly</li>
+<li><strong>Adaptive learning</strong>: BPE learns from whatever languages are in training data</li>
+<li><strong>Byte-level processing</strong>: No language-specific rules needed</li>
+</ul>
+</section>
+<section id="practical-implications" class="level3">
+<h3 class="anchored" data-anchor-id="practical-implications">Practical Implications:</h3>
+<ul>
+<li><strong>Chinese costs more tokens</strong>: Less frequent in training = larger byte chunks per token<br>
+</li>
+<li><strong>Same model, all languages</strong>: No separate tokenizers needed</li>
+<li><strong>Seamless multilingual AI</strong>: Natural language switching in conversations</li>
+</ul>
+<p>While Byte Pair Encoding is an efficient way to handle universal language, it is probably less useful for language like Chinese because the byte part does not preserve any semantic meaning.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
