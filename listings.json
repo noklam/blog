@@ -10,6 +10,8 @@
     "listing": "/index.html",
     "items": [
       "/posts/2022-04-22-python-dataclass-partial-immutable.html",
+      "/posts/lsp/2025-09-15-LanguageServer.html",
+      "/posts/operating-system/homework1.html",
       "/posts/bpe_gpt/2025-08-03-understand-how-gpt-output-chinese-token.html",
       "/posts/2025-07-31-generate-llmstxt-mkdocs.html",
       "/posts/ruff_in_python/2025-02-05-dive-deep-into-ruff-reimplement-ruff-in-python.html",

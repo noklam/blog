@@ -6,11 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="noklam">
-<meta name="dcterms.date" content="2023-11-16">
-<meta name="description" content="Kedro Config Loader, resolution order">
+<meta name="description" content="Summary learning of implementing LSP server for Kedro in PyCharm and VSCode">
 
-<title>blog - How Kedro Config Loader works</title>
+<title>blog - Replicate IDE behavior - Click to definition</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -127,15 +159,16 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">How Kedro Config Loader works</h1>
+      <h1 class="title">Replicate IDE behavior - Click to definition</h1>
                   <div>
         <div class="description">
-          Kedro Config Loader, resolution order
+          Summary learning of implementing LSP server for Kedro in PyCharm and VSCode
         </div>
       </div>
                           <div class="quarto-categories">
                 <div class="quarto-category">python</div>
                 <div class="quarto-category">kedro</div>
+                <div class="quarto-category">databricks</div>
               </div>
                   </div>
   </div>
@@ -143,19 +176,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
   
   <div class="quarto-title-meta">
 
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>noklam </p>
-            </div>
-    </div>
       
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">November 16, 2023</p>
-      </div>
-    </div>
     
       
     </div>
@@ -165,14 +186,7 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#config-resolution-without-globals" id="toc-config-resolution-without-globals" class="nav-link active" data-scroll-target="#config-resolution-without-globals">Config Resolution (Without Globals)</a></li>
-  <li><a href="#config-resolution-with-globals" id="toc-config-resolution-with-globals" class="nav-link" data-scroll-target="#config-resolution-with-globals">Config Resolution (With Globals)</a></li>
-  </ul>
-</nav>
+        
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -180,23 +194,30 @@ gtag('config', 'G-28PTCJ2ELM', { 'anonymize_ip': true});
 
 
 
-<p>Kedro offers a <a href="https://docs.kedro.org/en/stable/configuration/index.html">configuration system</a>, it involves concepts such as - environment (it can be multiple files) - variable interpolation (advance templating) - globals - custom resolvers - runtime parameters (override via CLI or programatically)</p>
-<p>The official documentation has plenty of examples, so I am going to focus on explaining the internals.</p>
-<section id="config-resolution-without-globals" class="level1">
-<h1>Config Resolution (Without Globals)</h1>
-<p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="2023-11-16-kedro-config-loader-dive-deep_files/figure-html/42f690d0-1-image.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">image.png</figcaption>
-</figure>
+<p>Langauge Server Protocol(LSP) defines what a LSP expect, return. It’s similar to MCP (in fact, MCP was inspired by LSP), in a sense that it is an API without actual implementation. (like an abstract class).</p>
+<div class="cell" data-vscode="{&quot;languageId&quot;:&quot;plaintext&quot;}">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Language server <span class="kw">is</span> great <span class="kw">in</span> terms of reusing code to support different IDEs. However, there are some challenges <span class="im">as</span> <span class="kw">not</span> everything you expected <span class="kw">is</span> included <span class="kw">in</span> LSP. For example, In VSCode Python, <span class="cf">if</span> you do `Ctrl<span class="op">+</span>click` (<span class="kw">or</span> Cmd<span class="op">+</span>Click), it will jump to the definition of the function<span class="op">/</span>variable. If you do this again at the definition, it will then jump to the references instead.</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>Behind the scene, this <span class="kw">is</span> what happened:</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fl">1.</span> User does `Ctrl<span class="op">+</span>Click` on a function<span class="op">/</span>variable <span class="cf">for</span> first time.</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fl">2.</span> VSCode client sends `textDocument<span class="op">/</span>definition` request to the language server.</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fl">3.</span> Language server responds <span class="cf">with</span> the location of the definition.</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fl">4.</span> VSCode client react to the response, <span class="kw">and</span> jump to the definition.</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>The second time user does `Ctrl<span class="op">+</span>Click` on the definition, VSCode client sends `textDocument<span class="op">/</span>references` request to the language server. However, the language server does <span class="kw">not</span> know that this request <span class="kw">is</span> triggered by the second `Ctrl<span class="op">+</span>Click` on the definition, it does something different:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fl">1.</span> User does `Ctrl<span class="op">+</span>Click` on a function<span class="op">/</span>variable <span class="cf">for</span> first time.</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fl">2.</span> VSCode client sends `textDocument<span class="op">/</span>definition` request to the language server.</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fl">3.</span> Language server responds <span class="cf">with</span> the location of the definition, but the location <span class="kw">is</span> same <span class="im">as</span> the current location.</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fl">4.</span> VSCode client react to the response, <span class="kw">and</span> send a new `textDocument<span class="op">/</span>references` request to the language server.</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fl">5.</span> Language server responds <span class="cf">with</span> the locations of the references.</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fl">6.</span> VSCode client react to the response, <span class="kw">and</span> show the references <span class="kw">in</span> a new panel <span class="kw">or</span> go to the reference <span class="cf">if</span> there <span class="kw">is</span> only one.</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>So to support a somewhat expected UX, it actually requires client side logic <span class="kw">and</span> it<span class="st">'s not universal across different IDEs. This is one of the limitations of using LSP. This behavior is not always ideal as well, for example the C++ complains about this behavior a lot as it triggers too many requests and slows down the IDE.</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="er">In VSCode, the behavior can be configured by `editor.gotoLocation.alternativeDeclarationCmommand`, depends on what setting you have, it may or may not trigger the `reference` action. In PyCharm, the behavior is different. If you provide any non empty response, the PyCharm native Python plugin will not do anything. So the language server has to be aware of the IDE and return different response </span>(i.e. In VScode you may want to <span class="cf">return</span> to cursor, but <span class="kw">in</span> PyCharm you rather it <span class="cf">return</span> `None`)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="config-resolution-with-globals" class="level1">
-<h1>Config Resolution (With Globals)</h1>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
