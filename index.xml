@@ -10,7 +10,527 @@
 <atom:link href="https://noklam.github.io/blog/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Sat, 02 Aug 2025 23:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 27 Jan 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>How chat.stream() works under the hood?</title>
+  <dc:creator>noklam </dc:creator>
+  <link>https://noklam.github.io/blog/posts/sse_events/2026-01-27-how-stream-chat-works-sse.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> mistralai <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Mistral</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> os</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">client <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Mistral(api_key<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>os.environ[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"MISTRAL_API_KEY"</span>])</span>
+<span id="cb1-5">stream <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> client.chat.stream(model<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mistral-small-latest"</span>, messages<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[{<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"role"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"user"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"content"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Explain generators in 100 words."</span>}])</span>
+<span id="cb1-6"></span>
+<span id="cb1-7"></span>
+<span id="cb1-8"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i, chunk <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(stream):</span>
+<span id="cb1-9">    delta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> chunk.data.choices[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].delta.content <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">or</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">""</span></span>
+<span id="cb1-10">    <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Chunk </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>i<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>delta<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, end<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">""</span>, flush<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span></code></pre></div>
+<p>Most Chat API support a “stream” mode where you can stream your response as it comes instead of one big chunk of data. This is handy when you have a long conversation and this is what support the experience that it feels like someone is typing a response as you asked a question.</p>
+<p>What unusual to me is this line of code:</p>
+<pre><code>for i, chunk in enumerate(stream):</code></pre>
+<p>If this is just a Python for-loop, wouldn’t this waste a lot of CPU cycle where the Python interpreter just keep iterating on the same object until it’s done?</p>
+<section id="quick-refresher-of-iterator-iterable-and-generator" class="level2">
+<h2 class="anchored" data-anchor-id="quick-refresher-of-iterator-iterable-and-generator">Quick Refresher of <code>Iterator</code>, <code>Iterable</code> and <code>Generator</code></h2>
+<p>In Python, anything that can be “loop” is called <code>Iterable</code>. At the start of a for-loop, the statement first create an <code>Iterator</code> from <code>iter(obj)</code>, and the repeated invokes <code>next(iterator)</code> inside a loop until it sees a special <code>StopIteration</code> exception and terminate.</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">obj <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>]  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Iterable</span></span>
+<span id="cb3-2">it <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">iter</span>(obj)   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Returns Iterator</span></span>
+<span id="cb3-3"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">while</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>:</span>
+<span id="cb3-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">try</span>:</span>
+<span id="cb3-5">        item <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">next</span>(it)  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Yields 1, then 2, then 3</span></span>
+<span id="cb3-6">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Loop body</span></span>
+<span id="cb3-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">except</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">StopIteration</span>:</span>
+<span id="cb3-8">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">break</span></span></code></pre></div>
+</section>
+<section id="simlutation-of-sse-server-and-client" class="level2">
+<h2 class="anchored" data-anchor-id="simlutation-of-sse-server-and-client">Simlutation of SSE Server and client</h2>
+<p>On server side, we are not doing anything fancy but using FastAPI streaming response to push data continuously.</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fastapi <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> FastAPI</span>
+<span id="cb4-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> fastapi.responses <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> StreamingResponse</span>
+<span id="cb4-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> asyncio</span>
+<span id="cb4-4"></span>
+<span id="cb4-5">app <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> FastAPI()</span>
+<span id="cb4-6"></span>
+<span id="cb4-7"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">async</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> sse_generator():</span>
+<span id="cb4-8">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>):</span>
+<span id="cb4-9">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">yield</span> <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"data: tick </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>i<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n\n</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span>
+<span id="cb4-10">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"📤 Sent: tick </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>i<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span>
+<span id="cb4-11">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">await</span> asyncio.sleep(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb4-12">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">yield</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data: [DONE]</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span>
+<span id="cb4-13"></span>
+<span id="cb4-14"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@app.get</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"/"</span>)</span>
+<span id="cb4-15"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">async</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> sse():</span>
+<span id="cb4-16">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> StreamingResponse(sse_generator(), media_type<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"text/event-stream"</span>)</span>
+<span id="cb4-17"></span>
+<span id="cb4-18"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"__main__"</span>:</span>
+<span id="cb4-19">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> uvicorn</span>
+<span id="cb4-20">    uvicorn.run(app, host<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"127.0.0.1"</span>, port<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8000</span>)</span></code></pre></div>
+<p>On Client side</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#!/usr/bin/env python3</span></span>
+<span id="cb5-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> socket</span>
+<span id="cb5-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> time</span>
+<span id="cb5-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> sys</span>
+<span id="cb5-5"></span>
+<span id="cb5-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Raw TCP socket → PROVES OS epoll control</span></span>
+<span id="cb5-7">sock <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span>
+<span id="cb5-8">sock.<span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">connect</span>((<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'127.0.0.1'</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8000</span>))</span>
+<span id="cb5-9"></span>
+<span id="cb5-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># HTTP request</span></span>
+<span id="cb5-11">sock.send(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">b"""GET / HTTP/1.1</span></span>
+<span id="cb5-12"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Host: localhost:8000</span></span>
+<span id="cb5-13"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Connection: keep-alive</span></span>
+<span id="cb5-14"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">Accept: text/event-stream</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\r\n\r\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span>)</span>
+<span id="cb5-15"></span>
+<span id="cb5-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Skip HTTP headers</span></span>
+<span id="cb5-17">header <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">b''</span></span>
+<span id="cb5-18"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">while</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">b'</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\r\n\r\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> header:</span>
+<span id="cb5-19">    header <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> sock.recv(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1024</span>)</span>
+<span id="cb5-20"></span>
+<span id="cb5-21"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"🔄 Raw socket FOR loop - OS epoll pausing..."</span>, flush<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb5-22">start <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> time.time()</span>
+<span id="cb5-23">count <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span>
+<span id="cb5-24"></span>
+<span id="cb5-25"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># YOUR FOR LOOP - PURE OS PAUSE</span></span>
+<span id="cb5-26"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">while</span> count <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>:</span>
+<span id="cb5-27">    chunk <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> sock.recv(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1024</span>).decode(errors<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'ignore'</span>)</span>
+<span id="cb5-28">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'tick '</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> chunk:</span>
+<span id="cb5-29">        tick_num <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> chunk.split(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'tick '</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].split(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'</span>)[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb5-30">        now <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> time.time() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> start</span>
+<span id="cb5-31">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"T+</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>now<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">s 📦 tick </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>tick_num<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, flush<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="cb5-32">        count <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb5-33">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">elif</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'[DONE]'</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> chunk:</span>
+<span id="cb5-34">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">break</span></span>
+<span id="cb5-35"></span>
+<span id="cb5-36"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"✅ Epoll demo complete"</span>)</span>
+<span id="cb5-37">sock.close()</span></code></pre></div>
+<p>On client side, you can see that in this <code>while</code> loop - the loop actually get paused on <code>sock.recv</code>. Under the hood, <code>sock.recv</code> will trigger a OS level <code>epoll_wait</code> call that only resume when data arrives. One way to prove that is try to change the code in the server side i.e.&nbsp;sleep for 2 seconds, and see how client response change.</p>
+<p>This is magic that is done at the OS level. Imagine if this feature is not supported by OS, the application code will need to poll the server continuously to waste a lot of CPU cycle (i.e.&nbsp;poll every 10ms).</p>
+</section>
+<section id="but-why-do-you-still-need-to-check-if-delta.content-is-empty" class="level2">
+<h2 class="anchored" data-anchor-id="but-why-do-you-still-need-to-check-if-delta.content-is-empty">But why do you still need to check if delta.content is empty?</h2>
+<p>As we understood, the stream is only resume where there is new data arrived. So when then we still need to check <code>if delta.context</code> exists?</p>
+<p>The reason is simple, the server sends data without contents: - Usage stats - tool calls</p>
+<p>An example of data may looks like this:</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb6-1"><span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">data:</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">{</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"choices"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">[</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">{</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"delta"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:{</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"tool_calls"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">[</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">{</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"index"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">,</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"type"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"function"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">,</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"function"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:{</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"name"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"get_weather"</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">}}</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">]</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">}}</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">]</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+</section>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
+<p>In summary, the short answer for an efficient for-loop without constant polling is because of the OS level <code>epoll_wait</code> feature that is support by modern web socket already. As a result, the application code is simplified and remains efficient.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>fastapi</category>
+  <category>python</category>
+  <category>sse</category>
+  <guid>https://noklam.github.io/blog/posts/sse_events/2026-01-27-how-stream-chat-works-sse.html</guid>
+  <pubDate>Tue, 27 Jan 2026 00:00:00 GMT</pubDate>
+  <media:content url="https://noklam.github.io/blog/posts/sse_events/images/fastpages_posts/codespaces/codespaces.png" medium="image" type="image/png"/>
+</item>
 <item>
   <title>How AI Models Handle English and Chinese Text: The Same Tokenizer for Different Languages</title>
   <link>https://noklam.github.io/blog/posts/bpe_gpt/2025-08-03-understand-how-gpt-output-chinese-token.html</link>
@@ -6344,7 +6864,7 @@ font-style: inherit;">'ggplot'</span>, my_style]):</span>
 <p>To enable all of the features, the resolution order is actually quite complicated. It involes multiple stages of merging in different scope. This diagram belows describe what happen under the hood. The key is identify two things 1. Some feature apply in local scope (it is not cross environment) 2. There are different merging strategy, some are using <code>OmegaConf</code>, some are pure dictionary merge 3. Configuration are resolved and then merge across environments. i.e.&nbsp;you cannot interpolate a value from another environment.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/42f690d0-1-image.png" class="img-fluid figure-img"></p>
+<p><img src="https://noklam.github.io/blog/posts/kedro_config_loader/2023-11-16-kedro-config-loader-dive-deep_files/figure-html/155d6416-1-image.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">image.png</figcaption>
 </figure>
 </div>
@@ -6863,216 +7383,6 @@ Node(make_monthly_predictions, ['mar.input_data'], ['apr.input_data'], None)
   <category>kedro</category>
   <guid>https://noklam.github.io/blog/posts/understand_namespace/2023-09-26-understand-kedro-namespace-pipeline.html</guid>
   <pubDate>Mon, 25 Sep 2023 23:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Function overloading - singledispatch in Python with type hint</title>
-  <link>https://noklam.github.io/blog/posts/python_single_dispatch/python-dispatch-typehint.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>With Python&gt;=3.7, the <code>@singledispatch</code> method can now understand the type hints. It behaves like function overloading but it’s more dynamic than the static langauge.</p>
-<p>Here is a quick example to demonstrate it.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> functools <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> singledispatch</span>
-<span id="cb1-2"></span>
-<span id="cb1-3"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@singledispatch</span></span>
-<span id="cb1-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> foo(x):</span>
-<span id="cb1-5">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"foo"</span>)</span></code></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@foo.register</span></span>
-<span id="cb2-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> _(x: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">float</span>):</span>
-<span id="cb2-3">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"It's a float"</span>)</span>
-<span id="cb2-4"></span>
-<span id="cb2-5"></span>
-<span id="cb2-6"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@foo.register</span></span>
-<span id="cb2-7"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> _(x: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>):</span>
-<span id="cb2-8">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"It's a string now!"</span>)</span></code></pre></div>
-</div>
-<p>Let’s see how it works.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">foo(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>foo</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">foo(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.0</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>It's a float</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">foo(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"1"</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>It's a string now!</code></pre>
-</div>
-</div>
-<p>The function <code>foo</code> now understand the type of the argument and dispatch the corresponding functions. This is nicer than a big chunk of <code>if/else</code> statement since it’s less couple. It’s also easy to extend this. Imagine the <code>foo</code> function is import from a package, it’s easy to extend it.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Imagine `foo` was imported from a package</span></span>
-<span id="cb9-2"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Now that you have a special type and you want to extend it from your own library, you don't need to touch the source code at all.</span></span>
-<span id="cb9-3"></span>
-<span id="cb9-4"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># from bar import foo</span></span>
-<span id="cb9-5"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> Nok:</span>
-<span id="cb9-6">    ...</span>
-<span id="cb9-7"></span>
-<span id="cb9-8"></span>
-<span id="cb9-9"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@foo.register</span></span>
-<span id="cb9-10"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> _(x: Nok):</span>
-<span id="cb9-11">    <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Nok"</span>)</span>
-<span id="cb9-12"></span>
-<span id="cb9-13"></span>
-<span id="cb9-14">nok <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Nok()</span>
-<span id="cb9-15">foo(nok)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Nok</code></pre>
-</div>
-</div>
-<p>This is only possible because Python is a dynamic language. In contrast, to achieve the same functionalities with monkey patching, you would need to copy the source code of the function and extend the <code>if/else</code> block.</p>
-<p>Let’s dive a bit deeper to the decorator.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>([attr <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> attr <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">dir</span>(foo) <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">not</span> attr.startswith(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"_"</span>)])</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>['dispatch', 'register', 'registry']</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">foo.dispatch</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>&lt;function functools.singledispatch.&lt;locals&gt;.dispatch(cls)&gt;</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">foo.register</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>&lt;function functools.singledispatch.&lt;locals&gt;.register(cls, func=None)&gt;</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">foo.registry</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<pre><code>mappingproxy({object: &lt;function __main__.foo(x)&gt;,
-              float: &lt;function __main__._(x: float)&gt;,
-              str: &lt;function __main__._(x: str)&gt;,
-              __main__.Nok: &lt;function __main__._(x: __main__.Nok)&gt;,
-              __main__.Nok: &lt;function __main__._(x: __main__.Nok)&gt;})</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> abc</span>
-<span id="cb19-2"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">isinstance</span>(foo.registry, abc.Mapping)</span></code></pre></div>
-</div>
-<p>The <code>foo.registry</code> is the most interesting part. Basically, it’s a dictionary-like object which store the types. It behaves like</p>
-<div class="sourceCode" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">if</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">type</span>(x) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"int"</span>:</span>
-<span id="cb20-2">    do_something()</span>
-<span id="cb20-3"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">elif</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">type</span>(x) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"float"</span>:</span>
-<span id="cb20-4">    do_somthing_else()</span>
-<span id="cb20-5"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">else</span>:</span>
-<span id="cb20-6">    do_this_instead()</span></code></pre></div>
-
-
-
- ]]></description>
-  <category>python</category>
-  <guid>https://noklam.github.io/blog/posts/python_single_dispatch/python-dispatch-typehint.html</guid>
-  <pubDate>Wed, 16 Nov 2022 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
