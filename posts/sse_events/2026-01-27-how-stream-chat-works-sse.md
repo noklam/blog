@@ -1,9 +1,9 @@
 ---
-author: <a href='https://twitter.com/HamelHusain'>Hamel Husain</a> & <a href='https://twitter.com/jeremyphoward'>Jeremy
-  Howard</a>
+author: noklam
 categories:
-- codespaces
-- nbdev
+- fastapi
+- python
+- sse
 date: '2026-01-27'
 description: How does a streaming chat actually works?
   before.
@@ -11,7 +11,7 @@ hide: false
 image: images/fastpages_posts/codespaces/codespaces.png
 layout: post
 permalink: /codespaces
-title: 'How chat.stream() works under the hood'?
+title: 'How chat.stream() works under the hood?'
 toc: false
 
 ---
